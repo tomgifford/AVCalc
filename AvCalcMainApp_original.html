@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuel, Time, and Distance to Climb Calculator</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        .result-area {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #eff6ff;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .result-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .unit {
+            font-size: 1rem;
+            font-weight: normal;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Fuel, Time,and Distance to Climb</h1>
+
+    <div class="input-group">
+        <label for="aircraft-type">Aircraft Type</label>
+        <select id="aircraft-type" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 1rem; box-sizing: border-box; background-color: #fff;">
+            <option value="pa28-161">Piper PA-28-161 Warrior II</option>
+        </select>
+    </div>
+
+    <div style="display: flex; gap: 1rem;">
+        <div class="input-group" style="flex: 1;">
+            <label for="temp">Temp (°C)</label>
+            <input type="number" id="temp" placeholder="e.g. 15" step="0.1" value="15">
+        </div>
+        <div class="input-group" style="flex: 1;">
+            <label for="altimeter">Altimeter (inHg)</label>
+            <input type="number" id="altimeter" placeholder="e.g. 29.92" step="0.01" value="29.92">
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label for="altitude">Indicated Altitude (ft)</label>
+        <input type="number" id="altitude" placeholder="e.g. 5000" value="3500">
+    </div>
+
+    <div class="input-group">
+        <label for="start-altitude">Starting Altitude, Indicated (ft)</label>
+        <input type="number" id="start-altitude" placeholder="e.g. 0" value="0">
+    </div>
+
+
+    <div class="result-area">
+        <div class="result-label" style="margin-top: 1rem;">Pressure Altitude (at target)</div>
+        <div class="result-value" id="output-pa">-- <span class="unit">ft</span></div>
+        <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem;">
+            <div>
+                <div class="result-label">Est. Time to Climb</div>
+                <div class="result-value" id="climb-time">-- <span class="unit">min</span></div>
+            </div>
+            <div>
+                <div class="result-label">Est. Distance to Climb</div>
+                <div class="result-value" id="climb-dist">-- <span class="unit">nm</span></div>
+            </div>
+            <div>
+                <div class="result-label">Est. Fuel to Climb</div>
+                <div class="result-value" id="climb-fuel">-- <span class="unit">gal</span></div>
+            </div>
+        </div>
+        <div style="margin-top: 0.75rem;">
+            <a href="#" id="details-link" style="font-size: 0.75rem; text-decoration: none; color: var(--primary-color);">Details</a>
+        </div>
+        <div id="details-container" style="display: none; margin-top: 0.5rem; font-size: 0.875rem; color: #64748b; border-top: 1px solid #cbd5e1; padding-top: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; gap: 0.5rem;">
+                <span>T: <span id="temp-target">--</span>°C</span>
+                <span>PA: <span id="pa-target">--</span>ft</span>
+                <span style="color: var(--text-color); font-weight: 600;">Target: <span id="dist-target">--</span> nm / <span id="time-target">--</span> min / <span id="fuel-target">--</span> gal</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; gap: 0.5rem;">
+                <span>T: <span id="temp-start">--</span>°C</span>
+                <span>PA: <span id="pa-start">--</span>ft</span>
+                <span style="color: var(--text-color); font-weight: 600;">Start: <span id="dist-start">--</span> nm / <span id="time-start">--</span> min / <span id="fuel-start">--</span> gal</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const tempInput = document.getElementById('temp');
+    const altInput = document.getElementById('altitude');
+    const startAltInput = document.getElementById('start-altitude');
+    const setInput = document.getElementById('altimeter');
+    const outputPA = document.getElementById('output-pa');
+    const climbOutput = document.getElementById('climb-dist');
+    const timeOutput = document.getElementById('climb-time');
+    const fuelOutput = document.getElementById('climb-fuel');
+    const detailsLink = document.getElementById('details-link');
+    const detailsContainer = document.getElementById('details-container');
+    const distTargetSpan = document.getElementById('dist-target');
+    const distStartSpan = document.getElementById('dist-start');
+    const timeTargetSpan = document.getElementById('time-target');
+    const timeStartSpan = document.getElementById('time-start');
+    const tempTargetSpan = document.getElementById('temp-target');
+    const paTargetSpan = document.getElementById('pa-target');
+    const tempStartSpan = document.getElementById('temp-start');
+    const paStartSpan = document.getElementById('pa-start');
+    const fuelTargetSpan = document.getElementById('fuel-target');
+    const fuelStartSpan = document.getElementById('fuel-start');
+
+    const climbDistLookup = [
+        { yRef:  0, dist:  0.0 },
+        { yRef:  5, dist:  2.0 },
+        { yRef: 10, dist:  5.0 },
+        { yRef: 15, dist:  8.0 },
+        { yRef: 20, dist: 10.5 },
+        { yRef: 25, dist: 14.0 },
+        { yRef: 30, dist: 17.0 },
+        { yRef: 35, dist: 22.5 },
+        { yRef: 40, dist: 27.0 },
+        { yRef: 45, dist: 34.0 },
+        { yRef: 50, dist: 43.0 },
+        { yRef: 55, dist: 56.5 },
+        { yRef: 60, dist: 77.0 },
+    ];
+
+    const timeLookup = [
+        { yRef:  0, time:  0.0 },
+        { yRef:  5, time:  2.0 },
+        { yRef: 10, time:  4.0 },
+        { yRef: 15, time:  6.0 },
+        { yRef: 20, time:  8.0 },
+        { yRef: 25, time: 10.5 },
+        { yRef: 30, time: 13.0 },
+        { yRef: 35, time: 16.0 },
+        { yRef: 40, time: 19.0 },
+        { yRef: 45, time: 24.0 },
+        { yRef: 50, time: 30.0 },
+        { yRef: 55, time: 39.0 },
+        { yRef: 60, time: 50.0 },
+    ];
+
+    const fuelLookup = [
+        { yRef:  0, fuel: 0.00 },
+        { yRef:  5, fuel: 0.25 },
+        { yRef: 10, fuel: 0.54 },
+        { yRef: 15, fuel: 0.86 },
+        { yRef: 20, fuel: 1.21 },
+        { yRef: 25, fuel: 1.60 },
+        { yRef: 30, fuel: 2.13 },
+        { yRef: 35, fuel: 3.09 },
+        { yRef: 40, fuel: 4.00 },
+        { yRef: 45, fuel: 4.47 },
+        { yRef: 50, fuel: 5.00 },
+        { yRef: 55, fuel: 6.19 },
+        { yRef: 60, fuel: 8.00 },
+    ];
+
+
+    // ── Left-panel lookup: YRef by pressure altitude and temperature ─────────
+    // Each pa entry holds points read from the chart's left Y-axis gridlines.
+    // At T=-40 (left Y-axis), YRef = PA by definition.
+    const yRefLookup = [
+        {
+            pa: 1000,
+            points: [
+                { t: -40, yRef:  3.9 },
+                { t: -30, yRef:  4.0 },
+                { t: -20, yRef:  4.2 },
+                { t: -10, yRef:  4.4 },
+                { t:   0, yRef:  4.8 },
+                { t:  10, yRef:  5.3 },
+                { t:  20, yRef:  5.8 },
+                { t:  30, yRef:  6.5 },
+                { t:  40, yRef:  7.2 },
+            ]
+        },
+        {
+            pa: 2000,
+            points: [
+                { t: -40, yRef:  7.8 },
+                { t: -30, yRef:  8.0 },
+                { t: -20, yRef:  8.4 },
+                { t: -10, yRef:  8.8 },
+                { t:   0, yRef:  9.6 },
+                { t:  10, yRef: 10.6 },
+                { t:  20, yRef: 11.6 },
+                { t:  30, yRef: 13.0 },
+                { t:  40, yRef: 14.4 },
+            ]
+        },
+        {
+            pa: 3000,
+            points: [
+                { t: -40, yRef: 11.7 },
+                { t: -30, yRef: 12.0 },
+                { t: -20, yRef: 12.6 },
+                { t: -10, yRef: 13.2 },
+                { t:   0, yRef: 14.4 },
+                { t:  10, yRef: 15.9 },
+                { t:  20, yRef: 17.4 },
+                { t:  30, yRef: 19.5 },
+                { t:  40, yRef: 21.6 },
+            ]
+        },
+        {
+            pa: 4000,
+            points: [
+                { t: -40, yRef: 15.6 },
+                { t: -30, yRef: 16.0 },
+                { t: -20, yRef: 16.8 },
+                { t: -10, yRef: 17.6 },
+                { t:   0, yRef: 19.2 },
+                { t:  10, yRef: 21.2 },
+                { t:  20, yRef: 23.2 },
+                { t:  30, yRef: 26.0 },
+                { t:  40, yRef: 28.8 },
+            ]
+        },
+        {
+            pa: 5000,
+            points: [
+                { t: -40, yRef: 19.5 },
+                { t: -30, yRef: 20.0 },
+                { t: -20, yRef: 21.0 },
+                { t: -10, yRef: 22.0 },
+                { t:   0, yRef: 24.0 },
+                { t:  10, yRef: 26.5 },
+                { t:  20, yRef: 29.0 },
+                { t:  30, yRef: 32.5 },
+                { t:  40, yRef: 36.0 },
+            ]
+        },
+        {
+            pa: 6000,
+            points: [
+                { t: -40, yRef: 23.4 },
+                { t: -30, yRef: 24.0 },
+                { t: -20, yRef: 25.2 },
+                { t: -10, yRef: 26.4 },
+                { t:   0, yRef: 28.8 },
+                { t:  10, yRef: 31.8 },
+                { t:  20, yRef: 34.8 },
+                { t:  30, yRef: 39.0 },
+                { t:  40, yRef: 43.2 },
+            ]
+        },
+        {
+            pa: 7000,
+            points: [
+                { t: -40, yRef: 27.3 },
+                { t: -30, yRef: 28.0 },
+                { t: -20, yRef: 29.4 },
+                { t: -10, yRef: 30.8 },
+                { t:   0, yRef: 33.6 },
+                { t:  10, yRef: 37.1 },
+                { t:  20, yRef: 40.6 },
+                { t:  30, yRef: 45.5 },
+                { t:  40, yRef: 50.4 },
+            ]
+        },
+        {
+            pa: 8000,
+            points: [
+                { t: -40, yRef: 31.2 },
+                { t: -30, yRef: 32.0 },
+                { t: -20, yRef: 33.6 },
+                { t: -10, yRef: 35.2 },
+                { t:   0, yRef: 38.4 },
+                { t:  10, yRef: 42.4 },
+                { t:  20, yRef: 46.4 },
+                { t:  30, yRef: 52.0 },
+                { t:  40, yRef: 57.6 },
+            ]
+        },
+        {
+            pa: 9000,
+            points: [
+                { t: -40, yRef: 35.1 },
+                { t: -30, yRef: 36.0 },
+                { t: -20, yRef: 37.8 },
+                { t: -10, yRef: 39.6 },
+                { t:   0, yRef: 43.2 },
+                { t:  10, yRef: 47.7 },
+                { t:  20, yRef: 52.2 },
+                { t:  30, yRef: 58.5 },
+                { t:  40, yRef: 64.8 },
+            ]
+        },
+        {
+            pa: 10000,
+            points: [
+                { t: -40, yRef: 39.0 },
+                { t: -30, yRef: 40.0 },
+                { t: -20, yRef: 42.0 },
+                { t: -10, yRef: 44.0 },
+                { t:   0, yRef: 48.0 },
+                { t:  10, yRef: 53.0 },
+                { t:  20, yRef: 58.0 },
+                { t:  30, yRef: 65.0 },
+                { t:  40, yRef: 72.0 },
+            ]
+        },
+        {
+            pa: 11000,
+            points: [
+                { t: -40, yRef: 42.9 },
+                { t: -30, yRef: 44.0 },
+                { t: -20, yRef: 46.2 },
+                { t: -10, yRef: 48.4 },
+                { t:   0, yRef: 52.8 },
+                { t:  10, yRef: 58.3 },
+                { t:  20, yRef: 63.8 },
+                { t:  30, yRef: 71.5 },
+                { t:  40, yRef: 79.2 },
+            ]
+        },
+        {
+            pa: 12000,
+            points: [
+                { t: -40, yRef: 46.8 },
+                { t: -30, yRef: 48.0 },
+                { t: -20, yRef: 50.4 },
+                { t: -10, yRef: 52.8 },
+                { t:   0, yRef: 57.6 },
+                { t:  10, yRef: 63.6 },
+                { t:  20, yRef: 69.6 },
+                { t:  30, yRef: 78.0 },
+                { t:  40, yRef: 86.4 },
+            ]
+        },
+    ];
+
+    function interpYRefAtT(points, T) {
+        if (T <= points[0].t) return points[0].yRef;
+        if (T >= points.at(-1).t) return points.at(-1).yRef;
+        for (let i = 0; i < points.length - 1; i++) {
+            if (T >= points[i].t && T <= points[i+1].t) {
+                const p0 = points[i], p1 = points[i+1];
+                return p0.yRef + (p1.yRef - p0.yRef) * (T - p0.t) / (p1.t - p0.t);
+            }
+        }
+        return 0;
+    }
+
+    function getYRef(pa, T) {
+        if (pa <= yRefLookup[0].pa) return interpYRefAtT(yRefLookup[0].points, T);
+        if (pa >= yRefLookup.at(-1).pa) return interpYRefAtT(yRefLookup.at(-1).points, T);
+        for (let i = 0; i < yRefLookup.length - 1; i++) {
+            if (pa >= yRefLookup[i].pa && pa <= yRefLookup[i+1].pa) {
+                const yRef0 = interpYRefAtT(yRefLookup[i].points, T);
+                const yRef1 = interpYRefAtT(yRefLookup[i+1].points, T);
+                return yRef0 + (yRef1 - yRef0) * (pa - yRefLookup[i].pa) / (yRefLookup[i+1].pa - yRefLookup[i].pa);
+            }
+        }
+        return 0;
+    }
+
+    // Step 2 — translate Y horizontally to find the time intercept on the right panel
+    function getTimeFromY(y) {
+        if (y <= 0) return 0;
+        if (y >= timeLookup.at(-1).da) return timeLookup.at(-1).time;
+        for (let i = 0; i < timeLookup.length - 1; i++) {
+            if (y >= timeLookup[i].da && y <= timeLookup[i+1].da) {
+                const t0 = timeLookup[i], t1 = timeLookup[i+1];
+                return t0.time + (t1.time - t0.time) * (y - t0.da) / (t1.da - t0.da);
+            }
+        }
+        return 0;
+    }
+
+    function getClimbTime(pa, T) {
+        const yRef = getYRef(pa, T);
+        return getTimeFromY(Math.max(0, yRef));
+    }
+
+    detailsLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        detailsContainer.style.display = detailsContainer.style.display === 'none' ? 'block' : 'none';
+    });
+
+    function calculateDA() {
+        const resetResults = () => {
+            climbOutput.innerHTML = '-- <span class="unit">nm</span>';
+            timeOutput.innerHTML = '-- <span class="unit">min</span>';
+            fuelOutput.innerHTML = '-- <span class="unit">gal</span>';
+            outputPA.innerHTML = '-- <span class="unit">ft</span>';
+            distTargetSpan.textContent = '--';
+            distStartSpan.textContent = '--';
+            timeTargetSpan.textContent = '--';
+            timeStartSpan.textContent = '--';
+            fuelTargetSpan.textContent = '--';
+            fuelStartSpan.textContent = '--';
+            tempTargetSpan.textContent = '--';
+            paTargetSpan.textContent = '--';
+            tempStartSpan.textContent = '--';
+            paStartSpan.textContent = '--';
+        };
+        const T = parseFloat(tempInput.value);
+        const IA = parseFloat(altInput.value);
+        const AS = parseFloat(setInput.value);
+        const SA = parseFloat(startAltInput.value);
+
+        if (isNaN(T) || isNaN(IA) || isNaN(AS) || isNaN(SA)) {
+            resetResults();
+            return;
+        }
+
+        let paTarget, stdTempTarget, daTarget;
+        let paStart, stdTempStart, daStart;
+
+        const calculateDensityAltitude = (indicatedAltitude) => {
+            const pa = indicatedAltitude + (29.92 - AS) * 1000;
+            const stdTemp = 15 - (2 * (pa / 1000));
+            const da = pa + (120 * (T - stdTemp));
+            return { pa, stdTemp, da };
+        };
+
+        const targetCalc = calculateDensityAltitude(IA);
+        daTarget = targetCalc.da;
+        paTarget = targetCalc.pa;
+        stdTempTarget = targetCalc.stdTemp;
+        
+        const startCalc = calculateDensityAltitude(SA);
+        daStart = startCalc.da;
+        paStart = startCalc.pa;
+        stdTempStart = startCalc.stdTemp;
+
+        const getDist = (yRef) => {
+            if (yRef <= 0) return 0;
+            if (yRef >= climbDistLookup.at(-1).yRef) return climbDistLookup.at(-1).dist;
+            for (let i = 0; i < climbDistLookup.length - 1; i++) {
+                if (yRef >= climbDistLookup[i].yRef && yRef <= climbDistLookup[i+1].yRef) {
+                    const d0 = climbDistLookup[i];
+                    const d1 = climbDistLookup[i+1];
+                    return d0.dist + (d1.dist - d0.dist) * (yRef - d0.yRef) / (d1.yRef - d0.yRef);
+                }
+            }
+            return 0;
+        };
+
+        const getTime = (yRef) => {
+            if (yRef <= 0) return 0;
+            if (yRef >= timeLookup.at(-1).yRef) return timeLookup.at(-1).time;
+            for (let i = 0; i < timeLookup.length - 1; i++) {
+                if (yRef >= timeLookup[i].yRef && yRef <= timeLookup[i+1].yRef) {
+                    const t0 = timeLookup[i];
+                    const t1 = timeLookup[i+1];
+                    return t0.time + (t1.time - t0.time) * (yRef - t0.yRef) / (t1.yRef - t0.yRef);
+                }
+            }
+            return 0;
+        };
+
+        const getFuel = (yRef) => {
+            if (yRef <= 0) return 0;
+            if (yRef >= fuelLookup.at(-1).yRef) return fuelLookup.at(-1).fuel;
+            for (let i = 0; i < fuelLookup.length - 1; i++) {
+                if (yRef >= fuelLookup[i].yRef && yRef <= fuelLookup[i+1].yRef) {
+                    const f0 = fuelLookup[i];
+                    const f1 = fuelLookup[i+1];
+                    return f0.fuel + (f1.fuel - f0.fuel) * (yRef - f0.yRef) / (f1.yRef - f0.yRef);
+                }
+            }
+            return 0;
+        };
+
+        const yRefTarget = getYRef(paTarget, T);
+        const yRefStart = getYRef(paStart, T);
+        const distTarget = getDist(yRefTarget);
+        const distStart = getDist(yRefStart);
+        const netDist = Math.max(0, distTarget - distStart);
+
+        const timeTarget = getTime(yRefTarget);
+        const timeStart = getTime(yRefStart);
+        const netTime = Math.max(0, timeTarget - timeStart);
+
+        const fuelTarget = getFuel(yRefTarget);
+        const fuelStart = getFuel(yRefStart);
+        const netFuel = Math.max(0, fuelTarget - fuelStart);
+
+        const aboveMax = yRefTarget > timeLookup.at(-1).yRef;
+        outputPA.innerHTML = `${Math.round(paTarget).toLocaleString()} <span class="unit">ft</span>`;
+        climbOutput.innerHTML = `${aboveMax ? '> ' : ''}${netDist.toFixed(1)} <span class="unit">nm</span>`;
+        timeOutput.innerHTML = `${aboveMax ? '> ' : ''}${netTime.toFixed(0)} <span class="unit">min</span>`;
+        fuelOutput.innerHTML = `${aboveMax ? '> ' : ''}${netFuel.toFixed(1)} <span class="unit">gal</span>`;
+
+        distTargetSpan.textContent = distTarget.toFixed(1);
+        distStartSpan.textContent = distStart.toFixed(1);
+        timeTargetSpan.textContent = timeTarget.toFixed(1);
+        timeStartSpan.textContent = timeStart.toFixed(1);
+        fuelTargetSpan.textContent = fuelTarget.toFixed(2);
+        fuelStartSpan.textContent = fuelStart.toFixed(2);
+        tempTargetSpan.textContent = `${T.toFixed(1)} (${stdTempTarget.toFixed(1)})`;
+        paTargetSpan.textContent = Math.round(paTarget).toLocaleString();
+        tempStartSpan.textContent = `${T.toFixed(1)} (${stdTempStart.toFixed(1)})`;
+        paStartSpan.textContent = Math.round(paStart).toLocaleString();
+
+    }
+
+    [tempInput, altInput, startAltInput, setInput].forEach(input => {
+        input.addEventListener('input', calculateDA);
+    });
+
+    calculateDA();
+</script>
+
+</body>
+</html>
