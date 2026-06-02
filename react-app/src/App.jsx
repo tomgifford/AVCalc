@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getClimbYRef, getDist, getTime, getFuel, calculateDensityAltitude, timeLookup } from './lib/climb-calc.js';
 import { getCruiseTAS, getCruiseYRef, cruiseFuelGPH } from './lib/cruise-calc.js';
 import { getPerformanceChart } from './lib/performance-charts.js';
@@ -62,17 +62,26 @@ export default function App() {
 
     const chart = getPerformanceChart(aircraftType, chartType);
 
+    useEffect(() => {
+        handleCruiseTempChange(cruiseTemp);
+    }, []);
+
+    function calcStartClimbTemp(t, ia, sa, as_) {
+        if ([t, ia, sa, as_].every(v => !isNaN(v))) {
+            const { pa: paTarget } = calculateDensityAltitude(ia, as_, t);
+            const { pa: paStart }  = calculateDensityAltitude(sa, as_, t);
+            setStartClimbTemp((t + 2 * (paTarget - paStart) / 1000).toFixed(1));
+        }
+    }
+
     function handleCruiseTempChange(val) {
         setCruiseTemp(val);
-        const newT = parseFloat(val);
-        const curIA = parseFloat(altitude);
-        const curSA = parseFloat(startAlt);
-        const curAS = parseFloat(altimeter);
-        if ([newT, curIA, curSA, curAS].every(v => !isNaN(v))) {
-            const { pa: paTarget } = calculateDensityAltitude(curIA, curAS, newT);
-            const { pa: paStart }  = calculateDensityAltitude(curSA, curAS, newT);
-            setStartClimbTemp((newT + 2 * (paTarget - paStart) / 1000).toFixed(1));
-        }
+        calcStartClimbTemp(parseFloat(val), parseFloat(altitude), parseFloat(startAlt), parseFloat(altimeter));
+    }
+
+    function handleStartAltChange(val) {
+        setStartAlt(val);
+        calcStartClimbTemp(parseFloat(cruiseTemp), parseFloat(altitude), parseFloat(val), parseFloat(altimeter));
     }
 
     const T  = parseFloat(cruiseTemp);
@@ -155,7 +164,7 @@ export default function App() {
                 ) : (
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <NumericInput id="start-altitude" label="IA - Start (ft)" value={startAlt}
-                            onChange={setStartAlt} step={500} placeholder="e.g. 0" style={{ flex: 1 }} />
+                            onChange={handleStartAltChange} step={500} placeholder="e.g. 0" style={{ flex: 1 }} />
                         <NumericInput id="start-climb-temp" label="Temp (°C)" value={startClimbTemp}
                             onChange={setStartClimbTemp} step={1} placeholder="e.g. 15" style={{ flex: 1 }} />
                     </div>
