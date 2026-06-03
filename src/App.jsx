@@ -4,7 +4,7 @@ import { getCruiseTAS, getCruiseYRef, cruiseFuelGPH } from './lib/cruise-calc.js
 import { getPerformanceChart } from './lib/performance-charts.js';
 import './App.css';
 
-function NumericInput({ id, label, value, onChange, step = 1, placeholder, style }) {
+function NumericInput({ id, label, value, onChange, step = 1, placeholder, style, disabled }) {
     return (
         <div className="input-group" style={style}>
             <label htmlFor={id}>{label}</label>
@@ -15,6 +15,7 @@ function NumericInput({ id, label, value, onChange, step = 1, placeholder, style
                 step={step}
                 value={value}
                 onChange={e => onChange(e.target.value)}
+                disabled={disabled}
             />
         </div>
     );
@@ -137,37 +138,46 @@ export default function App() {
                     </select>
                 </div>
 
-                <div className="input-group">
-                    <label htmlFor="chart-type">Chart Type</label>
-                    <select id="chart-type" value={chartType} onChange={e => setChartType(e.target.value)}>
-                        <option value="climb">Climb Performance</option>
-                        <option value="cruise">Cruise Performance (Best Power)</option>
-                    </select>
-                </div>
+                <RadioGroup
+                    label="Chart Type"
+                    options={[
+                        { value: 'climb', label: 'Climb Performance' },
+                        { value: 'cruise', label: 'Cruise Performance' },
+                    ]}
+                    value={chartType}
+                    onChange={setChartType}
+                />
 
-                <NumericInput id="altimeter" label="Altimeter (inHg)" value={altimeter}
-                    onChange={setAltimeter} step={0.01} placeholder="e.g. 29.92" />
+                <fieldset className="conditions-group">
+                    <legend>Conditions</legend>
 
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                    <NumericInput id="altitude" label="IA - Cruise (ft)" value={altitude}
-                        onChange={setAltitude} step={500} placeholder="e.g. 5000" style={{ flex: 1 }} />
-                    <NumericInput id="cruise-temp" label="Temp (°C)" value={cruiseTemp}
-                        onChange={handleCruiseTempChange} step={1} placeholder="e.g. 15" style={{ flex: 1 }} />
-                </div>
-                {chartType === 'cruise' ? (
+                    <NumericInput id="altimeter" label="Altimeter (inHg)" value={altimeter}
+                        onChange={setAltimeter} step={0.01} placeholder="e.g. 29.92" />
+
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <NumericInput id="altitude" label="IA - Cruise (ft)" value={altitude}
+                            onChange={setAltitude} step={500} placeholder="e.g. 5000" style={{ flex: 1 }} />
+                        <NumericInput id="cruise-temp" label="Temp (°C)" value={cruiseTemp}
+                            onChange={handleCruiseTempChange} step={1} placeholder="e.g. 15" style={{ flex: 1 }} />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <NumericInput id="start-altitude" label="IA - Start (ft)" value={startAlt}
+                            onChange={handleStartAltChange} step={500} placeholder="e.g. 0" style={{ flex: 1 }}
+                            disabled={chartType === 'cruise'} />
+                        <NumericInput id="start-climb-temp" label="Temp (°C)" value={startClimbTemp}
+                            onChange={setStartClimbTemp} step={1} placeholder="e.g. 15" style={{ flex: 1 }}
+                            disabled={chartType === 'cruise'} />
+                    </div>
+                </fieldset>
+
+                {chartType === 'cruise' && (
                     <RadioGroup
                         label="Power"
                         options={[{ value: 75, label: '75%' }, { value: 65, label: '65%' }, { value: 55, label: '55%' }]}
                         value={power}
                         onChange={v => setPower(v)}
                     />
-                ) : (
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <NumericInput id="start-altitude" label="IA - Start (ft)" value={startAlt}
-                            onChange={handleStartAltChange} step={500} placeholder="e.g. 0" style={{ flex: 1 }} />
-                        <NumericInput id="start-climb-temp" label="Temp (°C)" value={startClimbTemp}
-                            onChange={setStartClimbTemp} step={1} placeholder="e.g. 15" style={{ flex: 1 }} />
-                    </div>
                 )}
 
                 <div className="result-area">
