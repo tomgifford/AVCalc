@@ -51,9 +51,10 @@ function ResultValue({ label, value, unit, prefix = '' }) {
 }
 
 export default function App() {
-    const [aircraftType, setAircraftType] = useState('pa28-161');
-    const [chartType, setChartType]       = useState('climb');
-    const [power, setPower]               = useState(65);
+    const [aircraftType, setAircraftType]     = useState('pa28-161');
+    const [chartType, setChartType]           = useState('climb');
+    const [wheelFairings, setWheelFairings]   = useState('yes');
+    const [power, setPower]                   = useState(65);
     const [cruiseTemp, setCruiseTemp]           = useState('15');
     const [startClimbTemp, setStartClimbTemp]   = useState('15');
     const [altitude, setAltitude]               = useState('5000');
@@ -148,6 +149,18 @@ export default function App() {
                     onChange={setChartType}
                 />
 
+                {aircraftType === 'pa28-161' && (
+                    <RadioGroup
+                        label="Wheel Fairings Installed"
+                        options={[
+                            { value: 'yes', label: 'Yes' },
+                            { value: 'no',  label: 'No'  },
+                        ]}
+                        value={wheelFairings}
+                        onChange={setWheelFairings}
+                    />
+                )}
+
                 <fieldset className="conditions-group">
                     <legend>Conditions</legend>
 
@@ -229,14 +242,14 @@ export default function App() {
                             {showDetails && results && (
                                 <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#64748b', borderTop: '1px solid #cbd5e1', paddingTop: '0.5rem' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', gap: '0.5rem' }}>
-                                        <span>T: {T.toFixed(1)} ({results.stdTempTarget.toFixed(1)})°C</span>
+                                        <span>T: {T.toFixed(1)}°C</span>
                                         <span>PA: {Math.round(results.paTarget).toLocaleString()} ft</span>
                                         <span style={{ color: 'var(--text-color)', fontWeight: 600 }}>
                                             Target: {results.distTarget.toFixed(1)} nm / {results.timeTarget.toFixed(1)} min / {results.fuelTarget.toFixed(2)} gal
                                         </span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem' }}>
-                                        <span>T: {T.toFixed(1)} ({results.stdTempStart.toFixed(1)})°C</span>
+                                        <span>T: {ST.toFixed(1)}°C</span>
                                         <span>PA: {Math.round(results.paStart).toLocaleString()} ft</span>
                                         <span style={{ color: 'var(--text-color)', fontWeight: 600 }}>
                                             Start: {results.distStart.toFixed(1)} nm / {results.timeStart.toFixed(1)} min / {results.fuelStart.toFixed(2)} gal
