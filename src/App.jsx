@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { getClimbYRef, getDist, getTime, getFuel, calculateDensityAltitude, timeLookup } from './lib/climb-calc.js';
-import { getCruiseTAS, getCruiseYRef, cruiseFuelGPH } from './lib/cruise-calc.js';
+import { getClimbYRef, getDist, getTime, getFuel, calculateDensityAltitude, calcStartClimbTemp, calculatePressureAltitude } from './lib/climb-calc.js';
+import { getCruiseTAS, getCruiseYRef } from './lib/cruise-calc.js';
 import { getPerformanceChart } from './lib/performance-charts.js';
+import { getAircraftData } from './lib/aircraft-registry.js';
 import './App.css';
 
 function NumericInput({ id, label, value, onChange, step = 1, placeholder, style, disabled }) {
@@ -62,28 +63,23 @@ export default function App() {
     const [altimeter, setAltimeter] = useState('29.92');
     const [showDetails, setShowDetails] = useState(false);
 
+    const aircraftData = getAircraftData(aircraftType);
     const chart = getPerformanceChart(aircraftType, chartType);
 
     useEffect(() => {
         handleCruiseTempChange(cruiseTemp);
     }, []);
 
-    function calcStartClimbTemp(t, ia, sa, as_) {
-        if ([t, ia, sa, as_].every(v => !isNaN(v))) {
-            const { pa: paTarget } = calculateDensityAltitude(ia, as_, t);
-            const { pa: paStart }  = calculateDensityAltitude(sa, as_, t);
-            setStartClimbTemp((t + 2 * (paTarget - paStart) / 1000).toFixed(1));
-        }
-    }
-
     function handleCruiseTempChange(val) {
         setCruiseTemp(val);
-        calcStartClimbTemp(parseFloat(val), parseFloat(altitude), parseFloat(startAlt), parseFloat(altimeter));
+        const temp = calcStartClimbTemp(parseFloat(val), parseFloat(altitude), parseFloat(startAlt), parseFloat(altimeter));
+        if (temp !== null) setStartClimbTemp(temp);
     }
 
     function handleStartAltChange(val) {
         setStartAlt(val);
-        calcStartClimbTemp(parseFloat(cruiseTemp), parseFloat(altitude), parseFloat(val), parseFloat(altimeter));
+        const temp = calcStartClimbTemp(parseFloat(cruiseTemp), parseFloat(altitude), parseFloat(val), parseFloat(altimeter));
+        if (temp !== null) setStartClimbTemp(temp);
     }
 
     const T  = parseFloat(cruiseTemp);
@@ -95,23 +91,25 @@ export default function App() {
 
     let results = null;
     if (valid) {
-        const { pa: paTarget, stdTemp: stdTempTarget } = calculateDensityAltitude(IA, AS, T);
-        const { pa: paStart,  stdTemp: stdTempStart  } = calculateDensityAltitude(SA, AS, ST);
+        //const { pa: paTarget, stdTemp: stdTempTarget } = calculateDensityAltitude(IA, AS, T);
+        //const { pa: paStart,  stdTemp: stdTempStart  } = calculateDensityAltitude(SA, AS, ST);
+        const { pa: paTarget, stdTemp: stdTempTarget } = calculatePressureAltitude(IA, AS, T);
+        const { pa: paStart,  stdTemp: stdTempStart  } = calculatePressureAltitude(SA, AS, ST);
+        
+        const yRefTarget = getClimbYRef(aircraftData.climb, paTarget, T);
+        const yRefStart  = getClimbYRef(aircraftData.climb, paStart,  ST);
 
-        const yRefTarget = getClimbYRef(paTarget, T);
-        const yRefStart  = getClimbYRef(paStart,  ST);
+        const distTarget = getDist(aircraftData.climb, yRefTarget);
+        const distStart  = getDist(aircraftData.climb, yRefStart);
+        const timeTarget = getTime(aircraftData.climb, yRefTarget);
+        const timeStart  = getTime(aircraftData.climb, yRefStart);
+        const fuelTarget = getFuel(aircraftData.climb, yRefTarget);
+        const fuelStart  = getFuel(aircraftData.climb, yRefStart);
 
-        const distTarget = getDist(yRefTarget);
-        const distStart  = getDist(yRefStart);
-        const timeTarget = getTime(yRefTarget);
-        const timeStart  = getTime(yRefStart);
-        const fuelTarget = getFuel(yRefTarget);
-        const fuelStart  = getFuel(yRefStart);
-
-        const aboveMax = yRefTarget > timeLookup.at(-1).yRef;
+        const aboveMax = yRefTarget > aircraftData.climb.timeLookup.at(-1).yRef;
 
         results = {
-            paTarget, stdTempTarget, paStart, stdTempStart,
+            paTarget, /*stdTempTarget,*/ paStart, /*stdTempStart,*/
             distTarget, distStart, netDist: Math.max(0, distTarget - distStart),
             timeTarget, timeStart, netTime: Math.max(0, timeTarget - timeStart),
             fuelTarget, fuelStart, netFuel: Math.max(0, fuelTarget - fuelStart),
@@ -121,10 +119,9 @@ export default function App() {
 
     let cruiseResults = null;
     if (chartType === 'cruise' && valid) {
-        const { pa } = calculateDensityAltitude(IA, AS, T);
-        const yRef = getCruiseYRef(pa, T);
-        const tas = getCruiseTAS(pa, T, power);
-        cruiseResults = { tas, fuelFlow: cruiseFuelGPH[power], yRef };
+        const yRef = getCruiseYRef(aircraftData.cruise, results.paTarget, T);
+        const tas = getCruiseTAS(aircraftData.cruise, results.paTarget, T, power, wheelFairings);
+        cruiseResults = { tas, fuelFlow: aircraftData.cruise.cruiseFuelGPH[power], yRef };
     }
 
     return (
@@ -136,6 +133,7 @@ export default function App() {
                     <label htmlFor="aircraft-type">Aircraft Type</label>
                     <select id="aircraft-type" value={aircraftType} onChange={e => setAircraftType(e.target.value)}>
                         <option value="pa28-161">Piper PA-28-161 Warrior II</option>
+                        <option value="pa28-181">Piper PA-28-181 Archer II</option>
                     </select>
                 </div>
 
@@ -149,7 +147,7 @@ export default function App() {
                     onChange={setChartType}
                 />
 
-                {aircraftType === 'pa28-161' && (
+                {['pa28-161', 'pa28-181'].includes(aircraftType) && (
                     <RadioGroup
                         label="Wheel Fairings Installed"
                         options={[
@@ -242,14 +240,14 @@ export default function App() {
                             {showDetails && results && (
                                 <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#64748b', borderTop: '1px solid #cbd5e1', paddingTop: '0.5rem' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', gap: '0.5rem' }}>
-                                        <span>T: {T.toFixed(1)} ({results.stdTempTarget.toFixed(1)})°C</span>
+                                        <span>T: {T.toFixed(1)} ({cruiseTemp})°C</span>
                                         <span>PA: {Math.round(results.paTarget).toLocaleString()} ft</span>
                                         <span style={{ color: 'var(--text-color)', fontWeight: 600 }}>
                                             Target: {results.distTarget.toFixed(1)} nm / {results.timeTarget.toFixed(1)} min / {results.fuelTarget.toFixed(2)} gal
                                         </span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem' }}>
-                                        <span>T: {T.toFixed(1)} ({results.stdTempStart.toFixed(1)})°C</span>
+                                        <span>T: {T.toFixed(1)} ({startClimbTemp})°C</span>
                                         <span>PA: {Math.round(results.paStart).toLocaleString()} ft</span>
                                         <span style={{ color: 'var(--text-color)', fontWeight: 600 }}>
                                             Start: {results.distStart.toFixed(1)} nm / {results.timeStart.toFixed(1)} min / {results.fuelStart.toFixed(2)} gal

@@ -1,5 +1,3 @@
-import { yRefLookup, climbDistLookup, timeLookup, fuelLookup } from './pa28-161-data.js';
-
 function interpYRefAtT(points, T) {
     if (T <= points[0].t) return points[0].yRef;
     if (T >= points.at(-1).t) return points.at(-1).yRef;
@@ -12,7 +10,8 @@ function interpYRefAtT(points, T) {
     return 0;
 }
 
-export function getClimbYRef(pa, T) {
+export function getClimbYRef(data, pa, T) {
+    const { yRefLookup } = data;
     if (pa <= yRefLookup[0].pa) return interpYRefAtT(yRefLookup[0].points, T);
     if (pa >= yRefLookup.at(-1).pa) return interpYRefAtT(yRefLookup.at(-1).points, T);
     for (let i = 0; i < yRefLookup.length - 1; i++) {
@@ -25,7 +24,8 @@ export function getClimbYRef(pa, T) {
     return 0;
 }
 
-export function getDist(yRef) {
+export function getDist(data, yRef) {
+    const { climbDistLookup } = data;
     if (yRef <= 0) return 0;
     if (yRef >= climbDistLookup.at(-1).yRef) return climbDistLookup.at(-1).dist;
     for (let i = 0; i < climbDistLookup.length - 1; i++) {
@@ -37,7 +37,8 @@ export function getDist(yRef) {
     return 0;
 }
 
-export function getTime(yRef) {
+export function getTime(data, yRef) {
+    const { timeLookup } = data;
     if (yRef <= 0) return 0;
     if (yRef >= timeLookup.at(-1).yRef) return timeLookup.at(-1).time;
     for (let i = 0; i < timeLookup.length - 1; i++) {
@@ -49,7 +50,8 @@ export function getTime(yRef) {
     return 0;
 }
 
-export function getFuel(yRef) {
+export function getFuel(data, yRef) {
+    const { fuelLookup } = data;
     if (yRef <= 0) return 0;
     if (yRef >= fuelLookup.at(-1).yRef) return fuelLookup.at(-1).fuel;
     for (let i = 0; i < fuelLookup.length - 1; i++) {
@@ -68,4 +70,16 @@ export function calculateDensityAltitude(indicatedAltitude, altimeterSetting, T)
     return { pa, stdTemp, da };
 }
 
-export { timeLookup };
+export function calculatePressureAltitude(indicatedAltitude, altimeterSetting) {
+    const pa = indicatedAltitude + (29.92 - altimeterSetting) * 1000;
+    return { pa };
+}
+
+export function calcStartClimbTemp(t, ia, sa, as_) {
+    if ([t, ia, sa, as_].every(v => !isNaN(v))) {
+        const { pa: paTarget } = calculatePressureAltitude(ia, as_);
+        const { pa: paStart }  = calculatePressureAltitude(sa, as_);
+        return (t + 2 * (paTarget - paStart) / 1000).toFixed(1);
+    }
+    return null;
+}

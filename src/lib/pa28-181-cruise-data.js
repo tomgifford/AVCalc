@@ -1,6 +1,3 @@
-// Left-panel lookup: yRef by pressure altitude and temperature.
-// Values read from the cruise chart left panel (POH Fig 5-21).
-// PA 5000 line: intersects x-axis at T=-33 (yRef=0), far end at T=40 (yRef=44).
 export const cruiseYRefLookup = [
     { pa:     0, points: [
         { t:  15, yRef:  0 },
@@ -62,7 +59,7 @@ export const cruiseYRefLookup = [
         { t:  20, yRef: 40 },
         { t:  30, yRef: 45.5 },
         { t:  40, yRef: 50.5 },
-    ]},                                 
+    ]},
     { pa:  8000, points: [
         { t: -40, yRef: 16 },
         { t: -30, yRef: 23 },
@@ -106,10 +103,6 @@ export const cruiseYRefLookup = [
     ]},
 ];
 
-// Right-panel lookup: TAS by yRef, keyed by % power.
-// yRef values match the same scale as yRefLookup in pa28-161-data.js.
-// Calibration: PA 5000, OAT 16 °C → yRef ≈ 28, 75% → 122.5 KTAS (per chart example).
-// Interpolating at yRef 28 gives: 121 + (123-121)*(3/5) = 122.2 KTAS ✓
 export const cruiseTASLookup = {
     75: [
         { yRef:  5, tas: 114 },
@@ -154,7 +147,6 @@ export const cruiseTASLookup = {
     ],
 };
 
-// Fuel flow from chart legend (best power mixture)
 export const cruiseFuelGPH = { 75: 10.0, 65: 8.8, 55: 7.8 };
 
-export const noFairingsTASDeduction = 7.0;
+export const noFairingsTASDeduction = 2.6;

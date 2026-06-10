@@ -1,5 +1,3 @@
-import { cruiseYRefLookup, cruiseTASLookup, cruiseFuelGPH } from './pa28-161-cruise-data.js';
-
 function interpYRefAtT(points, T) {
     if (T <= points[0].t) return points[0].yRef;
     if (T >= points.at(-1).t) return points.at(-1).yRef;
@@ -12,7 +10,8 @@ function interpYRefAtT(points, T) {
     return 0;
 }
 
-export function getCruiseYRef(pa, oat) {
+export function getCruiseYRef(data, pa, oat) {
+    const { cruiseYRefLookup } = data;
     if (pa <= cruiseYRefLookup[0].pa) return interpYRefAtT(cruiseYRefLookup[0].points, oat);
     if (pa >= cruiseYRefLookup.at(-1).pa) return interpYRefAtT(cruiseYRefLookup.at(-1).points, oat);
     for (let i = 0; i < cruiseYRefLookup.length - 1; i++) {
@@ -25,19 +24,24 @@ export function getCruiseYRef(pa, oat) {
     return 0;
 }
 
-export function getCruiseTAS(pa, oat, power) {
-    const yRef = getCruiseYRef(pa, oat);
+export function getCruiseTAS(data, pa, oat, power, wheelFairings) {
+    const { cruiseTASLookup } = data;
+    const yRef = getCruiseYRef(data, pa, oat);
     const table = cruiseTASLookup[power];
     if (!table) return null;
-    if (yRef <= table[0].yRef) return table[0].tas;
-    if (yRef >= table.at(-1).yRef) return table.at(-1).tas;
-    for (let i = 0; i < table.length - 1; i++) {
-        if (yRef >= table[i].yRef && yRef <= table[i + 1].yRef) {
-            const t0 = table[i], t1 = table[i + 1];
-            return t0.tas + (t1.tas - t0.tas) * (yRef - t0.yRef) / (t1.yRef - t0.yRef);
+    let tas;
+    if (yRef <= table[0].yRef) tas = table[0].tas;
+    else if (yRef >= table.at(-1).yRef) tas = table.at(-1).tas;
+    else {
+        tas = null;
+        for (let i = 0; i < table.length - 1; i++) {
+            if (yRef >= table[i].yRef && yRef <= table[i + 1].yRef) {
+                const t0 = table[i], t1 = table[i + 1];
+                tas = t0.tas + (t1.tas - t0.tas) * (yRef - t0.yRef) / (t1.yRef - t0.yRef);
+                break;
+            }
         }
     }
-    return null;
+    if (tas !== null && wheelFairings === 'no') tas -= data.noFairingsTASDeduction;
+    return tas;
 }
-
-export { cruiseFuelGPH };
