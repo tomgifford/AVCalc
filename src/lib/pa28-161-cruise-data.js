@@ -64,11 +64,11 @@ export const cruiseYRefLookup = [
         { t:  40, yRef: 50.5 },
     ]},                                 
     { pa:  8000, points: [
-        { t: -40, yRef: 16 },
-        { t: -30, yRef: 23 },
-        { t: -20, yRef: 29 },
-        { t: -10, yRef: 35 },
-        { t:   0, yRef: 41.5 },
+        { t: -40, yRef: 14.5 },
+        { t: -30, yRef: 21.5 },
+        { t: -20, yRef: 28 },
+        { t: -10, yRef: 34 },
+        { t:   0, yRef: 40.5 },
         { t:  10, yRef: 47 },
         { t:  20, yRef: 52.5 },
         { t:  30, yRef: 57.5 },
@@ -76,14 +76,14 @@ export const cruiseYRefLookup = [
     ]},
     { pa: 10000, points: [
         { t: -40, yRef: 28 },
-        { t: -30, yRef: 34 },
-        { t: -20, yRef: 39 },
-        { t: -10, yRef: 44.5 },
-        { t:   0, yRef: 50 },
-        { t:  10, yRef: 55 },
-        { t:  20, yRef: 59.5 },
-        { t:  30, yRef: 64 },
-        { t:  40, yRef: 68 },
+        { t: -30, yRef: 34.5 },
+        { t: -20, yRef: 41 },
+        { t: -10, yRef: 47 },
+        { t:   0, yRef: 53 },
+        { t:  10, yRef: 58.5 },
+        { t:  20, yRef: 64. },
+        { t:  30, yRef: 69 },
+        { t:  40, yRef: 74.5 },
     ]},
     { pa: 12000, points: [
         { t: -40, yRef: 40 },
@@ -97,7 +97,7 @@ export const cruiseYRefLookup = [
     ]},
     { pa:  14000, points: [
         { t: -40, yRef: 47 },
-        { t: -30, yRef: 54 },
+        { t: -30, yRef: 53.5 },
         { t: -20, yRef: 59.5 },
         { t: -10, yRef: 65.5 },
         { t:   0, yRef: 71 },
@@ -112,8 +112,9 @@ export const cruiseYRefLookup = [
 // Interpolating at yRef 28 gives: 121 + (123-121)*(3/5) = 122.2 KTAS ✓
 export const cruiseTASLookup = {
     75: [
+        { yRef:  0, tas: 112.5 },
         { yRef:  5, tas: 114 },
-        { yRef: 10, tas: 116 },
+        { yRef: 10, tas: 115.5 },
         { yRef: 15, tas: 117 },
         { yRef: 20, tas: 118.5 },
         { yRef: 25, tas: 120 },
@@ -123,6 +124,7 @@ export const cruiseTASLookup = {
         { yRef: 45, tas: 126 },
     ],
     65: [
+        { yRef:  0, tas: 105 },
         { yRef:  5, tas: 106 },
         { yRef: 10, tas: 107 },
         { yRef: 15, tas: 108 },
@@ -138,9 +140,10 @@ export const cruiseTASLookup = {
         { yRef: 64, tas: 118 },
     ],
     55: [
-        { yRef:  5, tas:  96.5 },
-        { yRef: 10, tas:  97.5 },
-        { yRef: 15, tas: 98.5 },
+        { yRef:  0, tas: 95.5 },
+        { yRef:  5, tas:  96.3 },
+        { yRef: 10, tas:  97.2 },
+        { yRef: 15, tas: 98.0 },
         { yRef: 20, tas: 99 },
         { yRef: 25, tas: 100 },
         { yRef: 30, tas: 101 },
@@ -150,7 +153,7 @@ export const cruiseTASLookup = {
         { yRef: 50, tas: 105 },
         { yRef: 55, tas: 106 },
         { yRef: 60, tas: 107 },
-        { yRef: 66, tas: 109 },
+        { yRef: 68, tas: 109 },
     ],
 };
 

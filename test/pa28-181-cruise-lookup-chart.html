@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cruise Lookup Table Validation — PA-28-181</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: sans-serif;
+    background: #f8fafc;
+    margin: 0;
+    padding: 2rem;
+  }
+  h1 {
+    font-size: 1.2rem;
+    color: #1e40af;
+    margin: 0 0 0.25rem;
+    text-align: center;
+  }
+  p.subtitle {
+    font-size: 0.78rem;
+    color: #64748b;
+    text-align: center;
+    margin: 0 0 1.5rem;
+  }
+  .charts {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+  }
+  .chart-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.1);
+    padding: 1.25rem 1.5rem;
+    width: 860px;
+  }
+  .chart-card h2 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<h1>PA-28-181 Cruise Lookup Table Validation</h1>
+<p class="subtitle">Live data from pa28-181-cruise-data.js</p>
+
+<div class="charts">
+  <div class="chart-card">
+    <h2 style="color:#334155">yRef Lookup — all PA lines (Temperature → yRef)</h2>
+    <canvas id="chartYRef"></canvas>
+  </div>
+
+  <div class="chart-card" style="width:700px">
+    <h2 style="color:#334155">TAS Lookup — by Power Setting (yRef → TAS)</h2>
+    <canvas id="chartTAS"></canvas>
+  </div>
+</div>
+
+<script type="module">
+import Chart from 'chart.js/auto';
+import { cruiseYRefLookup, cruiseTASLookup } from '../src/lib/pa28-181-cruise-data.js';
+
+const PA_COLORS = [
+    '#e63946','#f4a261','#e9c46a','#2a9d8f','#457b9d',
+    '#1d3557','#6a0572','#b5179e','#7209b7','#3a0ca3',
+    '#4361ee','#4cc9f0',
+];
+
+new Chart(document.getElementById('chartYRef'), {
+    type: 'line',
+    data: {
+        datasets: cruiseYRefLookup.map((row, i) => ({
+            label: `PA ${row.pa.toLocaleString()} ft`,
+            data: row.points.map(p => ({ x: p.t, y: p.yRef })),
+            borderColor: PA_COLORS[i % PA_COLORS.length],
+            borderWidth: 1.5,
+            tension: 0,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            fill: false,
+        })),
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        aspectRatio: 1.8,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'right',
+                labels: { font: { size: 10 }, boxWidth: 14, padding: 6 },
+            },
+            tooltip: {
+                callbacks: {
+                    label: ctx => `${ctx.dataset.label}  T: ${ctx.parsed.x}°C  yRef: ${ctx.parsed.y.toFixed(1)}`,
+                },
+            },
+        },
+        scales: {
+            x: {
+                type: 'linear',
+                title: { display: true, text: 'Temperature (°C)', font: { size: 11 } },
+                ticks: { font: { size: 10 } },
+                grid: { color: '#e2e8f0' },
+            },
+            y: {
+                type: 'linear',
+                title: { display: true, text: 'yRef', font: { size: 11 } },
+                min: 0,
+                ticks: { stepSize: 5, font: { size: 10 } },
+                grid: { color: '#e2e8f0' },
+            },
+        },
+    },
+});
+
+const TAS_COLORS = { 75: '#e63946', 65: '#2a9d8f', 55: '#1982c4' };
+
+new Chart(document.getElementById('chartTAS'), {
+    type: 'line',
+    data: {
+        datasets: Object.entries(cruiseTASLookup).map(([pct, rows]) => ({
+            label: `${pct}% power`,
+            data: rows.map(p => ({ x: p.tas, y: p.yRef })),
+            borderColor: TAS_COLORS[pct],
+            borderWidth: 2,
+            tension: 0,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            fill: false,
+        })),
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        aspectRatio: 1,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                labels: { font: { size: 11 }, boxWidth: 14, padding: 10 },
+            },
+            tooltip: {
+                callbacks: {
+                    label: ctx => `${ctx.dataset.label}  TAS: ${ctx.parsed.x} kt  yRef: ${ctx.parsed.y}`,
+                },
+            },
+        },
+        scales: {
+            x: {
+                type: 'linear',
+                title: { display: true, text: 'TAS (kt)', font: { size: 11 } },
+                ticks: { font: { size: 10 } },
+                grid: { color: '#e2e8f0' },
+            },
+            y: {
+                type: 'linear',
+                title: { display: true, text: 'yRef', font: { size: 11 } },
+                min: 0,
+                ticks: { stepSize: 5, font: { size: 10 } },
+                grid: { color: '#e2e8f0' },
+            },
+        },
+    },
+});
+</script>
+</body>
+</html>
