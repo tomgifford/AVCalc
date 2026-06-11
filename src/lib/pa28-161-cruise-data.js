@@ -107,7 +107,7 @@ export const cruiseYRefLookup = [
 ];
 
 // Right-panel lookup: TAS by yRef, keyed by % power.
-// yRef values match the same scale as yRefLookup in pa28-161-data.js.
+// yRef values match the same scale as yRefLookup in pa28-161-climb-data.js.
 // Calibration: PA 5000, OAT 16 °C → yRef ≈ 28, 75% → 122.5 KTAS (per chart example).
 // Interpolating at yRef 28 gives: 121 + (123-121)*(3/5) = 122.2 KTAS ✓
 export const cruiseTASLookup = {

@@ -1,6 +1,6 @@
-import * as pa28161Climb from './pa28-161-data.js';
+import * as pa28161Climb from './pa28-161-climb-data.js';
 import * as pa28161Cruise from './pa28-161-cruise-data.js';
-import * as pa28181Climb from './pa28-181-data.js';
+import * as pa28181Climb from './pa28-181-climb-data.js';
 import * as pa28181Cruise from './pa28-181-cruise-data.js';
 
 const REGISTRY = {

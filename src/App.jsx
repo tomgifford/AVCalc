@@ -244,6 +244,7 @@ export default function App() {
                         {showDetails && results && (
                             <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#64748b', borderTop: '1px solid #cbd5e1', paddingTop: '0.5rem' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', gap: '0.5rem' }}>
+                                    <span>Cruise:</span>
                                     <span>PA: {Math.round(results.paTarget).toLocaleString()} ft</span>
                                     <span>T: {cruiseTemp}°C</span>
                                     <span style={{ color: 'var(--text-color)', fontWeight: 600 }}>
@@ -251,6 +252,7 @@ export default function App() {
                                     </span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem' }}>
+                                    <span>Start:</span>
                                     <span>PA: {Math.round(results.paStart).toLocaleString()} ft</span>
                                     <span>T: {startClimbTemp}°C</span>
                                     <span style={{ color: 'var(--text-color)', fontWeight: 600 }}>

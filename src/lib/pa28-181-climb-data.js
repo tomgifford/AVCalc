@@ -1,65 +1,87 @@
+/*statue miles
 export const climbDistLookup = [
     { yRef:  0, dist:  0.0 },
-    { yRef:  1, dist:  1.5 },
-    { yRef:  2, dist:  2.3 },
+    { yRef:  1, dist:  1.1 },
+    { yRef:  2, dist:  2.1 },
     { yRef:  4, dist:  4.5 },
     { yRef:  6, dist:  7.0 },
     { yRef:  8, dist:  9.5 },
     { yRef: 10, dist:  12.5 },
     { yRef: 12, dist:  15.8 },
     { yRef: 14, dist:  19.5 },
-    { yRef: 16, dist: 24.6 }, // interpolated
-    { yRef: 18, dist: 29.7 }, // interpolated
-    { yRef: 20, dist: 34.8 }, // interpolated
-    { yRef: 22, dist: 39.9 }, // interpolated
-    { yRef: 24, dist:  45 },
-    { yRef: 26, dist:  55 },
+    { yRef: 16, dist: 23.7 },
+    { yRef: 18, dist: 28.7 },
+    { yRef: 20, dist: 33.9 }, 
+    { yRef: 22, dist: 41.0 },
+    { yRef: 24, dist:  50 },
+    { yRef: 26, dist:  61 },
     { yRef: 27.6, dist:  70 },
 ];
+*/
+export const climbDistLookup = [
+    { yRef:  0, dist:  0.0 },
+    { yRef:  1, dist:  0.8 },
+    { yRef:  2, dist:  1.5 },
+    { yRef:  3, dist:  2.4 },
+    { yRef:  4, dist:  3.2 },
+    { yRef:  6, dist:  5.2 },
+    { yRef:  8, dist:  7.5 },
+    { yRef: 10, dist:  10.3 },
+    { yRef: 12, dist:  13.4 },
+    { yRef: 14, dist:  16.8 },
+    { yRef: 16, dist: 20.2 },
+    { yRef: 18, dist: 25.0 },
+    { yRef: 20, dist: 30.0 }, 
+    { yRef: 22, dist: 36.2 },
+    { yRef: 24, dist:  43.2 },
+    { yRef: 26, dist:  52.5 },
+    { yRef: 27, dist:  57.9 },
+    { yRef: 28, dist:  68.0 },
 
+];
 export const timeLookup = [
     { yRef:  0, time:  0 },
     { yRef:  1, time:  0.7 },
     { yRef:  2, time:  1.25 },
     { yRef:  4, time:  2.6 },
-    { yRef:  6, time:  4.45 }, // interpolated
-    { yRef:  8, time:  6.3  }, // interpolated
-    { yRef: 10, time:  8.15 }, // interpolated
-    { yRef: 12, time:  10 },
-    { yRef: 14, time: 12.5  }, // interpolated
-    { yRef: 16, time: 15.0  }, // interpolated
-    { yRef: 18, time: 17.5  }, // interpolated
-    { yRef: 20, time:  20 },
-    { yRef: 22, time: 26.25 }, // interpolated
-    { yRef: 24, time: 32.5  }, // interpolated
-    { yRef: 26, time: 38.75 }, // interpolated
+    { yRef:  6, time:  4.0 }, 
+    { yRef:  8, time:  5.8  }, 
+    { yRef: 10, time:  7.6 },
+    { yRef: 12, time:  9.7 },
+    { yRef: 14, time: 12.1  }, 
+    { yRef: 16, time: 15.0  },
+    { yRef: 18, time: 18.2  }, 
+    { yRef: 20, time:  21.9 },
+    { yRef: 22, time: 26.0 }, 
+    { yRef: 24, time: 31.2  },
+    { yRef: 26, time: 37.5 },
     { yRef: 28, time:  45 },
 ];
 
 export const fuelLookup = [
     { yRef:  0, fuel:  0 },
-    { yRef:  1, fuel:  0 },
-    { yRef:  2, fuel:  0 },
-    { yRef:  4, fuel:  0.8 },
-    { yRef:  6, fuel:  1.18 }, // interpolated
-    { yRef:  8, fuel:  1.56 }, // interpolated
-    { yRef: 10, fuel:  1.93 }, // interpolated
-    { yRef: 12, fuel:  2.31 }, // interpolated
-    { yRef: 13, fuel:  2.5 },
-    { yRef: 14, fuel:  2.75 }, // interpolated
-    { yRef: 16, fuel:  3.25 }, // interpolated
-    { yRef: 18, fuel:  3.75 }, // interpolated
-    { yRef: 20, fuel:  4.25 }, // interpolated
-    { yRef: 22, fuel:  4.75 }, // interpolated
-    { yRef: 23, fuel:  5 },
-    { yRef: 24, fuel:  5.7  }, // interpolated
-    { yRef: 26, fuel:  7.1  }, // interpolated
+    { yRef:  1, fuel:  0.1 },
+    { yRef:  2, fuel:  0.2 },
+    { yRef:  4, fuel:  0.5 },
+    { yRef:  6, fuel:  .9 }, 
+    { yRef:  8, fuel:  1.35 }, 
+    { yRef: 10, fuel:  1.8 }, 
+    { yRef: 12, fuel:  2.3 }, 
+    { yRef: 13, fuel:  2.55 },
+    { yRef: 14, fuel:  2.8 }, 
+    { yRef: 16, fuel:  3.35 },
+    { yRef: 18, fuel:  4.0 }, 
+    { yRef: 20, fuel:  4.75 },
+    { yRef: 22, fuel:  5.55 }, 
+    { yRef: 24, fuel:  6.35  },
+    { yRef: 26, fuel:  7.45  }, 
     { yRef: 28, fuel:  8.5 },
 ];
 
 export const yRefLookup = [
-    { pa:     0, points: [
-        { t: 0, yRef: 0 }, { t: 100, yRef: 0 },
+     { pa:     0, points: [
+        { t: 58, yRef: 0 },
+        { t: 100, yRef: 5.3 },
     ]},
     { pa:  1000, points: [
         { t:  40, yRef: 0.00 }, { t:  50, yRef: 1.25 }, { t:  60, yRef: 2.5 },

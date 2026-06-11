@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AVCalc — Test Charts</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f8fafc;
+    margin: 0;
+    padding: 3rem 2rem;
+    color: #1e293b;
+  }
+  h1 {
+    font-size: 1.4rem;
+    color: #1e40af;
+    margin: 0 0 0.25rem;
+    text-align: center;
+  }
+  p.subtitle {
+    font-size: 0.82rem;
+    color: #64748b;
+    text-align: center;
+    margin: 0 0 2.5rem;
+  }
+  .grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  .aircraft-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    overflow: hidden;
+  }
+  .aircraft-header {
+    background: #1e40af;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 0.75rem 1.25rem;
+    letter-spacing: 0.02em;
+  }
+  .chart-links {
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .chart-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .chart-type-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    width: 52px;
+    flex-shrink: 0;
+  }
+  .chart-links a {
+    display: inline-block;
+    font-size: 0.875rem;
+    color: #2563eb;
+    text-decoration: none;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    background: #eff6ff;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .chart-links a:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+  }
+</style>
+</head>
+<body>
+<h1>AVCalc Test Charts</h1>
+<p class="subtitle">Live validation charts — data read directly from source files</p>
+
+<div class="grid">
+
+  <div class="aircraft-card">
+    <div class="aircraft-header">Piper PA-28-161 Warrior II</div>
+    <div class="chart-links">
+      <div class="chart-row">
+        <span class="chart-type-label">Climb</span>
+        <a href="pa28-161-climb-lookup-chart.html">Lookup Table Validation</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="aircraft-card">
+    <div class="aircraft-header">Piper PA-28-181 Archer II</div>
+    <div class="chart-links">
+      <div class="chart-row">
+        <span class="chart-type-label">Climb</span>
+        <a href="pa28-181-climb-lookup-chart.html">Lookup Table Validation</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
