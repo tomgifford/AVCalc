@@ -54,7 +54,7 @@ function ResultValue({ label, value, unit, prefix = '' }) {
 export default function App() {
     const [aircraftType, setAircraftType]     = useState('pa28-161');
     const [chartType, setChartType]           = useState('climb');
-    const [wheelFairings, setWheelFairings]   = useState('yes');
+    const [wheelFairings, setWheelFairings]   = useState('no');
     const [power, setPower]                   = useState(65);
     const [cruiseTemp, setCruiseTemp]           = useState('15');
     const [startClimbTemp, setStartClimbTemp]   = useState('15');
@@ -91,8 +91,6 @@ export default function App() {
 
     let results = null;
     if (valid) {
-        //const { pa: paTarget, stdTemp: stdTempTarget } = calculateDensityAltitude(IA, AS, T);
-        //const { pa: paStart,  stdTemp: stdTempStart  } = calculateDensityAltitude(SA, AS, ST);
         const { pa: paTarget, stdTemp: stdTempTarget } = calculatePressureAltitude(IA, AS, T);
         const { pa: paStart,  stdTemp: stdTempStart  } = calculatePressureAltitude(SA, AS, ST);
         
@@ -109,7 +107,7 @@ export default function App() {
         const aboveMax = yRefTarget > aircraftData.climb.timeLookup.at(-1).yRef;
 
         results = {
-            paTarget, /*stdTempTarget,*/ paStart, /*stdTempStart,*/
+            paTarget, paStart,
             distTarget, distStart, netDist: Math.max(0, distTarget - distStart),
             timeTarget, timeStart, netTime: Math.max(0, timeTarget - timeStart),
             fuelTarget, fuelStart, netFuel: Math.max(0, fuelTarget - fuelStart),
@@ -131,21 +129,11 @@ export default function App() {
 
                 <div className="input-group">
                     <label htmlFor="aircraft-type">Aircraft Type</label>
-                    <select id="aircraft-type" value={aircraftType} onChange={e => setAircraftType(e.target.value)}>
+                    <select id="aircraft-type" value={aircraftType} onChange={e => { setAircraftType(e.target.value); setWheelFairings('no'); }}>
                         <option value="pa28-161">Piper PA-28-161 Warrior II</option>
                         <option value="pa28-181">Piper PA-28-181 Archer II</option>
                     </select>
                 </div>
-
-                <RadioGroup
-                    label="Chart Type"
-                    options={[
-                        { value: 'climb', label: 'Climb Performance' },
-                        { value: 'cruise', label: 'Cruise Performance' },
-                    ]}
-                    value={chartType}
-                    onChange={setChartType}
-                />
 
                 {['pa28-161', 'pa28-181'].includes(aircraftType) && (
                     <RadioGroup
@@ -158,6 +146,16 @@ export default function App() {
                         onChange={setWheelFairings}
                     />
                 )}
+
+                <RadioGroup
+                    label="Chart Type"
+                    options={[
+                        { value: 'climb', label: 'Climb Performance' },
+                        { value: 'cruise', label: 'Cruise Performance' },
+                    ]}
+                    value={chartType}
+                    onChange={setChartType}
+                />
 
                 <fieldset className="conditions-group">
                     <legend>Conditions</legend>
@@ -191,81 +189,80 @@ export default function App() {
                     />
                 )}
 
-                <div className="result-area">
-                    {chartType === 'cruise' ? (
-                        <div style={{ display: 'flex', alignItems: 'flex-end', marginTop: '1rem' }}>
-                            <div style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '2rem' }}>
-                                <ResultValue label="True Airspeed"
-                                    value={cruiseResults ? cruiseResults.tas.toFixed(1) : '--'}
-                                    unit="KTAS" />
-                                <ResultValue label="Fuel Flow"
-                                    value={cruiseResults ? cruiseResults.fuelFlow.toFixed(1) : '--'}
-                                    unit="GPH" />
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'right', lineHeight: 1.3 }}>
-                                <div>yRef</div>
-                                <div style={{ fontWeight: 600 }}>
-                                    {cruiseResults ? cruiseResults.yRef.toFixed(1) : '--'}
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <>
-                            <div className="result-label" style={{ marginTop: '1rem' }}>Pressure Altitude (at target)</div>
-                            <div className="result-value">
-                                {results ? Math.round(results.paTarget).toLocaleString() : '--'}{' '}
-                                <span className="unit">ft</span>
-                            </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '1rem' }}>
-                                <ResultValue label="Est. Time to Climb"
-                                    value={results ? results.netTime.toFixed(0) : '--'}
-                                    unit="min" prefix={results?.prefix} />
-                                <ResultValue label="Est. Distance to Climb"
-                                    value={results ? results.netDist.toFixed(1) : '--'}
-                                    unit="nm" prefix={results?.prefix} />
-                                <ResultValue label="Est. Fuel to Climb"
-                                    value={results ? results.netFuel.toFixed(2) : '--'}
-                                    unit="gal" prefix={results?.prefix} />
-                            </div>
-
-                            <div style={{ marginTop: '0.75rem' }}>
-                                <a href="#"
-                                    style={{ fontSize: '0.75rem', textDecoration: 'none', color: 'var(--primary-color)' }}
-                                    onClick={e => { e.preventDefault(); setShowDetails(d => !d); }}>
-                                    Details
-                                </a>
-                            </div>
-
-                            {showDetails && results && (
-                                <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#64748b', borderTop: '1px solid #cbd5e1', paddingTop: '0.5rem' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', gap: '0.5rem' }}>
-                                        <span>T: {T.toFixed(1)} ({cruiseTemp})°C</span>
-                                        <span>PA: {Math.round(results.paTarget).toLocaleString()} ft</span>
-                                        <span style={{ color: 'var(--text-color)', fontWeight: 600 }}>
-                                            Target: {results.distTarget.toFixed(1)} nm / {results.timeTarget.toFixed(1)} min / {results.fuelTarget.toFixed(2)} gal
-                                        </span>
-                                    </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem' }}>
-                                        <span>T: {T.toFixed(1)} ({startClimbTemp})°C</span>
-                                        <span>PA: {Math.round(results.paStart).toLocaleString()} ft</span>
-                                        <span style={{ color: 'var(--text-color)', fontWeight: 600 }}>
-                                            Start: {results.distStart.toFixed(1)} nm / {results.timeStart.toFixed(1)} min / {results.fuelStart.toFixed(2)} gal
-                                        </span>
-                                    </div>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
             </div>
 
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2rem', minWidth: 0 }}>
             {chart && (
                 <div className="chart-panel">
                     <div className="chart-title">{chart.title}</div>
                     <img src={chart.src} alt={chart.alt} />
                 </div>
             )}
+            <div className="result-area">
+                {chartType === 'cruise' ? (
+                    <div style={{ display: 'flex', alignItems: 'flex-end', marginTop: '1rem' }}>
+                        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '2rem' }}>
+                            <ResultValue label="True Airspeed"
+                                value={cruiseResults ? cruiseResults.tas.toFixed(1) : '--'}
+                                unit="KTAS" />
+                            <ResultValue label="Fuel Flow"
+                                value={cruiseResults ? cruiseResults.fuelFlow.toFixed(1) : '--'}
+                                unit="GPH" />
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'right', lineHeight: 1.3 }}>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <div className="result-label" style={{ marginTop: '1rem' }}>Pressure Altitude (at target)</div>
+                        <div className="result-value">
+                            {results ? Math.round(results.paTarget).toLocaleString() : '--'}{' '}
+                            <span className="unit">ft</span>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '1rem' }}>
+                            <ResultValue label="Est. Time to Climb"
+                                value={results ? results.netTime.toFixed(0) : '--'}
+                                unit="min" prefix={results?.prefix} />
+                            <ResultValue label="Est. Distance to Climb"
+                                value={results ? results.netDist.toFixed(1) : '--'}
+                                unit="nm" prefix={results?.prefix} />
+                            <ResultValue label="Est. Fuel to Climb"
+                                value={results ? results.netFuel.toFixed(2) : '--'}
+                                unit="gal" prefix={results?.prefix} />
+                        </div>
+
+                        <div style={{ marginTop: '0.75rem' }}>
+                            <a href="#"
+                                style={{ fontSize: '0.75rem', textDecoration: 'none', color: 'var(--primary-color)' }}
+                                onClick={e => { e.preventDefault(); setShowDetails(d => !d); }}>
+                                Details
+                            </a>
+                        </div>
+
+                        {showDetails && results && (
+                            <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#64748b', borderTop: '1px solid #cbd5e1', paddingTop: '0.5rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', gap: '0.5rem' }}>
+                                    <span>PA: {Math.round(results.paTarget).toLocaleString()} ft</span>
+                                    <span>T: {cruiseTemp}°C</span>
+                                    <span style={{ color: 'var(--text-color)', fontWeight: 600 }}>
+                                        Target: {results.distTarget.toFixed(1)} nm / {results.timeTarget.toFixed(1)} min / {results.fuelTarget.toFixed(2)} gal
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem' }}>
+                                    <span>PA: {Math.round(results.paStart).toLocaleString()} ft</span>
+                                    <span>T: {startClimbTemp}°C</span>
+                                    <span style={{ color: 'var(--text-color)', fontWeight: 600 }}>
+                                        Start: {results.distStart.toFixed(1)} nm / {results.timeStart.toFixed(1)} min / {results.fuelStart.toFixed(2)} gal
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+            </div>
         </div>
     );
 }

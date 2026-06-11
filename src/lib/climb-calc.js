@@ -79,7 +79,7 @@ export function calcStartClimbTemp(t, ia, sa, as_) {
     if ([t, ia, sa, as_].every(v => !isNaN(v))) {
         const { pa: paTarget } = calculatePressureAltitude(ia, as_);
         const { pa: paStart }  = calculatePressureAltitude(sa, as_);
-        return (t + 2 * (paTarget - paStart) / 1000).toFixed(1);
+        return Math.round(t + 2 * (paTarget - paStart) / 1000).toString();
     }
     return null;
 }

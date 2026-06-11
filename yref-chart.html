@@ -1,68 +1,24 @@
-export const climbDistLookup = [
-    { yRef:  0, dist:  0.0 },
-    { yRef:  1, dist:  1.5 },
-    { yRef:  2, dist:  2.3 },
-    { yRef:  4, dist:  4.5 },
-    { yRef:  6, dist:  7.0 },
-    { yRef:  8, dist:  9.5 },
-    { yRef: 10, dist:  12.5 },
-    { yRef: 12, dist:  15.8 },
-    { yRef: 14, dist:  19.5 },
-    { yRef: 16, dist: 24.6 }, // interpolated
-    { yRef: 18, dist: 29.7 }, // interpolated
-    { yRef: 20, dist: 34.8 }, // interpolated
-    { yRef: 22, dist: 39.9 }, // interpolated
-    { yRef: 24, dist:  45 },
-    { yRef: 26, dist:  55 },
-    { yRef: 27.6, dist:  70 },
-];
-
-export const timeLookup = [
-    { yRef:  0, time:  0 },
-    { yRef:  1, time:  0.7 },
-    { yRef:  2, time:  1.25 },
-    { yRef:  4, time:  2.6 },
-    { yRef:  6, time:  4.45 }, // interpolated
-    { yRef:  8, time:  6.3  }, // interpolated
-    { yRef: 10, time:  8.15 }, // interpolated
-    { yRef: 12, time:  10 },
-    { yRef: 14, time: 12.5  }, // interpolated
-    { yRef: 16, time: 15.0  }, // interpolated
-    { yRef: 18, time: 17.5  }, // interpolated
-    { yRef: 20, time:  20 },
-    { yRef: 22, time: 26.25 }, // interpolated
-    { yRef: 24, time: 32.5  }, // interpolated
-    { yRef: 26, time: 38.75 }, // interpolated
-    { yRef: 28, time:  45 },
-];
-
-export const fuelLookup = [
-    { yRef:  0, fuel:  0 },
-    { yRef:  1, fuel:  0 },
-    { yRef:  2, fuel:  0 },
-    { yRef:  4, fuel:  0.8 },
-    { yRef:  6, fuel:  1.18 }, // interpolated
-    { yRef:  8, fuel:  1.56 }, // interpolated
-    { yRef: 10, fuel:  1.93 }, // interpolated
-    { yRef: 12, fuel:  2.31 }, // interpolated
-    { yRef: 13, fuel:  2.5 },
-    { yRef: 14, fuel:  2.75 }, // interpolated
-    { yRef: 16, fuel:  3.25 }, // interpolated
-    { yRef: 18, fuel:  3.75 }, // interpolated
-    { yRef: 20, fuel:  4.25 }, // interpolated
-    { yRef: 22, fuel:  4.75 }, // interpolated
-    { yRef: 23, fuel:  5 },
-    { yRef: 24, fuel:  5.7  }, // interpolated
-    { yRef: 26, fuel:  7.1  }, // interpolated
-    { yRef: 28, fuel:  8.5 },
-];
-
-export const yRefLookup = [
-    { pa:     0, points: [
-        { t: 0, yRef: 0 }, { t: 100, yRef: 0 },
-    ]},
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>yRefLookup Chart — PA-28-181</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  body { font-family: sans-serif; background: #f8fafc; display: flex; flex-direction: column; align-items: center; padding: 2rem; }
+  h1 { font-size: 1.2rem; color: #1e40af; margin-bottom: 1.5rem; }
+  .chart-wrap { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.1); padding: 1.5rem; width: 900px; }
+</style>
+</head>
+<body>
+<h1>PA-28-181 yRefLookup — all PA lines</h1>
+<div class="chart-wrap">
+  <canvas id="chart"></canvas>
+</div>
+<script>
+const yRefLookup = [
     { pa:  1000, points: [
-        { t:  40, yRef: 0.00 }, { t:  50, yRef: 1.25 }, { t:  60, yRef: 2.5 },
+        { t:  40, yRef: 0.00 }, { t:  50, yRef: 1.25 }, { t:  60, yRef: 2.5  },
         { t:  70, yRef: 3.75 }, { t:  80, yRef: 5.00 }, { t:  90, yRef: 6.25 },
         { t: 100, yRef: 7.50 },
     ]},
@@ -127,3 +83,51 @@ export const yRefLookup = [
         { t:  20, yRef: 24.3 }, { t:  30, yRef: 25.6 }, { t:  40, yRef: 26.9 }, { t:  48, yRef: 28.0 },
     ]},
 ];
+
+const colors = [
+    '#e63946','#f4a261','#e9c46a','#2a9d8f','#457b9d',
+    '#6a4c93','#1982c4','#8ac926','#ff595e','#ffca3a',
+    '#6a994e','#bc4749',
+];
+
+const datasets = yRefLookup.map((row, i) => ({
+    label: `PA ${row.pa.toLocaleString()} ft`,
+    data: row.points.map(p => ({ x: p.t, y: p.yRef })),
+    borderColor: colors[i % colors.length],
+    backgroundColor: colors[i % colors.length],
+    borderWidth: 2,
+    pointRadius: 4,
+    tension: 0,
+    fill: false,
+}));
+
+new Chart(document.getElementById('chart'), {
+    type: 'line',
+    data: { datasets },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'right' },
+            title: { display: false },
+        },
+        scales: {
+            x: {
+                type: 'linear',
+                title: { display: true, text: 'Temperature (°C)' },
+                min: -30,
+                max: 105,
+                ticks: { stepSize: 10 },
+                grid: { color: '#e2e8f0' },
+            },
+            y: {
+                title: { display: true, text: 'yRef' },
+                min: 0,
+                ticks: { stepSize: 2 },
+                grid: { color: '#e2e8f0' },
+            },
+        },
+    },
+});
+</script>
+</body>
+</html>
