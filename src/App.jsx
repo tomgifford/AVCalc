@@ -62,6 +62,7 @@ export default function App() {
     const [startAlt, setStartAlt]               = useState('0');
     const [altimeter, setAltimeter] = useState('29.92');
     const [showDetails, setShowDetails] = useState(false);
+    const [chartExpanded, setChartExpanded] = useState(false);
 
     const aircraftData = getAircraftData(aircraftType);
     const chart = getPerformanceChart(aircraftType, chartType);
@@ -196,6 +197,11 @@ export default function App() {
             {chart && (
                 <div className="chart-panel">
                     <div className="chart-title">{chart.title}</div>
+                    <img src={chart.src} alt={chart.alt} onClick={() => setChartExpanded(true)} title="Click to expand" />
+                </div>
+            )}
+            {chartExpanded && (
+                <div className="chart-modal-overlay" onClick={() => setChartExpanded(false)}>
                     <img src={chart.src} alt={chart.alt} />
                 </div>
             )}
