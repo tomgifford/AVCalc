@@ -189,3 +189,115 @@ select:focus {
     border-color: var(--primary-color);
     color: #fff;
 }
+
+.result-main-values {
+    margin-top: 1rem;
+}
+
+.bar-handle {
+    display: none;
+}
+
+.chart-tap-hint {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    body {
+        padding: 0.75rem 0.5rem 110px;
+    }
+
+    .app-layout {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .container {
+        max-width: 100%;
+    }
+
+    .chart-panel {
+        flex: none;
+        padding: 1rem;
+    }
+
+    .result-area {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin-top: 0;
+        border-radius: 0;
+        border-top: 2px solid #bfdbfe;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.12);
+        padding: 0.6rem 1rem;
+        z-index: 100;
+    }
+
+    .result-value {
+        font-size: 1.25rem;
+    }
+
+    .result-label {
+        font-size: 0.7rem;
+    }
+
+    .result-main-values {
+        margin-top: 0;
+        gap: 1.25rem !important;
+    }
+
+    .result-cruise-row {
+        justify-content: center;
+        gap: 2rem;
+    }
+
+    .pa-result {
+        display: none;
+    }
+
+    .details-toggle-desktop {
+        display: none;
+    }
+
+    .details-content {
+        font-size: 0.7rem;
+        margin-top: 0.4rem !important;
+        padding-top: 0.4rem !important;
+    }
+
+    .details-content > div {
+        flex-wrap: wrap;
+        gap: 0.3rem !important;
+    }
+
+    .chart-tap-hint {
+        display: block;
+        text-align: center;
+        font-size: 0.7rem;
+        color: #94a3b8;
+        margin-top: 0.25rem;
+    }
+
+    .bar-handle {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 0 8px;
+        margin-bottom: 0.35rem;
+        border-bottom: 1px solid #bfdbfe;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .bar-handle::before,
+    .bar-handle::after {
+        content: '';
+        display: block;
+        width: 28px;
+        height: 2.5px;
+        background-color: #94a3b8;
+        border-radius: 2px;
+    }
+}

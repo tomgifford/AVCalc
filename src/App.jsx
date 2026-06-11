@@ -126,7 +126,7 @@ export default function App() {
     return (
         <div className="app-layout">
             <div className="container">
-                <h1>Fuel, Time, and Distance to Climb</h1>
+                <h1>POH-Based Performance</h1>
 
                 <div className="input-group">
                     <label htmlFor="aircraft-type">Aircraft Type</label>
@@ -198,6 +198,7 @@ export default function App() {
                 <div className="chart-panel">
                     <div className="chart-title">{chart.title}</div>
                     <img src={chart.src} alt={chart.alt} onClick={() => setChartExpanded(true)} title="Click to expand" />
+                    <span className="chart-tap-hint">Tap to expand</span>
                 </div>
             )}
             {chartExpanded && (
@@ -207,7 +208,7 @@ export default function App() {
             )}
             <div className="result-area">
                 {chartType === 'cruise' ? (
-                    <div style={{ display: 'flex', alignItems: 'flex-end', marginTop: '1rem' }}>
+                    <div className="result-cruise-row" style={{ display: 'flex', alignItems: 'center' }}>
                         <div style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '2rem' }}>
                             <ResultValue label="True Airspeed"
                                 value={cruiseResults ? cruiseResults.tas.toFixed(1) : '--'}
@@ -221,13 +222,15 @@ export default function App() {
                     </div>
                 ) : (
                     <>
-                        <div className="result-label" style={{ marginTop: '1rem' }}>Pressure Altitude (at target)</div>
-                        <div className="result-value">
+                        <div className="bar-handle" onClick={() => setShowDetails(d => !d)}></div>
+
+                        <div className="result-label pa-result">Pressure Altitude (at target)</div>
+                        <div className="result-value pa-result">
                             {results ? Math.round(results.paTarget).toLocaleString() : '--'}{' '}
                             <span className="unit">ft</span>
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '1rem' }}>
+                        <div className="result-main-values" style={{ display: 'flex', justifyContent: 'center', gap: '2rem' }}>
                             <ResultValue label="Est. Time to Climb"
                                 value={results ? results.netTime.toFixed(0) : '--'}
                                 unit="min" prefix={results?.prefix} />
@@ -239,7 +242,7 @@ export default function App() {
                                 unit="gal" prefix={results?.prefix} />
                         </div>
 
-                        <div style={{ marginTop: '0.75rem' }}>
+                        <div className="details-toggle-desktop" style={{ marginTop: '0.75rem' }}>
                             <a href="#"
                                 style={{ fontSize: '0.75rem', textDecoration: 'none', color: 'var(--primary-color)' }}
                                 onClick={e => { e.preventDefault(); setShowDetails(d => !d); }}>
@@ -248,7 +251,7 @@ export default function App() {
                         </div>
 
                         {showDetails && results && (
-                            <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#64748b', borderTop: '1px solid #cbd5e1', paddingTop: '0.5rem' }}>
+                            <div className="details-content" style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#64748b', borderTop: '1px solid #cbd5e1', paddingTop: '0.5rem' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', gap: '0.5rem' }}>
                                     <span>Cruise:</span>
                                     <span>PA: {Math.round(results.paTarget).toLocaleString()} ft</span>
