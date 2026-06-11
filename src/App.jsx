@@ -22,9 +22,9 @@ function NumericInput({ id, label, value, onChange, step = 1, placeholder, style
     );
 }
 
-function RadioGroup({ label, options, value, onChange }) {
+function RadioGroup({ label, options, value, onChange, inline }) {
     return (
-        <div className="input-group">
+        <div className={inline ? 'input-group input-group-inline' : 'input-group'}>
             <label>{label}</label>
             <div className="radio-group">
                 {options.map(opt => (
@@ -137,25 +137,27 @@ export default function App() {
                 </div>
 
                 {['pa28-161', 'pa28-181'].includes(aircraftType) && (
-                    <RadioGroup
-                        label="Wheel Fairings Installed"
-                        options={[
-                            { value: 'yes', label: 'Yes' },
-                            { value: 'no',  label: 'No'  },
-                        ]}
-                        value={wheelFairings}
-                        onChange={setWheelFairings}
-                    />
+                    <div className="input-group input-group-inline">
+                        <label>Wheel Fairings</label>
+                        <label className="toggle-switch">
+                            <input type="checkbox"
+                                checked={wheelFairings === 'yes'}
+                                onChange={e => setWheelFairings(e.target.checked ? 'yes' : 'no')} />
+                            <span className="toggle-track"><span className="toggle-thumb" /></span>
+                            <span className="toggle-label">{wheelFairings === 'yes' ? 'Yes' : 'No'}</span>
+                        </label>
+                    </div>
                 )}
 
                 <RadioGroup
-                    label="Chart Type"
+                    label="Chart"
                     options={[
-                        { value: 'climb', label: 'Climb Performance' },
-                        { value: 'cruise', label: 'Cruise Performance' },
+                        { value: 'climb', label: 'Climb' },
+                        { value: 'cruise', label: 'Cruise' },
                     ]}
                     value={chartType}
                     onChange={setChartType}
+                    inline
                 />
 
                 <fieldset className="conditions-group">
@@ -224,7 +226,7 @@ export default function App() {
                     <>
                         <div className="bar-handle" onClick={() => setShowDetails(d => !d)}></div>
 
-                        <div className="result-label pa-result">Pressure Altitude (at target)</div>
+                        <div className="result-label pa-result">Pressure Altitude (cruise)</div>
                         <div className="result-value pa-result">
                             {results ? Math.round(results.paTarget).toLocaleString() : '--'}{' '}
                             <span className="unit">ft</span>
