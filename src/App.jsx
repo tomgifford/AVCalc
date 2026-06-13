@@ -1,11 +1,29 @@
 import { useState, useEffect } from 'react';
-import { getClimbYRef, getDist, getTime, getFuel, calculateDensityAltitude, calcStartClimbTemp, calculatePressureAltitude } from './lib/climb-calc.js';
+import { getClimbYRef, getDist, getTime, getFuel, calculateDensityAltitude, calcStartClimbTemp, calculatePressureAltitude, getClimbChartLimits } from './lib/climb-calc.js';
 import { getCruiseTAS, getCruiseYRef } from './lib/cruise-calc.js';
 import { getPerformanceChart } from './lib/performance-charts.js';
 import { getAircraftData } from './lib/aircraft-registry.js';
 import './App.css';
 
-function NumericInput({ id, label, value, onChange, step = 1, placeholder, style, disabled }) {
+function NumericInput({ id, label, value, onChange, step = 1, placeholder, style, disabled, min, max, rangeHint, flashTrigger = 0 }) {
+    const [flashing, setFlashing] = useState(false);
+    const hasLimits = min !== undefined || max !== undefined;
+
+    useEffect(() => {
+        if (flashTrigger > 0) setFlashing(true);
+    }, [flashTrigger]);
+
+    function isOutOfRange(num) {
+        return (min !== undefined && num < min) || (max !== undefined && num > max);
+    }
+
+    function handleChange(newVal) {
+        if (!hasLimits) { onChange(newVal); return; }
+        const num = parseFloat(newVal);
+        if (newVal !== '' && !isNaN(num) && isOutOfRange(num)) { setFlashing(true); return; }
+        onChange(newVal);
+    }
+
     return (
         <div className="input-group" style={style}>
             <label htmlFor={id}>{label}</label>
@@ -15,9 +33,12 @@ function NumericInput({ id, label, value, onChange, step = 1, placeholder, style
                 placeholder={placeholder}
                 step={step}
                 value={value}
-                onChange={e => onChange(e.target.value)}
+                onChange={e => handleChange(e.target.value)}
                 disabled={disabled}
+                className={flashing ? 'input-flash-invalid' : ''}
+                onAnimationEnd={() => setFlashing(false)}
             />
+            {flashing && rangeHint && <span className="range-hint">{rangeHint}</span>}
         </div>
     );
 }
@@ -63,24 +84,34 @@ export default function App() {
     const [altimeter, setAltimeter] = useState('29.92');
     const [showDetails, setShowDetails] = useState(false);
     const [chartExpanded, setChartExpanded] = useState(false);
+    const [startTempFlash, setStartTempFlash] = useState(0);
 
     const aircraftData = getAircraftData(aircraftType);
     const chart = getPerformanceChart(aircraftType, chartType);
+    const { minTemp, maxTemp } = getClimbChartLimits(aircraftData.climb);
+    const tempRangeHint = `Valid: ${minTemp} to ${maxTemp} °C`;
 
     useEffect(() => {
         handleCruiseTempChange(cruiseTemp);
     }, []);
 
+    function applyStartClimbTemp(temp) {
+        const num = parseFloat(temp);
+        if (num < minTemp) { setStartClimbTemp(String(minTemp)); setStartTempFlash(f => f + 1); }
+        else if (num > maxTemp) { setStartClimbTemp(String(maxTemp)); setStartTempFlash(f => f + 1); }
+        else { setStartClimbTemp(temp); }
+    }
+
     function handleCruiseTempChange(val) {
         setCruiseTemp(val);
         const temp = calcStartClimbTemp(parseFloat(val), parseFloat(altitude), parseFloat(startAlt), parseFloat(altimeter));
-        if (temp !== null) setStartClimbTemp(temp);
+        if (temp !== null) applyStartClimbTemp(temp);
     }
 
     function handleStartAltChange(val) {
         setStartAlt(val);
         const temp = calcStartClimbTemp(parseFloat(cruiseTemp), parseFloat(altitude), parseFloat(val), parseFloat(altimeter));
-        if (temp !== null) setStartClimbTemp(temp);
+        if (temp !== null) applyStartClimbTemp(temp);
     }
 
     const T  = parseFloat(cruiseTemp);
@@ -170,7 +201,8 @@ export default function App() {
                         <NumericInput id="altitude" label="IA - Cruise (ft)" value={altitude}
                             onChange={setAltitude} step={500} placeholder="e.g. 5000" style={{ flex: 1 }} />
                         <NumericInput id="cruise-temp" label="Temp (°C)" value={cruiseTemp}
-                            onChange={handleCruiseTempChange} step={1} placeholder="e.g. 15" style={{ flex: 1 }} />
+                            onChange={handleCruiseTempChange} step={1} placeholder="e.g. 15" style={{ flex: 1 }}
+                            min={minTemp} max={maxTemp} rangeHint={tempRangeHint} />
                     </div>
 
                     <div style={{ display: 'flex', gap: '1rem' }}>
@@ -179,7 +211,9 @@ export default function App() {
                             disabled={chartType === 'cruise'} />
                         <NumericInput id="start-climb-temp" label="Temp (°C)" value={startClimbTemp}
                             onChange={setStartClimbTemp} step={1} placeholder="e.g. 15" style={{ flex: 1 }}
-                            disabled={chartType === 'cruise'} />
+                            disabled={chartType === 'cruise'}
+                            min={minTemp} max={maxTemp} rangeHint={tempRangeHint}
+                            flashTrigger={startTempFlash} />
                     </div>
                 </fieldset>
 

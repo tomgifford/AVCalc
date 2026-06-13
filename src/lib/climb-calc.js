@@ -11,6 +11,7 @@ function interpYRefAtT(points, T) {
 }
 
 export function getClimbYRef(data, pa, T) {
+    if (pa <= 0) return 0;
     const { yRefLookup } = data;
     if (pa <= yRefLookup[0].pa) return interpYRefAtT(yRefLookup[0].points, T);
     if (pa >= yRefLookup.at(-1).pa) return interpYRefAtT(yRefLookup.at(-1).points, T);
@@ -73,6 +74,16 @@ export function calculateDensityAltitude(indicatedAltitude, altimeterSetting, T)
 export function calculatePressureAltitude(indicatedAltitude, altimeterSetting) {
     const pa = indicatedAltitude + (29.92 - altimeterSetting) * 1000;
     return { pa };
+}
+
+export function getClimbChartLimits(data) {
+    const { yRefLookup } = data;
+    const temps = yRefLookup.flatMap(row => row.points.map(p => p.t));
+    return {
+        minTemp: Math.min(...temps),
+        maxTemp: Math.max(...temps),
+        maxPA: Math.max(...yRefLookup.map(row => row.pa)),
+    };
 }
 
 export function calcStartClimbTemp(t, ia, sa, as_) {
