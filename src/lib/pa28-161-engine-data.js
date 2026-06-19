@@ -1,0 +1,122 @@
+// PA-28-161 Warrior II Engine Performance data — values TBD
+// yRefLookup shape: { pa, points: [{ t, yRef }, ...] }
+export const yRefLookup = [
+    { pa:     0, points: [
+        { t:  15, yRef:  0 },
+        { t:  20, yRef:  3 },
+        { t:  30, yRef:  9.5 },
+        { t:  40, yRef: 15 },
+    ]},
+    { pa:  1000, points: [
+        { t:   5, yRef:  0 },
+        { t:  10, yRef:  3 },
+        { t:  20, yRef:  9.5 },
+        { t:  30, yRef: 15.5 },
+        { t:  40, yRef: 20.5 },
+    ]},
+    { pa:  2000, points: [
+        { t:  -5, yRef:  0 },
+        { t:   0, yRef:  3 },
+        { t:  10, yRef:  9.5 },
+        { t:  20, yRef: 15.5 },
+        { t:  30, yRef: 21 },
+        { t:  40, yRef: 26 },
+    ]},
+    { pa:  3000, points: [
+        { t: -17, yRef:  0 },
+        { t: -10, yRef:  4.5 },
+        { t:   0, yRef: 10.5 },
+        { t:  10, yRef: 16.5 },
+        { t:  20, yRef: 22 },
+        { t:  30, yRef: 27 },
+        { t:  40, yRef: 32 },
+    ]},
+    { pa:  4000, points: [
+        { t: -24, yRef:  0 },
+        { t: -20, yRef:  3 },
+        { t: -10, yRef:  9 },
+        { t:   0, yRef: 16 },
+        { t:  10, yRef: 22 },
+        { t:  20, yRef: 28 },
+        { t:  30, yRef: 33.5 },
+        { t:  40, yRef: 38.5 },
+    ]},
+    { pa:  5000, points: [
+        { t: -33, yRef:  0 },
+        { t: -20, yRef:  9 },
+        { t: -10, yRef: 15 },
+        { t:   0, yRef: 22 },
+        { t:  10, yRef: 28 },
+        { t:  20, yRef: 33.5 },
+        { t:  30, yRef: 39 },
+        { t:  40, yRef: 44 },
+    ]},
+    { pa:  6000, points: [
+        { t: -40, yRef:  2 },
+        { t: -30, yRef:  9 },
+        { t: -20, yRef: 15.5 },
+        { t: -10, yRef: 22 },
+        { t:   0, yRef: 28.5 },
+        { t:  10, yRef: 34.5 },
+        { t:  20, yRef: 40 },
+        { t:  30, yRef: 45.5 },
+        { t:  40, yRef: 50.5 },
+    ]},                                 
+    { pa:  8000, points: [
+        { t: -40, yRef: 14.5 },
+        { t: -30, yRef: 21.5 },
+        { t: -20, yRef: 28 },
+        { t: -10, yRef: 34 },
+        { t:   0, yRef: 40.5 },
+        { t:  10, yRef: 47 },
+        { t:  20, yRef: 52.5 },
+        { t:  30, yRef: 57.5 },
+        { t:  40, yRef: 62.5 },
+    ]},
+    { pa: 10000, points: [
+        { t: -40, yRef: 28 },
+        { t: -30, yRef: 34.5 },
+        { t: -20, yRef: 41 },
+        { t: -10, yRef: 47 },
+        { t:   0, yRef: 53 },
+        { t:  10, yRef: 58.5 },
+        { t:  20, yRef: 64. },
+        { t:  30, yRef: 69 },
+        { t:  40, yRef: 74.5 },
+    ]},
+    { pa: 12000, points: [
+        { t: -40, yRef: 40 },
+        { t: -30, yRef: 47 },
+        { t: -20, yRef: 53 },
+        { t: -10, yRef: 59.5 },
+        { t:   0, yRef: 65.5 },
+        { t:  10, yRef: 71 },
+        { t:  20, yRef: 76 },
+        { t:  28, yRef: 80 },
+    ]},
+    { pa:  14000, points: [
+        { t: -40, yRef: 47 },
+        { t: -30, yRef: 53.5 },
+        { t: -20, yRef: 59.5 },
+        { t: -10, yRef: 65.5 },
+        { t:   0, yRef: 71 },
+        { t:  10, yRef: 76 },
+        { t:  18, yRef: 80 },
+    ]},];
+
+// rpmLookup shape: { yRef, rpm } — one array per power setting
+// yRef from getEngineYRef → interpolate to get RPM for that power line
+export const rpmLookup = {
+    75: [
+         { yRef:  0, rpm: 2480 },
+         { yRef:  40, rpm: 2665 },
+    ],
+    65: [
+         { yRef:  0, rpm: 2340 },
+         { yRef:  67, rpm: 2640 },
+    ],
+    55: [
+         { yRef:  0, rpm: 2195 },
+         { yRef:  80, rpm: 2565 },
+    ],
+};

@@ -31,6 +31,23 @@ export const timeLookup = [
 ];
 export const fuelLookup = [
     { yRef:  0, fuel: 0.00 },
+    { yRef:  5, fuel: 0.45 },
+    { yRef: 10, fuel: 0.8 },
+    { yRef: 15, fuel: 1.1 },
+    { yRef: 20, fuel: 1.6 },
+    { yRef: 25, fuel: 2.0 },
+    { yRef: 30, fuel: 2.4 },
+    { yRef: 35, fuel: 3.0 },
+    { yRef: 40, fuel: 4.0 },
+    { yRef: 45, fuel: 4.9 },
+    { yRef: 50, fuel: 5.8 },
+    { yRef: 55, fuel: 6.8 },
+    { yRef: 60, fuel: 8.20 },
+];
+
+/*
+export const fuelLookup = [
+    { yRef:  0, fuel: 0.00 },
     { yRef:  5, fuel: 0.75 },
     { yRef: 10, fuel: 1.1 },
     { yRef: 15, fuel: 1.6 },
@@ -44,7 +61,7 @@ export const fuelLookup = [
     { yRef: 50, fuel: 5.8 },
     { yRef: 55, fuel: 6.8 },
     { yRef: 60, fuel: 8.20 },
-];
+];*/
 
 // Left-panel lookup: YRef by pressure altitude and temperature.
 // Values read from the PA-28-161 climb performance chart left Y-axis.

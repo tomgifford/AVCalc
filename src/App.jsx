@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getClimbYRef, getDist, getTime, getFuel, calculateDensityAltitude, calcStartClimbTemp, calculatePressureAltitude, getClimbChartLimits } from './lib/climb-calc.js';
 import { getCruiseTAS, getCruiseYRef } from './lib/cruise-calc.js';
+import { getEngineYRef, getEngineRPM } from './lib/engine-calc.js';
 import { getPerformanceChart } from './lib/performance-charts.js';
 import { getAircraftData } from './lib/aircraft-registry.js';
 import './App.css';
@@ -10,8 +11,8 @@ function NumericInput({ id, label, value, onChange, step = 1, placeholder, style
     const hasLimits = min !== undefined || max !== undefined;
 
     useEffect(() => {
-        if (flashTrigger > 0) setFlashing(true);
-    }, [flashTrigger]);
+        if (flashTrigger > 0 && !disabled) setFlashing(true);
+    }, [flashTrigger, disabled]);
 
     function isOutOfRange(num) {
         return (min !== undefined && num < min) || (max !== undefined && num > max);
@@ -35,10 +36,10 @@ function NumericInput({ id, label, value, onChange, step = 1, placeholder, style
                 value={value}
                 onChange={e => handleChange(e.target.value)}
                 disabled={disabled}
-                className={flashing ? 'input-flash-invalid' : ''}
+                className={flashing && !disabled ? 'input-flash-invalid' : ''}
                 onAnimationEnd={() => setFlashing(false)}
             />
-            {flashing && rangeHint && <span className="range-hint">{rangeHint}</span>}
+            {flashing && !disabled && rangeHint && <span className="range-hint">{rangeHint}</span>}
         </div>
     );
 }
@@ -61,6 +62,29 @@ function RadioGroup({ label, options, value, onChange, inline }) {
     );
 }
 
+// TODO: Replace ca-pub-XXXXXXXXXXXXXXXX and data-ad-slot value with your AdSense IDs
+function AdBanner() {
+    useEffect(() => {
+        try {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (e) {}
+    }, []);
+
+    return (
+        <div className="ad-banner">
+            <div className="ad-label">Advertisement</div>
+            <ins
+                className="adsbygoogle"
+                style={{ display: 'block' }}
+                data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                data-ad-slot="XXXXXXXXXX"
+                data-ad-format="auto"
+                data-full-width-responsive="true"
+            />
+        </div>
+    );
+}
+
 function ResultValue({ label, value, unit, prefix = '' }) {
     return (
         <div>
@@ -79,15 +103,16 @@ export default function App() {
     const [power, setPower]                   = useState(65);
     const [cruiseTemp, setCruiseTemp]           = useState('15');
     const [startClimbTemp, setStartClimbTemp]   = useState('15');
-    const [altitude, setAltitude]               = useState('5000');
+    const [altitude, setAltitude]               = useState('5500');
     const [startAlt, setStartAlt]               = useState('0');
     const [altimeter, setAltimeter] = useState('29.92');
     const [showDetails, setShowDetails] = useState(false);
-    const [chartExpanded, setChartExpanded] = useState(false);
+    const [expandedChart, setExpandedChart] = useState(null);
     const [startTempFlash, setStartTempFlash] = useState(0);
 
     const aircraftData = getAircraftData(aircraftType);
     const chart = getPerformanceChart(aircraftType, chartType);
+    const engineChart = chartType === 'cruise' ? getPerformanceChart(aircraftType, 'engine') : null;
     const { minTemp, maxTemp } = getClimbChartLimits(aircraftData.climb);
     const tempRangeHint = `Valid: ${minTemp} to ${maxTemp} °C`;
 
@@ -147,6 +172,13 @@ export default function App() {
         };
     }
 
+    let engineYRef = null;
+    let engineRPM = null;
+    if ((chartType === 'engine' || chartType === 'cruise') && valid) {
+        engineYRef = getEngineYRef(aircraftData.engine, results.paTarget, T);
+        engineRPM = getEngineRPM(aircraftData.engine, engineYRef, power);
+    }
+
     let cruiseResults = null;
     if (chartType === 'cruise' && valid) {
         const yRef = getCruiseYRef(aircraftData.cruise, results.paTarget, T);
@@ -155,6 +187,7 @@ export default function App() {
     }
 
     return (
+        <div className="page-wrapper">
         <div className="app-layout">
             <div className="container">
                 <h1>POH-Based Performance</h1>
@@ -185,6 +218,7 @@ export default function App() {
                     options={[
                         { value: 'climb', label: 'Climb' },
                         { value: 'cruise', label: 'Cruise' },
+                        { value: 'engine', label: 'Engine' },
                     ]}
                     value={chartType}
                     onChange={setChartType}
@@ -208,16 +242,16 @@ export default function App() {
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <NumericInput id="start-altitude" label="IA - Start (ft)" value={startAlt}
                             onChange={handleStartAltChange} step={500} placeholder="e.g. 0" style={{ flex: 1 }}
-                            disabled={chartType === 'cruise'} />
+                            disabled={chartType === 'cruise' || chartType === 'engine'} />
                         <NumericInput id="start-climb-temp" label="Temp (°C)" value={startClimbTemp}
                             onChange={setStartClimbTemp} step={1} placeholder="e.g. 15" style={{ flex: 1 }}
-                            disabled={chartType === 'cruise'}
+                            disabled={chartType === 'cruise' || chartType === 'engine'}
                             min={minTemp} max={maxTemp} rangeHint={tempRangeHint}
                             flashTrigger={startTempFlash} />
                     </div>
                 </fieldset>
 
-                {chartType === 'cruise' && (
+                {(chartType === 'cruise' || chartType === 'engine') && (
                     <RadioGroup
                         label="Power"
                         options={[{ value: 75, label: '75%' }, { value: 65, label: '65%' }, { value: 55, label: '55%' }]}
@@ -233,17 +267,38 @@ export default function App() {
             {chart && (
                 <div className="chart-panel">
                     <div className="chart-title">{chart.title}</div>
-                    <img src={chart.src} alt={chart.alt} onClick={() => setChartExpanded(true)} title="Click to expand" />
+                    <img src={chart.src} alt={chart.alt} onClick={() => setExpandedChart(chart)} title="Click to expand" />
                     <span className="chart-tap-hint">Tap to expand</span>
                 </div>
             )}
-            {chartExpanded && (
-                <div className="chart-modal-overlay" onClick={() => setChartExpanded(false)}>
-                    <img src={chart.src} alt={chart.alt} />
+            {engineChart && (
+                <div className="chart-panel">
+                    <div className="chart-title">{engineChart.title}</div>
+                    <img src={engineChart.src} alt={engineChart.alt} onClick={() => setExpandedChart(engineChart)} title="Click to expand" />
+                    <span className="chart-tap-hint">Tap to expand</span>
+                </div>
+            )}
+            {expandedChart && (
+                <div className="chart-modal-overlay" onClick={() => setExpandedChart(null)}>
+                    <img src={expandedChart.src} alt={expandedChart.alt} />
                 </div>
             )}
             <div className="result-area">
-                {chartType === 'cruise' ? (
+                {chartType === 'engine' ? (
+                    <div className="result-cruise-row" style={{ display: 'flex', alignItems: 'center' }}>
+                        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '2rem' }}>
+                            {engineRPM?.outOfRange ? (
+                                <div style={{ color: '#dc2626', fontSize: '0.875rem', fontWeight: 600 }}>
+                                    Out of range — {power}% power not achievable at these conditions
+                                </div>
+                            ) : (
+                                <ResultValue label={`RPM (${power}%)`}
+                                    value={engineRPM ? Math.round(engineRPM.rpm) : '--'}
+                                    unit="RPM" />
+                            )}
+                        </div>
+                    </div>
+                ) : chartType === 'cruise' ? (
                     <div className="result-cruise-row" style={{ display: 'flex', alignItems: 'center' }}>
                         <div style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '2rem' }}>
                             <ResultValue label="True Airspeed"
@@ -252,6 +307,15 @@ export default function App() {
                             <ResultValue label="Fuel Flow"
                                 value={cruiseResults ? cruiseResults.fuelFlow.toFixed(1) : '--'}
                                 unit="GPH" />
+                            {engineRPM?.outOfRange ? (
+                                <div style={{ color: '#dc2626', fontSize: '0.875rem', fontWeight: 600, alignSelf: 'center' }}>
+                                    RPM N/A
+                                </div>
+                            ) : (
+                                <ResultValue label={`RPM (${power}%)`}
+                                    value={engineRPM ? Math.round(engineRPM.rpm) : '--'}
+                                    unit="RPM" />
+                            )}
                         </div>
                         <div style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'right', lineHeight: 1.3 }}>
                         </div>
@@ -310,6 +374,8 @@ export default function App() {
                 )}
             </div>
             </div>
+        </div>
+        <AdBanner />
         </div>
     );
 }

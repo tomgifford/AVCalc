@@ -12,6 +12,11 @@ const CHART_MAP = {
             alt: 'PA-28-161 Warrior II Cruise Performance Best Power chart',
             title: 'Cruise Performance (Best Power)',
         },
+        engine: {
+            src: `${base}charts/PA28-161-EnginePerformanceChart.png`,
+            alt: 'PA-28-161 Warrior II Engine Performance chart',
+            title: 'Engine Performance',
+        },
     },
     'pa28-181': {
         climb: {
@@ -23,6 +28,11 @@ const CHART_MAP = {
             src: `${base}charts/PA28-181-CruisePerfPowerChart.png`,
             alt: 'PA-28-181 Archer II Cruise Performance Best Power chart',
             title: 'Cruise Performance (Best Power)',
+        },
+        engine: {
+            src: `${base}charts/PA28-181-EnginePerformanceChart.png`,
+            alt: 'PA-28-181 Archer II Engine Performance chart',
+            title: 'Engine Performance',
         },
     },
 };

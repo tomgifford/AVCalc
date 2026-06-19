@@ -1,4 +1,6 @@
-export const cruiseYRefLookup = [
+// PA-28-181 Archer II Engine Performance data — values TBD
+// yRefLookup shape: { pa, points: [{ t, yRef }, ...] }
+export const yRefLookup = [
     { pa:     0, points: [
         { t:  14.5, yRef:  0 },
         { t:  37.8, yRef: 0 },
@@ -45,23 +47,27 @@ export const cruiseYRefLookup = [
     ]},
 ];
 
-export const cruiseTASLookup = {
+// rpmLookup shape: { yRef, rpm } — one array per power setting
+// yRef from getEngineYRef → interpolate to get RPM for that power line
+export const rpmLookup = {
     75: [
-        { yRef:  0, tas: 111 },
- //       { yRef: 11, tas: 120 },
-        { yRef: 16, tas: 125 },
+         { yRef:  0, rpm: 2440 },
+         { yRef: 18, rpm: 2660 },
+    ],
+    70: [
+         { yRef:  0, rpm: 2380 },
+         { yRef: 21, rpm: 2630 },
     ],
     65: [
-        { yRef:  0, tas: 103 },
-//        { yRef: 14, tas: 113 },
-        { yRef: 24, tas: 120.5 },
+         { yRef:  0, rpm: 2300 },
+         { yRef: 24, rpm: 2595 },
+    ],
+    60: [
+         { yRef:  0, rpm: 2210 },
+         { yRef: 26.5, rpm: 2550 },
     ],
     55: [
-        { yRef:  0, tas:  91.5 },
-        { yRef: 28, tas: 109 },
+         { yRef:  0, rpm: 2130 },
+         { yRef: 28, rpm: 2450 },
     ],
 };
-
-export const cruiseFuelGPH = { 75: 10.0, 65: 8.8, 55: 7.8 };
-
-export const noFairingsTASDeduction = 2.6;

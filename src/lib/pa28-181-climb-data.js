@@ -80,13 +80,13 @@ export const fuelLookup = [
 
 export const yRefLookup = [
     { pa:     0, points: [
-        { t: -28.9, yRef: 0 },
+        { t: 14.5, yRef: 0 },
         { t: 37.8, yRef: 0 },
     ]},
     { pa:  1000, points: [
         { t:  4.4, yRef: 0.00 }, { t: 10.0, yRef: 1.25 }, { t: 15.6, yRef: 2.5 },
         { t: 21.1, yRef: 3.75 }, { t: 26.7, yRef: 5.00 }, { t: 32.2, yRef: 6.25 },
-        { t: 37.8, yRef: 7.50 },
+        { t: 37.8, yRef: 7.40 },
     ]},
     { pa:  2000, points: [
         { t:  -5.6, yRef:  0.0 }, { t:  -1.1, yRef:  1.0 }, { t:   4.4, yRef:  2.3 }, { t: 10.0, yRef:  3.6 },
@@ -96,16 +96,16 @@ export const yRefLookup = [
     { pa:  3000, points: [
         { t: -15.0, yRef:  0.0 }, { t: -12.2, yRef:  0.7 }, { t:  -6.7, yRef:  2.0 }, { t:  -1.1, yRef:  3.3 },
         { t:   4.4, yRef:  4.6 }, { t:  10.0, yRef:  5.9 }, { t:  15.6, yRef:  7.2 }, { t:  21.1, yRef:  8.5 },
-        { t:  26.7, yRef:  9.8 }, { t:  32.2, yRef: 11.1 }, { t:  37.8, yRef: 12.4 },
+        { t:  26.7, yRef:  9.8 }, { t:  32.2, yRef: 11.1 }, { t:  37.8, yRef: 12.3 },
     ]},
     { pa:  4000, points: [
         { t: -23.9, yRef:  0.0 }, { t: -23.3, yRef:  0.1 }, { t: -17.8, yRef:  1.5 }, { t: -12.2, yRef:  2.8 },
         { t:  -6.7, yRef:  4.2 }, { t:  -1.1, yRef:  5.5 }, { t:   4.4, yRef:  6.8 }, { t:  10.0, yRef:  8.2 },
         { t:  15.6, yRef:  9.5 }, { t:  21.1, yRef: 10.9 }, { t:  26.7, yRef: 12.2 }, { t:  32.2, yRef: 13.6 },
-        { t:  37.8, yRef: 14.9 },
+        { t:  37.8, yRef: 14.8 },
     ]},
     { pa:  5000, points: [
-        { t: -28.9, yRef:  1.5 }, { t: -23.3, yRef:  2.8 }, { t: -17.8, yRef:  4.1 }, { t: -12.2, yRef:  5.5 },
+        { t: -28.9, yRef:  1.6 }, { t: -23.3, yRef:  2.8 }, { t: -17.8, yRef:  4.1 }, { t: -12.2, yRef:  5.5 },
         { t:  -6.7, yRef:  6.8 }, { t:  -1.1, yRef:  8.1 }, { t:   4.4, yRef:  9.4 }, { t:  10.0, yRef: 10.7 },
         { t:  15.6, yRef: 12.0 }, { t:  21.1, yRef: 13.4 }, { t:  26.7, yRef: 14.7 }, { t:  32.2, yRef: 16.0 },
         { t:  37.8, yRef: 17.3 },
