@@ -190,7 +190,7 @@ export default function App() {
         <div className="page-wrapper">
         <div className="app-layout">
             <div className="container">
-                <h1>POH-Based Performance</h1>
+                <h1>POH Chart Companion</h1>
 
                 <div className="input-group">
                     <label htmlFor="aircraft-type">Aircraft Type</label>
@@ -264,6 +264,7 @@ export default function App() {
             </div>
 
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2rem', minWidth: 0 }}>
+            <div className="charts-referenced-banner">Chart(s) Referenced:</div>
             {chart && (
                 <div className="chart-panel">
                     <div className="chart-title">{chart.title}</div>
