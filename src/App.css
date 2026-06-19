@@ -19,6 +19,55 @@ input.input-flash-invalid {
     margin-top: 0.2rem;
 }
 
+.stepper-row {
+    display: flex;
+    gap: 0.3rem;
+    align-items: stretch;
+}
+
+.stepper-row input {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+}
+
+.stepper-row input::-webkit-inner-spin-button,
+.stepper-row input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.stepper-row input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.stepper-btn {
+    width: 2rem;
+    flex-shrink: 0;
+    background-color: #e2e8f0;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    transition: background-color 0.15s, color 0.15s;
+    touch-action: manipulation;
+}
+
+.stepper-btn:hover:not(:disabled) {
+    background-color: #cbd5e1;
+    color: #1e293b;
+}
+
+.stepper-btn:disabled {
+    background-color: #f1f5f9;
+    color: #cbd5e1;
+    border-color: #e2e8f0;
+    cursor: not-allowed;
+}
+
 .conditions-group {
     border: 1px solid #cbd5e1;
     border-radius: 8px;

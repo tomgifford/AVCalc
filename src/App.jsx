@@ -25,20 +25,33 @@ function NumericInput({ id, label, value, onChange, step = 1, placeholder, style
         onChange(newVal);
     }
 
+    function handleStep(delta) {
+        const current = parseFloat(value);
+        const base = isNaN(current) ? 0 : current;
+        const decimals = (step.toString().split('.')[1] || '').length;
+        const factor = Math.pow(10, decimals);
+        const next = Math.round((base + delta * step) * factor) / factor;
+        handleChange(String(next));
+    }
+
     return (
         <div className="input-group" style={style}>
             <label htmlFor={id}>{label}</label>
-            <input
-                type="number"
-                id={id}
-                placeholder={placeholder}
-                step={step}
-                value={value}
-                onChange={e => handleChange(e.target.value)}
-                disabled={disabled}
-                className={flashing && !disabled ? 'input-flash-invalid' : ''}
-                onAnimationEnd={() => setFlashing(false)}
-            />
+            <div className="stepper-row">
+                <button type="button" className="stepper-btn" onClick={() => handleStep(-1)} disabled={disabled} aria-label="Decrease">−</button>
+                <input
+                    type="number"
+                    id={id}
+                    placeholder={placeholder}
+                    step={step}
+                    value={value}
+                    onChange={e => handleChange(e.target.value)}
+                    disabled={disabled}
+                    className={flashing && !disabled ? 'input-flash-invalid' : ''}
+                    onAnimationEnd={() => setFlashing(false)}
+                />
+                <button type="button" className="stepper-btn" onClick={() => handleStep(1)} disabled={disabled} aria-label="Increase">+</button>
+            </div>
             {flashing && !disabled && rangeHint && <span className="range-hint">{rangeHint}</span>}
         </div>
     );
@@ -101,7 +114,7 @@ export default function App() {
     const [chartType, setChartType]           = useState('climb');
     const [wheelFairings, setWheelFairings]   = useState('no');
     const [power, setPower]                   = useState(65);
-    const [cruiseTemp, setCruiseTemp]           = useState('15');
+    const [cruiseTemp, setCruiseTemp]           = useState('4');
     const [startClimbTemp, setStartClimbTemp]   = useState('15');
     const [altitude, setAltitude]               = useState('5500');
     const [startAlt, setStartAlt]               = useState('0');
@@ -229,7 +242,8 @@ export default function App() {
                     <legend>Conditions</legend>
 
                     <NumericInput id="altimeter" label="Altimeter (inHg)" value={altimeter}
-                        onChange={setAltimeter} step={0.01} placeholder="e.g. 29.92" />
+                        onChange={setAltimeter} step={0.01} placeholder="e.g. 29.92"
+                        style={{ width: 'calc(50% - 0.5rem)' }} />
 
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <NumericInput id="altitude" label="IA - Cruise (ft)" value={altitude}
