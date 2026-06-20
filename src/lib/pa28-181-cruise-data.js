@@ -62,6 +62,6 @@ export const cruiseTASLookup = {
     ],
 };
 
-export const cruiseFuelGPH = { 75: 10.0, 65: 8.8, 55: 7.8 };
+export const cruiseFuelGPH = { 75: 10.5, 65: 9.0, 55: 7.8 };
 
 export const noFairingsTASDeduction = 2.6;
