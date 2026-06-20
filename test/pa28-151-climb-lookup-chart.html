@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lookup Table Validation — PA-28-151</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: sans-serif;
+    background: #f8fafc;
+    margin: 0;
+    padding: 2rem;
+  }
+  h1 {
+    font-size: 1.2rem;
+    color: #1e40af;
+    margin: 0 0 0.25rem;
+    text-align: center;
+  }
+  p.subtitle {
+    font-size: 0.78rem;
+    color: #64748b;
+    text-align: center;
+    margin: 0 0 1.5rem;
+  }
+  .charts {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+  }
+  .chart-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.1);
+    padding: 1.25rem 1.5rem;
+    width: 700px;
+  }
+  .chart-card h2 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+    text-align: center;
+  }
+  .legend {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    font-size: 0.72rem;
+    color: #475569;
+    margin-top: 0.75rem;
+  }
+  .legend span { display: flex; align-items: center; gap: 0.3rem; }
+  .dot-filled { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+</style>
+</head>
+<body>
+<h1>PA-28-151 Climb Lookup Table Validation</h1>
+<p class="subtitle">Live data from pa28-151-climb-data.js &nbsp;·&nbsp; yRef on Y axis</p>
+
+<div class="charts">
+  <div class="chart-card">
+    <h2 style="color:#1982c4">Distance (nm)</h2>
+    <canvas id="chartDist"></canvas>
+    <div class="legend">
+      <span><span class="dot-filled" style="background:#1982c4"></span> Entered</span>
+    </div>
+  </div>
+  <div class="chart-card">
+    <h2 style="color:#e63946">Time (min)</h2>
+    <canvas id="chartTime"></canvas>
+    <div class="legend">
+      <span><span class="dot-filled" style="background:#e63946"></span> Entered</span>
+    </div>
+  </div>
+  <div class="chart-card">
+    <h2 style="color:#2a9d8f">Fuel (gal)</h2>
+    <canvas id="chartFuel"></canvas>
+    <div class="legend">
+      <span><span class="dot-filled" style="background:#2a9d8f"></span> Entered</span>
+    </div>
+  </div>
+
+  <div class="chart-card" style="width:860px">
+    <h2 style="color:#334155">yRef Lookup — all PA lines</h2>
+    <canvas id="chartYRef"></canvas>
+  </div>
+</div>
+
+<script type="module">
+import Chart from 'chart.js/auto';
+import { climbDistLookup, timeLookup, fuelLookup, yRefLookup } from '../src/lib/pa28-151-climb-data.js';
+
+function buildDataset(lookup, valueKey, color) {
+    return {
+        data: lookup.map(p => ({ x: p[valueKey], y: p.yRef })),
+        borderColor: color,
+        borderWidth: 2,
+        tension: 0,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: color,
+        pointBorderColor: color,
+        pointBorderWidth: 1.5,
+    };
+}
+
+function makeChart(canvasId, lookup, valueKey, color, xLabel) {
+    new Chart(document.getElementById(canvasId), {
+        type: 'line',
+        data: { datasets: [ buildDataset(lookup, valueKey, color) ] },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 1,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `yRef ${ctx.parsed.y}  →  ${xLabel}: ${ctx.parsed.x}`,
+                    },
+                },
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    position: 'left',
+                    title: { display: true, text: 'yRef', font: { size: 11 } },
+                    min: 0,
+                    ticks: { stepSize: 5, font: { size: 10 } },
+                    grid: { color: '#e2e8f0' },
+                },
+                x: {
+                    type: 'linear',
+                    position: 'bottom',
+                    title: { display: true, text: xLabel, color, font: { size: 11 } },
+                    ticks: { color, font: { size: 10 } },
+                    min: 0,
+                    grid: { color: '#e2e8f0' },
+                },
+            },
+        },
+    });
+}
+
+makeChart('chartDist', climbDistLookup, 'dist', '#1982c4', 'Distance (nm)');
+makeChart('chartTime', timeLookup,      'time', '#e63946', 'Time (min)');
+makeChart('chartFuel', fuelLookup,      'fuel', '#2a9d8f', 'Fuel (gal)');
+
+// yRef chart — one dataset per PA line
+const PA_COLORS = [
+    '#e63946','#f4a261','#e9c46a','#2a9d8f','#457b9d',
+    '#1d3557','#6a0572','#b5179e','#7209b7','#3a0ca3',
+    '#4361ee','#4cc9f0',
+];
+
+new Chart(document.getElementById('chartYRef'), {
+    type: 'line',
+    data: {
+        datasets: yRefLookup.map((row, i) => ({
+            label: `PA ${row.pa.toLocaleString()} ft`,
+            data: row.points.map(p => ({ x: p.t, y: p.yRef })),
+            borderColor: PA_COLORS[i % PA_COLORS.length],
+            borderWidth: 1.5,
+            tension: 0,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            fill: false,
+        })),
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        aspectRatio: 1.8,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'right',
+                labels: { font: { size: 10 }, boxWidth: 14, padding: 6 },
+            },
+            tooltip: {
+                callbacks: {
+                    label: ctx => `${ctx.dataset.label}  T: ${ctx.parsed.x}°C  yRef: ${ctx.parsed.y.toFixed(2)}`,
+                },
+            },
+        },
+        scales: {
+            x: {
+                type: 'linear',
+                title: { display: true, text: 'Temperature (°C)', font: { size: 11 } },
+                ticks: { font: { size: 10 } },
+                grid: { color: '#e2e8f0' },
+            },
+            y: {
+                type: 'linear',
+                title: { display: true, text: 'yRef', font: { size: 11 } },
+                min: 0,
+                ticks: { stepSize: 5, font: { size: 10 } },
+                grid: { color: '#e2e8f0' },
+            },
+        },
+    },
+});
+</script>
+</body>
+</html>

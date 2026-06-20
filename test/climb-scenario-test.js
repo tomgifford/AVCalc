@@ -1,5 +1,6 @@
 // Run with: node test/climb-scenario-test.js
 import { getClimbYRef, getDist, getTime, getFuel } from '../src/lib/climb-calc.js';
+import * as pa28151Climb from '../src/lib/pa28-151-climb-data.js';
 import * as pa28161Climb from '../src/lib/pa28-161-climb-data.js';
 import * as pa28181Climb from '../src/lib/pa28-181-climb-data.js';
 
@@ -174,6 +175,61 @@ const SCENARIOS = [
     { name: 'PA28-161 — PA 12000 / Std  -9°C',   aircraft: pa28161Climb, paStart: 0, tStart: 15, paTarget: 12000, tTarget:  -9,   expected: { time: null,  dist: null,  fuel: null   } },
     { name: 'PA28-161 — PA 12000 / Max  -9°C',   aircraft: pa28161Climb, paStart: 0, tStart: 15, paTarget: 12000, tTarget:  -9,   expected: { time: null,  dist: null,  fuel: null   } },
     { name: 'PA28-161 — PA 12000 / Min -40°C',   aircraft: pa28161Climb, paStart: 0, tStart: 15, paTarget: 12000, tTarget: -40,   expected: { time: null,  dist: null,  fuel: null   } },
+
+    // --- PA28-151 single-PA chart lookup scenarios (from sea level) ---
+
+    // PA 0
+    { name: 'PA28-151 — PA    0 / Std  15°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:     0, tTarget:  15,   expected: { time:   0,    dist:    0,    fuel:    0    } },
+    { name: 'PA28-151 — PA    0 / Max  40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:     0, tTarget:  40,   expected: { time:   0,    dist:    0,    fuel:    0    } },
+    { name: 'PA28-151 — PA    0 / Min -40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:     0, tTarget: -40,   expected: { time:   0,    dist:    0,    fuel:    0    } },
+    // PA 1000
+    { name: 'PA28-151 — PA 1000 / Std  13°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  1000, tTarget:  13,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 1000 / Max  40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  1000, tTarget:  40,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 1000 / Min -40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  1000, tTarget: -40,   expected: { time: null,  dist: null,  fuel: null   } },
+    // PA 2000
+    { name: 'PA28-151 — PA 2000 / Std  11°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  2000, tTarget:  11,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 2000 / Max  40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  2000, tTarget:  40,   expected: { time:   9.2,  dist:   12.5,  fuel:    2.0  } },
+    { name: 'PA28-151 — PA 2000 / Min -40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  2000, tTarget: -40,   expected: { time: null,  dist: null,  fuel: null   } },
+    // PA 3000
+    { name: 'PA28-151 — PA 3000 / Std   9°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  3000, tTarget:   9,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 3000 / Max  40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  3000, tTarget:  40,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 3000 / Min -40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  3000, tTarget: -40,   expected: { time: null,  dist: null,  fuel: null   } },
+    // PA 4000
+    { name: 'PA28-151 — PA 4000 / Std   7°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  4000, tTarget:   7,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 4000 / Max  40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  4000, tTarget:  40,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 4000 / Min -40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  4000, tTarget: -40,   expected: { time: null,  dist: null,  fuel: null   } },
+    // PA 5000
+    { name: 'PA28-151 — PA 5000 / Std   5°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  5000, tTarget:   5,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 5000 / Max  40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  5000, tTarget:  40,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 5000 / Min -40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  5000, tTarget: -40,   expected: { time: null,  dist: null,  fuel: null   } },
+    // PA 6000
+    { name: 'PA28-151 — PA 6000 / Std   3°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  6000, tTarget:   3,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 6000 / Max  40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  6000, tTarget:  40,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 6000 / Min -40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  6000, tTarget: -40,   expected: { time: null,  dist: null,  fuel: null   } },
+    // PA 7000
+    { name: 'PA28-151 — PA 7000 / Std   1°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  7000, tTarget:   1,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 7000 / Max  40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  7000, tTarget:  40,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 7000 / Min -40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  7000, tTarget: -40,   expected: { time: null,  dist: null,  fuel: null   } },
+    // PA 8000
+    { name: 'PA28-151 — PA 8000 / Std  -1°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  8000, tTarget:  -1,   expected: { time:  17.5,  dist:   23.75, fuel:    2.8  } },
+    { name: 'PA28-151 — PA 8000 / Max  40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  8000, tTarget:  40,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 8000 / Min -40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  8000, tTarget: -40,   expected: { time: null,  dist: null,  fuel: null   } },
+    // PA 9000
+    { name: 'PA28-151 — PA 9000 / Std  -3°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  9000, tTarget:  -3,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 9000 / Max  40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  9000, tTarget:  40,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 9000 / Min -40°C',    aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget:  9000, tTarget: -40,   expected: { time: null,  dist: null,  fuel: null   } },
+    // PA 10000
+    { name: 'PA28-151 — PA 10000 / Std  -5°C',   aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget: 10000, tTarget:  -5,   expected: { time:  25.0,  dist:   35.0,  fuel:    4.0  } },
+    { name: 'PA28-151 — PA 10000 / Max  40°C',   aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget: 10000, tTarget:  40,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 10000 / Min -40°C',   aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget: 10000, tTarget: -40,   expected: { time: null,  dist: null,  fuel: null   } },
+    // PA 11000
+    { name: 'PA28-151 — PA 11000 / Std  -7°C',   aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget: 11000, tTarget:  -7,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 11000 / Max  40°C',   aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget: 11000, tTarget:  40,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 11000 / Min -40°C',   aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget: 11000, tTarget: -40,   expected: { time: null,  dist: null,  fuel: null   } },
+    // PA 12000
+    { name: 'PA28-151 — PA 12000 / Std  -9°C',   aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget: 12000, tTarget:  -9,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 12000 / Max  40°C',   aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget: 12000, tTarget:  40,   expected: { time: null,  dist: null,  fuel: null   } },
+    { name: 'PA28-151 — PA 12000 / Min -40°C',   aircraft: pa28151Climb, paStart: 0, tStart: 15, paTarget: 12000, tTarget: -40,   expected: { time: null,  dist: null,  fuel: null   } },
 ];
 
 function fmtField(label, computed, expected) {

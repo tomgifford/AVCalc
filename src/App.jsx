@@ -208,12 +208,13 @@ export default function App() {
                 <div className="input-group">
                     <label htmlFor="aircraft-type">Aircraft Type</label>
                     <select id="aircraft-type" value={aircraftType} onChange={e => { setAircraftType(e.target.value); setWheelFairings('no'); }}>
+                        <option value="pa28-151">Piper PA-28-151 Warrior I</option>
                         <option value="pa28-161">Piper PA-28-161 Warrior II</option>
                         <option value="pa28-181">Piper PA-28-181 Archer II</option>
                     </select>
                 </div>
 
-                {['pa28-161', 'pa28-181'].includes(aircraftType) && (
+                {['pa28-151', 'pa28-161', 'pa28-181'].includes(aircraftType) && (
                     <div className="input-group input-group-inline">
                         <label>Wheel Fairings</label>
                         <label className="toggle-switch">
