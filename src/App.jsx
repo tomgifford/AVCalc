@@ -283,8 +283,9 @@ export default function App() {
 
             </div>
 
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2rem', minWidth: 0 }}>
+            <div className="charts-column">
             <div className="charts-referenced-banner">Chart(s) Referenced:</div>
+            <div className="charts-scroll-area">
             {chart && (
                 <div className="chart-panel">
                     <div className="chart-title">{chart.title}</div>
@@ -306,6 +307,7 @@ export default function App() {
                     <span className="chart-tap-hint">Tap to expand</span>
                 </div>
             )}
+            </div>
             {expandedChart && (
                 <div className="chart-modal-overlay" onClick={() => setExpandedChart(null)}>
                     <img src={expandedChart.src} alt={expandedChart.alt} />
