@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Airspeed Calibration Lookup — All Aircraft</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: sans-serif;
+    background: #f8fafc;
+    margin: 0;
+    padding: 2rem;
+  }
+  h1 {
+    font-size: 1.2rem;
+    color: #1e40af;
+    margin: 0 0 0.25rem;
+    text-align: center;
+  }
+  p.subtitle {
+    font-size: 0.78rem;
+    color: #64748b;
+    text-align: center;
+    margin: 0 0 1.5rem;
+  }
+  .charts {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+  }
+  .chart-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.1);
+    padding: 1.25rem 1.5rem;
+    width: 700px;
+  }
+  .chart-card h2 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+    text-align: center;
+    color: #334155;
+  }
+  .error {
+    color: #dc2626;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 1rem;
+    background: #fee2e2;
+    border-radius: 8px;
+  }
+</style>
+</head>
+<body>
+<h1>Airspeed Calibration — IAS vs CAS</h1>
+<p class="subtitle">Live data from airspeedcal-data.js — null entries are skipped until filled in</p>
+
+<div class="charts" id="charts">
+  <div class="chart-card">
+    <h2>PA-28-151</h2>
+    <canvas id="chart151"></canvas>
+  </div>
+  <div class="chart-card">
+    <h2>PA-28-161</h2>
+    <canvas id="chart161"></canvas>
+  </div>
+  <div class="chart-card">
+    <h2>PA-28-181</h2>
+    <canvas id="chart181"></canvas>
+  </div>
+</div>
+
+<script type="module">
+import Chart from 'chart.js/auto';
+
+let airspeedCalData;
+try {
+    ({ airspeedCalData } = await import('../src/lib/airspeedcal-data.js'));
+} catch (e) {
+    document.getElementById('charts').innerHTML =
+        `<div class="error">Failed to load airspeedcal-data.js — check for syntax errors (unfilled placeholders).<br><br>${e.message}</div>`;
+    throw e;
+}
+
+const FLAP_COLORS = {
+    flapsUp: '#1d3557',
+    flaps25: '#e63946',
+    flaps40: '#2a9d8f',
+};
+const FLAP_LABELS = {
+    flapsUp: 'Flaps UP',
+    flaps25: 'Flaps 25°',
+    flaps40: 'Flaps 40°',
+};
+
+function validPoints(table) {
+    return table.filter(p => p.cas !== null).map(p => ({ x: p.ias, y: p.cas }));
+}
+
+function refLine(data) {
+    const allIAS = Object.values(data).flatMap(t => t.map(p => p.ias));
+    const min = Math.min(...allIAS);
+    const max = Math.max(...allIAS);
+    return [{ x: min, y: min }, { x: max, y: max }];
+}
+
+function buildChart(canvasId, aircraftKey) {
+    const data = airspeedCalData[aircraftKey];
+    if (!data) return;
+
+    const datasets = [
+        {
+            label: 'IAS = CAS (reference)',
+            data: refLine(data),
+            borderColor: '#94a3b8',
+            borderDash: [5, 4],
+            borderWidth: 1,
+            pointRadius: 0,
+            fill: false,
+            order: 10,
+        },
+        ...Object.entries(data).map(([flap, table]) => ({
+            label: FLAP_LABELS[flap] ?? flap,
+            data: validPoints(table),
+            borderColor: FLAP_COLORS[flap] ?? '#888',
+            borderWidth: 2,
+            tension: 0,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            fill: false,
+        })),
+    ];
+
+    new Chart(document.getElementById(canvasId), {
+        type: 'line',
+        data: { datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 1.4,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: { font: { size: 10 }, boxWidth: 14, padding: 8 },
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `${ctx.dataset.label}  IAS: ${ctx.parsed.x} kt  CAS: ${ctx.parsed.y} kt`,
+                    },
+                },
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    title: { display: true, text: 'IAS (kt)', font: { size: 11 } },
+                    ticks: { stepSize: 10, font: { size: 10 } },
+                    grid: { color: '#e2e8f0' },
+                },
+                y: {
+                    type: 'linear',
+                    title: { display: true, text: 'CAS (kt)', font: { size: 11 } },
+                    ticks: { stepSize: 10, font: { size: 10 } },
+                    grid: { color: '#e2e8f0' },
+                },
+            },
+        },
+    });
+}
+
+buildChart('chart151', 'pa28-151');
+buildChart('chart161', 'pa28-161');
+buildChart('chart181', 'pa28-181');
+</script>
+</body>
+</html>

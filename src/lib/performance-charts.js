@@ -17,6 +17,11 @@ const CHART_MAP = {
             alt: 'PA-28-151 Warrior Engine Performance chart',
             title: 'Engine Performance',
         },
+        airspeedCal: {
+            src: `${base}charts/PA28-151-AirspeedCalChart.png`,
+            alt: 'PA-28-151 Warrior Airspeed Calibration chart',
+            title: 'Airspeed Calibration',
+        },
     },
     'pa28-161': {
         climb: {
@@ -34,6 +39,11 @@ const CHART_MAP = {
             alt: 'PA-28-161 Warrior II Engine Performance chart',
             title: 'Engine Performance',
         },
+        airspeedCal: {
+            src: `${base}charts/PA28-161-AirspeedCalChart.png`,
+            alt: 'PA-28-161 Warrior II Airspeed Calibration chart',
+            title: 'Airspeed Calibration',
+        },
     },
     'pa28-181': {
         climb: {
@@ -50,6 +60,11 @@ const CHART_MAP = {
             src: `${base}charts/PA28-181-EnginePerformanceChart.png`,
             alt: 'PA-28-181 Archer II Engine Performance chart',
             title: 'Engine Performance',
+        },
+        airspeedCal: {
+            src: `${base}charts/PA28-181-AirspeedCalChart.png`,
+            alt: 'PA-28-181 Archer II Airspeed Calibration chart',
+            title: 'Airspeed Calibration',
         },
     },
 };

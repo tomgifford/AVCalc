@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { getClimbYRef, getDist, getTime, getFuel, calculateDensityAltitude, calcStartClimbTemp, calculatePressureAltitude, getClimbChartLimits } from './lib/climb-calc.js';
 import { getCruiseTAS, getCruiseYRef } from './lib/cruise-calc.js';
+import { convertTasToCas } from './lib/utility-calc.js';
+import { getIASfromCAS } from './lib/airspeedcal-calc.js';
 import { getEngineYRef, getEngineRPM } from './lib/engine-calc.js';
 import { getPerformanceChart } from './lib/performance-charts.js';
 import { getAircraftData } from './lib/aircraft-registry.js';
@@ -126,6 +128,7 @@ export default function App() {
     const aircraftData = getAircraftData(aircraftType);
     const chart = getPerformanceChart(aircraftType, chartType);
     const engineChart = chartType === 'cruise' ? getPerformanceChart(aircraftType, 'engine') : null;
+    const airspeedCalChart = chartType === 'cruise' ? getPerformanceChart(aircraftType, 'airspeedCal') : null;
     const { minTemp, maxTemp } = getClimbChartLimits(aircraftData.climb);
     const tempRangeHint = `Valid: ${minTemp} to ${maxTemp} °C`;
 
@@ -196,7 +199,9 @@ export default function App() {
     if (chartType === 'cruise' && valid) {
         const yRef = getCruiseYRef(aircraftData.cruise, results.paTarget, T);
         const tas = getCruiseTAS(aircraftData.cruise, results.paTarget, T, power, wheelFairings);
-        cruiseResults = { tas, fuelFlow: aircraftData.cruise.cruiseFuelGPH[power], yRef };
+        const cas = convertTasToCas(tas, results.paTarget, T);
+        const ias = getIASfromCAS(aircraftData.airspeedCal, cas, 'flapsUp');
+        cruiseResults = { tas, cas, ias, fuelFlow: aircraftData.cruise.cruiseFuelGPH[power], yRef };
     }
 
     return (
@@ -294,6 +299,13 @@ export default function App() {
                     <span className="chart-tap-hint">Tap to expand</span>
                 </div>
             )}
+            {airspeedCalChart && (
+                <div className="chart-panel">
+                    <div className="chart-title">{airspeedCalChart.title}</div>
+                    <img src={airspeedCalChart.src} alt={airspeedCalChart.alt} onClick={() => setExpandedChart(airspeedCalChart)} title="Click to expand" />
+                    <span className="chart-tap-hint">Tap to expand</span>
+                </div>
+            )}
             {expandedChart && (
                 <div className="chart-modal-overlay" onClick={() => setExpandedChart(null)}>
                     <img src={expandedChart.src} alt={expandedChart.alt} />
@@ -317,9 +329,15 @@ export default function App() {
                 ) : chartType === 'cruise' ? (
                     <div className="result-cruise-row" style={{ display: 'flex', alignItems: 'center' }}>
                         <div style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '2rem' }}>
-                            <ResultValue label="True Airspeed"
+                            <ResultValue label="TAS"
                                 value={cruiseResults ? cruiseResults.tas.toFixed(1) : '--'}
-                                unit="KTAS" />
+                                unit="kts" />
+                            <ResultValue label="CAS"
+                                value={cruiseResults ? cruiseResults.cas.toFixed(1) : '--'}
+                                unit="kts" />
+                            <ResultValue label="IAS"
+                                value={cruiseResults?.ias != null ? cruiseResults.ias.toFixed(1) : '--'}
+                                unit="kts" />
                             <ResultValue label="Fuel Flow"
                                 value={cruiseResults ? cruiseResults.fuelFlow.toFixed(1) : '--'}
                                 unit="GPH" />
