@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getClimbYRef, getDist, getTime, getFuel, calculateDensityAltitude, calcStartClimbTemp, calculatePressureAltitude, getClimbChartLimits } from './lib/climb-calc.js';
 import { getCruiseTAS, getCruiseYRef } from './lib/cruise-calc.js';
 import { convertTasToCas } from './lib/utility-calc.js';
@@ -124,6 +124,14 @@ export default function App() {
     const [showDetails, setShowDetails] = useState(false);
     const [expandedChart, setExpandedChart] = useState(null);
     const [startTempFlash, setStartTempFlash] = useState(0);
+
+    const chartsBannerRef = useRef(null);
+    const chartsScrollAreaRef = useRef(null);
+
+    function scrollToCharts() {
+        chartsBannerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        chartsScrollAreaRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     const aircraftData = getAircraftData(aircraftType);
     const chart = getPerformanceChart(aircraftType, chartType);
@@ -284,8 +292,8 @@ export default function App() {
             </div>
 
             <div className="charts-column">
-            <div className="charts-referenced-banner">Chart(s) Referenced:</div>
-            <div className="charts-scroll-area">
+            <div className="charts-referenced-banner" ref={chartsBannerRef} onClick={scrollToCharts} style={{ cursor: 'pointer' }}>Chart(s) Referenced: ↓</div>
+            <div className="charts-scroll-area" ref={chartsScrollAreaRef}>
             {chart && (
                 <div className="chart-panel">
                     <div className="chart-title">{chart.title}</div>
