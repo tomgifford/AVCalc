@@ -393,6 +393,13 @@ select:focus {
         gap: 2rem;
     }
 
+    .result-cruise-values {
+        gap: 1.25rem !important;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 0 0.25rem;
+    }
+
     .pa-result {
         display: none;
     }

@@ -330,7 +330,7 @@ export default function App() {
                     </div>
                 ) : chartType === 'cruise' ? (
                     <div className="result-cruise-row" style={{ display: 'flex', alignItems: 'center' }}>
-                        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '2rem' }}>
+                        <div className="result-cruise-values" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '2rem', alignItems: 'flex-end' }}>
                             <ResultValue label="TAS"
                                 value={cruiseResults ? cruiseResults.tas.toFixed(1) : '--'}
                                 unit="kts" />
