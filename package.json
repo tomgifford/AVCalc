@@ -1,0 +1,16 @@
+{
+  "name": "avcalc",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "app",
+    "server"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=app",
+    "build": "npm run build --workspace=app",
+    "dev:server": "npm run dev --workspace=server",
+    "build:server": "npm run build --workspace=server",
+    "start:server": "npm run start --workspace=server"
+  }
+}
