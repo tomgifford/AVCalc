@@ -259,16 +259,16 @@ export default function App() {
                             min={minTemp} max={maxTemp} rangeHint={tempRangeHint} />
                     </div>
 
+                    {chartType === 'climb' && (
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <NumericInput id="start-altitude" label="IA - Start (ft)" value={startAlt}
-                            onChange={handleStartAltChange} step={500} placeholder="e.g. 0" style={{ flex: 1 }}
-                            disabled={chartType === 'cruise' || chartType === 'engine'} />
+                            onChange={handleStartAltChange} step={500} placeholder="e.g. 0" style={{ flex: 1 }} />
                         <NumericInput id="start-climb-temp" label="Temp (°C)" value={startClimbTemp}
                             onChange={setStartClimbTemp} step={1} placeholder="e.g. 15" style={{ flex: 1 }}
-                            disabled={chartType === 'cruise' || chartType === 'engine'}
                             min={minTemp} max={maxTemp} rangeHint={tempRangeHint}
                             flashTrigger={startTempFlash} />
                     </div>
+                    )}
                 </fieldset>
 
                 {(chartType === 'cruise' || chartType === 'engine') && (
