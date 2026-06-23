@@ -4,8 +4,11 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/AVCalc/',
+  base: '/',
   server: {
     host: true,
+    proxy: {
+      '/v1': 'http://localhost:3000',
+    },
   },
 })
