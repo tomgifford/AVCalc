@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug AVCalc Server",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/server/dist/index.js",
+            "preLaunchTask": "Build Server",
+            "sourceMaps": true,
+            "outFiles": ["${workspaceFolder}/server/dist/**/*.js"],
+            "skipFiles": ["<node_modules>/**"],
+            "cwd": "${workspaceFolder}/server",
+            "sourceMapPathOverrides": {
+                "../../src/*": "${workspaceFolder}/server/src/*"
+            },
+            "env": {
+                "PORT": "3000"
+            }
+        }
+    ]
+}

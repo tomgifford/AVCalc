@@ -1,0 +1,13 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Server",
+            "type": "npm",
+            "script": "build:server",
+            "group": "build",
+            "presentation": { "reveal": "silent" },
+            "problemMatcher": "$tsc"
+        }
+    ]
+}
