@@ -2,20 +2,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug AVCalc Server",
-            "type": "node",
+            "name": "Debug AVCalc in Firefox",
+            "type": "firefox",
             "request": "launch",
-            "program": "${workspaceFolder}/server/dist/index.js",
-            "sourceMaps": true,
-            "outFiles": ["${workspaceFolder}/server/dist/**/*.js"],
-            "skipFiles": ["<node_modules>/**"],
-            "cwd": "${workspaceFolder}/server",
-            "sourceMapPathOverrides": {
-                "../../src/*": "${workspaceFolder}/src/*"
-            },
-            "env": {
-                "PORT": "3000"
-            }
+            "url": "http://localhost:5173/AVCalc/",
+            "webRoot": "${workspaceFolder}/src",
+            "reAttach": true
         }
     ]
 }
