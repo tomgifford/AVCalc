@@ -67,12 +67,11 @@ export const cruiseYRefLookup = [
 export const cruiseTASLookup = {
     75: [
         { yRef:  0, tas: 111 },
- //       { yRef: 11, tas: 120 },
         { yRef: 18, tas: 125 },
     ],
     65: [
         { yRef:  0, tas: 103 },
-//        { yRef: 14, tas: 113 },
+        { yRef: 14, tas: 113 },
         { yRef: 24, tas: 120.5 },
     ],
     55: [
@@ -80,6 +79,20 @@ export const cruiseTASLookup = {
         { yRef: 28, tas: 109 },
     ],
 };
+
+export const cruiseMaxTAS = [
+    { yRef:  0, tas: 127.7 },   // max curve lower anchor
+    { yRef: 10, tas: 127.3   },  
+    { yRef: 12, tas: 127   },  
+    { yRef: 16, tas: 126   },  
+    { yRef: 18, tas: 125   },   // 75% intersection
+    { yRef: 20, tas: 123.8   },  
+    { yRef: 22, tas: 122.5 },   
+    { yRef: 24, tas: 120.5 },   // 65% intersection
+    { yRef: 26.1, tas: 117.3 },   
+    { yRef: 27.2, tas: 115.1 },
+    { yRef: 28, tas: 113   },   // max curve upper limit
+];
 
 export const cruiseFuelGPH = { 75: 10.5, 65: 9.0, 55: 7.8 };
 

@@ -62,7 +62,7 @@
 
 <script type="module">
 import Chart from 'chart.js/auto';
-import { cruiseYRefLookup, cruiseTASLookup } from '../src/lib/pa28-181-cruise-data.js';
+import { cruiseYRefLookup, cruiseTASLookup, cruiseMaxTAS } from '../src/lib/pa28-181-cruise-data.js';
 
 const PA_COLORS = [
     '#e63946','#f4a261','#e9c46a','#2a9d8f','#457b9d',
@@ -123,16 +123,30 @@ const TAS_COLORS = { 75: '#e63946', 65: '#2a9d8f', 55: '#1982c4' };
 new Chart(document.getElementById('chartTAS'), {
     type: 'line',
     data: {
-        datasets: Object.entries(cruiseTASLookup).map(([pct, rows]) => ({
-            label: `${pct}% power`,
-            data: rows.map(p => ({ x: p.tas, y: p.yRef })),
-            borderColor: TAS_COLORS[pct],
-            borderWidth: 2,
-            tension: 0,
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            fill: false,
-        })),
+        datasets: [
+            ...Object.entries(cruiseTASLookup).map(([pct, rows]) => ({
+                label: `${pct}% power`,
+                data: rows.map(p => ({ x: p.tas, y: p.yRef })),
+                borderColor: TAS_COLORS[pct],
+                borderWidth: 2,
+                tension: 0,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                fill: false,
+            })),
+            {
+                label: 'Max curve',
+                data: cruiseMaxTAS.map(p => ({ x: p.tas, y: p.yRef })),
+                borderColor: '#f97316',
+                borderWidth: 2,
+                borderDash: [6, 3],
+                tension: 0,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointStyle: 'diamond',
+                fill: false,
+            },
+        ],
     },
     options: {
         responsive: true,

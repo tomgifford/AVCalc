@@ -10,6 +10,18 @@ function interpYRefAtT(points, T) {
     return 0;
 }
 
+function interpTASOnMaxCurve(maxCurve, yRef) {
+    if (yRef <= maxCurve[0].yRef) return maxCurve[0].tas;
+    if (yRef >= maxCurve.at(-1).yRef) return maxCurve.at(-1).tas;
+    for (let i = 0; i < maxCurve.length - 1; i++) {
+        if (yRef >= maxCurve[i].yRef && yRef <= maxCurve[i + 1].yRef) {
+            const p0 = maxCurve[i], p1 = maxCurve[i + 1];
+            return p0.tas + (p1.tas - p0.tas) * (yRef - p0.yRef) / (p1.yRef - p0.yRef);
+        }
+    }
+    return maxCurve.at(-1).tas;
+}
+
 export function getCruiseYRef(data, pa, oat) {
     const { cruiseYRefLookup } = data;
     if (pa <= cruiseYRefLookup[0].pa) return interpYRefAtT(cruiseYRefLookup[0].points, oat);
@@ -25,13 +37,13 @@ export function getCruiseYRef(data, pa, oat) {
 }
 
 export function getCruiseTAS(data, pa, oat, power, wheelFairings) {
-    const { cruiseTASLookup } = data;
+    const { cruiseTASLookup, cruiseMaxTAS } = data;
     const yRef = getCruiseYRef(data, pa, oat);
     const table = cruiseTASLookup[power];
     if (!table) return null;
     let tas;
     if (yRef <= table[0].yRef) tas = table[0].tas;
-    else if (yRef >= table.at(-1).yRef) tas = table.at(-1).tas;
+    else if (yRef >= table.at(-1).yRef) tas = cruiseMaxTAS ? interpTASOnMaxCurve(cruiseMaxTAS, yRef) : table.at(-1).tas;
     else {
         tas = null;
         for (let i = 0; i < table.length - 1; i++) {
