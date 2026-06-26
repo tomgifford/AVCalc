@@ -81,3 +81,35 @@ input.input-flash-invalid {
     padding: 0 0.4rem;
     color: #64748b;
 }
+
+.result-stepper-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.result-stepper-row .stepper-btn {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1.25rem;
+}
+
+.result-editable-input {
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--primary-color);
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    font-family: inherit;
+    width: 4.5ch;
+    text-align: center;
+    padding: 0;
+    outline: none;
+    -moz-appearance: textfield;
+}
+.result-editable-input::-webkit-outer-spin-button,
+.result-editable-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}

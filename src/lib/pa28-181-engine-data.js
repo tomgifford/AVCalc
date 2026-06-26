@@ -90,3 +90,12 @@ export const rpmLookup = {
          { yRef: 28, rpm: 2450 },
     ],
 };
+
+export const engineMaxRPM = [
+    { yRef:  0,    rpm: 2700 },
+    { yRef: 18,    rpm: 2660 },  // 75% endpoint
+    { yRef: 21,    rpm: 2630 },  // 70% endpoint
+    { yRef: 24,    rpm: 2595 },  // 65% endpoint
+    { yRef: 26.5,  rpm: 2550 },  // 60% endpoint
+    { yRef: 28,    rpm: 2450 },  // 55% endpoint
+];

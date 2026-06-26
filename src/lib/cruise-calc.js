@@ -43,7 +43,7 @@ export function getCruiseTAS(data, pa, oat, power, wheelFairings) {
     if (!table) return null;
     let tas;
     if (yRef <= table[0].yRef) tas = table[0].tas;
-    else if (yRef >= table.at(-1).yRef) tas = cruiseMaxTAS ? interpTASOnMaxCurve(cruiseMaxTAS, yRef) : table.at(-1).tas;
+    else if (yRef > table.at(-1).yRef) tas = cruiseMaxTAS ? interpTASOnMaxCurve(cruiseMaxTAS, yRef) : table.at(-1).tas;
     else {
         tas = null;
         for (let i = 0; i < table.length - 1; i++) {

@@ -3,7 +3,7 @@ import { getClimbYRef, getDist, getTime, getFuel, calculateDensityAltitude, calc
 import { getCruiseTAS, getCruiseYRef } from './lib/cruise-calc.js';
 import { convertTasToCas } from './lib/utility-calc.js';
 import { getIASfromCAS } from './lib/airspeedcal-calc.js';
-import { getEngineYRef, getEngineRPM } from './lib/engine-calc.js';
+import { getEngineYRef, getEngineRPM, getPowerFromRPM } from './lib/engine-calc.js';
 import { getPerformanceChart } from './lib/performance-charts.js';
 import { getAircraftData } from './lib/aircraft-registry.js';
 import './App.css';
@@ -100,6 +100,34 @@ function AdBanner() {
     );
 }
 
+function EditableResultValue({ label, value, unit, onChange, step = 25 }) {
+    function handleStep(delta) {
+        const current = parseFloat(value);
+        if (isNaN(current)) return;
+        const rounded = Math.round(current / step) * step;
+        onChange(String(rounded + delta * step));
+    }
+
+    return (
+        <div>
+            <div className="result-label">{label}</div>
+            <div className="result-value result-stepper-row">
+                <button type="button" className="stepper-btn" onClick={() => handleStep(-1)} aria-label="Decrease">−</button>
+                <input
+                    type="number"
+                    value={value}
+                    onChange={e => onChange(e.target.value)}
+                    onFocus={e => e.target.select()}
+                    className="result-editable-input"
+                    step={step}
+                />
+                <button type="button" className="stepper-btn" onClick={() => handleStep(1)} aria-label="Increase">+</button>
+                <span className="unit">{unit}</span>
+            </div>
+        </div>
+    );
+}
+
 function ResultValue({ label, value, unit, prefix = '' }) {
     return (
         <div>
@@ -124,6 +152,7 @@ export default function App() {
     const [showDetails, setShowDetails] = useState(false);
     const [expandedChart, setExpandedChart] = useState(null);
     const [startTempFlash, setStartTempFlash] = useState(0);
+    const [rpmInput, setRpmInput] = useState('');
 
     const chartsBannerRef = useRef(null);
     const chartsScrollAreaRef = useRef(null);
@@ -161,6 +190,22 @@ export default function App() {
         setStartAlt(val);
         const temp = calcStartClimbTemp(parseFloat(cruiseTemp), parseFloat(altitude), parseFloat(val), parseFloat(altimeter));
         if (temp !== null) applyStartClimbTemp(temp);
+    }
+
+    function handlePowerChange(v) {
+        setPower(v);
+        setRpmInput('');
+    }
+
+    function handleRpmDisplayChange(val) {
+        setRpmInput(val);
+        if (val !== '') setPower(null);
+    }
+
+    function handleChartTypeChange(type) {
+        setChartType(type);
+        if (type !== 'engine') setRpmInput('');
+        if (type === 'cruise' && power === null) setPower(65);
     }
 
     const T  = parseFloat(cruiseTemp);
@@ -202,6 +247,18 @@ export default function App() {
         engineYRef = getEngineYRef(aircraftData.engine, results.paTarget, T);
         engineRPM = getEngineRPM(aircraftData.engine, engineYRef, power);
     }
+
+    let enginePowerResult = null;
+    if (chartType === 'engine' && valid && rpmInput !== '') {
+        const rpm = parseFloat(rpmInput);
+        if (!isNaN(rpm)) {
+            enginePowerResult = getPowerFromRPM(aircraftData.engine, engineYRef, rpm);
+        }
+    }
+
+    const displayRPM = rpmInput !== ''
+        ? rpmInput
+        : (engineRPM && !engineRPM.outOfRange ? String(Math.round(engineRPM.rpm)) : '');
 
     let cruiseResults = null;
     if (chartType === 'cruise' && valid) {
@@ -248,7 +305,7 @@ export default function App() {
                         { value: 'engine', label: 'Engine' },
                     ]}
                     value={chartType}
-                    onChange={setChartType}
+                    onChange={handleChartTypeChange}
                     inline
                 />
 
@@ -284,7 +341,7 @@ export default function App() {
                         label="Power"
                         options={[{ value: 75, label: '75%' }, { value: 65, label: '65%' }, { value: 55, label: '55%' }]}
                         value={power}
-                        onChange={v => setPower(v)}
+                        onChange={handlePowerChange}
                     />
                 )}
 
@@ -324,16 +381,21 @@ export default function App() {
             <div className="result-area">
                 {chartType === 'engine' ? (
                     <div className="result-cruise-row" style={{ display: 'flex', alignItems: 'center' }}>
-                        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '2rem' }}>
-                            {engineRPM?.outOfRange ? (
-                                <div style={{ color: '#dc2626', fontSize: '0.875rem', fontWeight: 600 }}>
-                                    Out of range — {power}% power not achievable at these conditions
-                                </div>
-                            ) : (
-                                <ResultValue label={`RPM (${power}%)`}
-                                    value={engineRPM ? Math.round(engineRPM.rpm) : '--'}
-                                    unit="RPM" />
-                            )}
+                        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '4rem', alignItems: 'flex-end' }}>
+                            <ResultValue
+                                label="Power"
+                                value={
+                                    rpmInput !== ''
+                                        ? (enginePowerResult?.outOfRange ? '—' : (enginePowerResult?.power?.toFixed(1) ?? '--'))
+                                        : (power !== null ? power : '--')
+                                }
+                                unit="%" />
+                            <EditableResultValue
+                                label="RPM"
+                                value={displayRPM}
+                                unit="RPM"
+                                onChange={handleRpmDisplayChange}
+                            />
                         </div>
                     </div>
                 ) : chartType === 'cruise' ? (
