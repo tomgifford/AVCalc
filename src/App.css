@@ -113,3 +113,8 @@ input.input-flash-invalid {
     -webkit-appearance: none;
     margin: 0;
 }
+
+.result-editable-input.input-na::placeholder {
+    color: #dc2626;
+    font-weight: 700;
+}

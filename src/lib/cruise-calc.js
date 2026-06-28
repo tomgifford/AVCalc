@@ -1,6 +1,6 @@
 function interpYRefAtT(points, T) {
     if (T <= points[0].t) return points[0].yRef;
-    if (T >= points.at(-1).t) return points.at(-1).yRef;
+    if (T > points.at(-1).t) return null;
     for (let i = 0; i < points.length - 1; i++) {
         if (T >= points[i].t && T <= points[i + 1].t) {
             const p0 = points[i], p1 = points[i + 1];
@@ -25,25 +25,30 @@ function interpTASOnMaxCurve(maxCurve, yRef) {
 export function getCruiseYRef(data, pa, oat) {
     const { cruiseYRefLookup } = data;
     if (pa <= cruiseYRefLookup[0].pa) return interpYRefAtT(cruiseYRefLookup[0].points, oat);
-    if (pa >= cruiseYRefLookup.at(-1).pa) return interpYRefAtT(cruiseYRefLookup.at(-1).points, oat);
+    if (pa > cruiseYRefLookup.at(-1).pa) return null;
     for (let i = 0; i < cruiseYRefLookup.length - 1; i++) {
         if (pa >= cruiseYRefLookup[i].pa && pa <= cruiseYRefLookup[i + 1].pa) {
             const yRef0 = interpYRefAtT(cruiseYRefLookup[i].points, oat);
             const yRef1 = interpYRefAtT(cruiseYRefLookup[i + 1].points, oat);
+            if (yRef0 === null || yRef1 === null) return null;
             return yRef0 + (yRef1 - yRef0) * (pa - cruiseYRefLookup[i].pa) / (cruiseYRefLookup[i + 1].pa - cruiseYRefLookup[i].pa);
         }
     }
-    return 0;
+    return null;
 }
 
 export function getCruiseTAS(data, pa, oat, power, wheelFairings) {
     const { cruiseTASLookup, cruiseMaxTAS } = data;
     const yRef = getCruiseYRef(data, pa, oat);
+    if (yRef === null) return null;
     const table = cruiseTASLookup[power];
     if (!table) return null;
     let tas;
     if (yRef <= table[0].yRef) tas = table[0].tas;
-    else if (yRef > table.at(-1).yRef) tas = cruiseMaxTAS ? interpTASOnMaxCurve(cruiseMaxTAS, yRef) : table.at(-1).tas;
+    else if (yRef > table.at(-1).yRef) {
+        if (!cruiseMaxTAS || yRef > cruiseMaxTAS.at(-1).yRef) return null;
+        tas = interpTASOnMaxCurve(cruiseMaxTAS, yRef);
+    }
     else {
         tas = null;
         for (let i = 0; i < table.length - 1; i++) {

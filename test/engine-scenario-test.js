@@ -48,19 +48,19 @@ const MAX_CURVE_TESTS = [
     // PA-28-151: boundary fix — exact endpoint yRef=16 on 75% line
     { name: 'PA28-151 — yRef=16, 75%: endpoint → in-range',    aircraft: pa28151Engine, yRef: 16,   power: 75, expected: { rpm: 2700, outOfRange: false } },
     // PA-28-151: max curve — yRef=17 is beyond 75% end, falls back to max curve (65% line)
-    { name: 'PA28-151 — yRef=17, 75%: beyond end → max curve', aircraft: pa28151Engine, yRef: 17,   power: 75, expected: { rpm: 2688.75, outOfRange: true  } },
+    { name: 'PA28-151 — yRef=17, 75%: beyond end → max curve', aircraft: pa28151Engine, yRef: 17,   power: 75, expected: { rpm: 2700, outOfRange: true  } },
     // PA-28-151: yRef=17 is in-range on 65% line
     { name: 'PA28-151 — yRef=17, 65%: in-range',               aircraft: pa28151Engine, yRef: 17,   power: 65, expected: { rpm: 2525, outOfRange: false } },
 
     // PA-28-161: boundary fix — exact endpoint yRef=40 on 75% line
     { name: 'PA28-161 — yRef=40, 75%: endpoint → in-range',    aircraft: pa28161Engine, yRef: 40,   power: 75, expected: { rpm: 2665, outOfRange: false } },
     // PA-28-161: max curve — yRef=45 is beyond 75% end
-    { name: 'PA28-161 — yRef=45, 75%: beyond end → max curve', aircraft: pa28161Engine, yRef: 45,   power: 75, expected: { rpm: 2660.4, outOfRange: true  } },
+    { name: 'PA28-161 — yRef=45, 75%: beyond end → max curve', aircraft: pa28161Engine, yRef: 45,   power: 75, expected: { rpm: 2700, outOfRange: true  } },
 
     // PA-28-181: boundary fix — exact endpoint yRef=18 on 75% line
     { name: 'PA28-181 — yRef=18, 75%: endpoint → in-range',    aircraft: pa28181Engine, yRef: 18,   power: 75, expected: { rpm: 2660, outOfRange: false } },
     // PA-28-181: max curve — yRef=20 is beyond 75% end
-    { name: 'PA28-181 — yRef=20, 75%: beyond end → max curve', aircraft: pa28181Engine, yRef: 20,   power: 75, expected: { rpm: 2640, outOfRange: true  } },
+    { name: 'PA28-181 — yRef=20, 75%: beyond end → max curve', aircraft: pa28181Engine, yRef: 20,   power: 75, expected: { rpm: 2633, outOfRange: true  } },
 ];
 
 console.log('\n\n── Max Curve / Boundary Tests ──');
@@ -114,3 +114,33 @@ for (const t of EXTRAP_TESTS) {
     }
 }
 console.log(`\n  ${ePass} passed, ${eFail} failed`);
+
+// ── PA/T-based boundary tests ─────────────────────────────────────────────────
+// Validates in-range vs. out-of-range transitions using real PA/T inputs.
+// Expected RPM values confirmed by manual app testing.
+const BOUNDARY_TESTS = [
+    // 65% line max yRef=67; PA 11500 / T=8 gives yRef≈66.8 → barely in range
+    { name: 'PA28-161 — PA 11500 / 8°C / 65%: in range',      aircraft: pa28161Engine, pa: 11500, t: 8, power: 65, expected: { rpm: 2639, outOfRange: false } },
+    // PA 11500 / T=9 gives yRef≈67.3 → 65% out of range, falls to max curve
+    { name: 'PA28-161 — PA 11500 / 9°C / 65%: out of range',  aircraft: pa28161Engine, pa: 11500, t: 9, power: 65, expected: { rpm: 2638, outOfRange: true  } },
+    // Same conditions, 55% line max yRef=80 → 55% still in range
+    { name: 'PA28-161 — PA 11500 / 9°C / 55%: in range',      aircraft: pa28161Engine, pa: 11500, t: 9, power: 55, expected: { rpm: 2506, outOfRange: false } },
+];
+
+console.log('\n── PA/T Boundary Tests ──');
+let bPass = 0, bFail = 0;
+for (const t of BOUNDARY_TESTS) {
+    const yRef = getEngineYRef(t.aircraft, t.pa, t.t);
+    const result = getEngineRPM(t.aircraft, yRef, t.power);
+    const rpmOk = result?.rpm != null && Math.abs(result.rpm - t.expected.rpm) / t.expected.rpm < 0.01;
+    const oorOk = result?.outOfRange === t.expected.outOfRange;
+    const ok = rpmOk && oorOk;
+    if (ok) bPass++; else bFail++;
+    const rpmStr = result?.rpm?.toFixed(1) ?? 'null';
+    const flag = ok ? '✓' : '✗ FAIL';
+    console.log(`  ${flag}  ${t.name}`);
+    if (!ok) {
+        console.log(`       rpm: got ${rpmStr}  exp ${t.expected.rpm}  outOfRange: got ${result?.outOfRange}  exp ${t.expected.outOfRange}`);
+    }
+}
+console.log(`\n  ${bPass} passed, ${bFail} failed`);

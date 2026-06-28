@@ -92,10 +92,15 @@ export const rpmLookup = {
 };
 
 export const engineMaxRPM = [
-    { yRef:  0,    rpm: 2700 },
-    { yRef: 18,    rpm: 2660 },  // 75% endpoint
-    { yRef: 21,    rpm: 2630 },  // 70% endpoint
-    { yRef: 24,    rpm: 2595 },  // 65% endpoint
-    { yRef: 26.5,  rpm: 2550 },  // 60% endpoint
-    { yRef: 28,    rpm: 2450 },  // 55% endpoint
+    { yRef:  0,    rpm: 2700 },   // chart anchor / capped
+    { yRef: 10,    rpm: 2700 },   // cruise-engine derived (capped at redline)
+    { yRef: 12,    rpm: 2693 },   // cruise-engine derived
+    { yRef: 16,    rpm: 2675 },   // cruise-engine derived
+    { yRef: 18,    rpm: 2660 },   // 75% endpoint (confirmed by cruise-engine)
+   { yRef: 21,    rpm: 2630 },
+//    { yRef: 20,    rpm: 2633 },   // cruise-engine derived
+//    { yRef: 22,    rpm: 2619 },   // cruise-engine derived
+    { yRef: 24,    rpm: 2595 },   // 65% endpoint (confirmed by cruise-engine)
+    { yRef: 26.5,  rpm: 2550 },   // 60% endpoint
+    { yRef: 28,    rpm: 2450 },   // 55% endpoint
 ];

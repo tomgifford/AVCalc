@@ -100,10 +100,13 @@ function AdBanner() {
     );
 }
 
-function EditableResultValue({ label, value, unit, onChange, step = 25 }) {
+function EditableResultValue({ label, value, unit, onChange, step = 25, placeholder, inputClassName = '', seedValue }) {
     function handleStep(delta) {
         const current = parseFloat(value);
-        if (isNaN(current)) return;
+        if (isNaN(current)) {
+            if (seedValue != null) onChange(String(Math.round(seedValue)));
+            return;
+        }
         const rounded = Math.round(current / step) * step;
         onChange(String(rounded + delta * step));
     }
@@ -118,8 +121,9 @@ function EditableResultValue({ label, value, unit, onChange, step = 25 }) {
                     value={value}
                     onChange={e => onChange(e.target.value)}
                     onFocus={e => e.target.select()}
-                    className="result-editable-input"
+                    className={`result-editable-input${inputClassName ? ' ' + inputClassName : ''}`}
                     step={step}
+                    placeholder={placeholder}
                 />
                 <button type="button" className="stepper-btn" onClick={() => handleStep(1)} aria-label="Increase">+</button>
                 <span className="unit">{unit}</span>
@@ -248,6 +252,11 @@ export default function App() {
         engineRPM = getEngineRPM(aircraftData.engine, engineYRef, power);
     }
 
+    let powerFromMaxRPM = null;
+    if (chartType === 'cruise' && engineRPM?.outOfRange && engineRPM?.rpm != null && engineYRef !== null) {
+        powerFromMaxRPM = getPowerFromRPM(aircraftData.engine, engineYRef, engineRPM.rpm);
+    }
+
     let enginePowerResult = null;
     if (chartType === 'engine' && valid && rpmInput !== '') {
         const rpm = parseFloat(rpmInput);
@@ -264,9 +273,11 @@ export default function App() {
     if (chartType === 'cruise' && valid) {
         const yRef = getCruiseYRef(aircraftData.cruise, results.paTarget, T);
         const tas = getCruiseTAS(aircraftData.cruise, results.paTarget, T, power, wheelFairings);
-        const cas = convertTasToCas(tas, results.paTarget, T);
-        const ias = getIASfromCAS(aircraftData.airspeedCal, cas, 'flapsUp');
-        cruiseResults = { tas, cas, ias, fuelFlow: aircraftData.cruise.cruiseFuelGPH[power], yRef };
+        if (tas !== null) {
+            const cas = convertTasToCas(tas, results.paTarget, T);
+            const ias = getIASfromCAS(aircraftData.airspeedCal, cas, 'flapsUp');
+            cruiseResults = { tas, cas, ias, fuelFlow: aircraftData.cruise.cruiseFuelGPH[power], yRef };
+        }
     }
 
     return (
@@ -381,31 +392,38 @@ export default function App() {
             <div className="result-area">
                 {chartType === 'engine' ? (
                     <div className="result-cruise-row" style={{ display: 'flex', alignItems: 'center' }}>
-                        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '4rem', alignItems: 'flex-end' }}>
-                            <ResultValue
-                                label="Power"
-                                value={
-                                    rpmInput !== ''
-                                        ? (enginePowerResult?.outOfRange ? '—' : (enginePowerResult?.power?.toFixed(1) ?? '--'))
-                                        : (power !== null ? power : '--')
-                                }
-                                unit="%" />
-                            <EditableResultValue
-                                label="RPM"
-                                value={displayRPM}
-                                unit="RPM"
-                                onChange={handleRpmDisplayChange}
-                            />
+                        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', alignItems: 'end' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <EditableResultValue
+                                    label="RPM"
+                                    value={displayRPM}
+                                    unit="RPM"
+                                    onChange={handleRpmDisplayChange}
+                                    placeholder="N/A"
+                                    inputClassName={displayRPM === '' && (!engineRPM || engineRPM.outOfRange) ? 'input-na' : ''}
+                                    seedValue={engineRPM?.outOfRange ? engineRPM.rpm : null}
+                                />
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <ResultValue
+                                    label="Power"
+                                    value={
+                                        rpmInput !== ''
+                                            ? (enginePowerResult?.outOfRange ? '—' : (enginePowerResult?.power?.toFixed(1) ?? '--'))
+                                            : (power !== null ? power : '--')
+                                    }
+                                    unit="%" />
+                            </div>
                         </div>
                     </div>
                 ) : chartType === 'cruise' ? (
                     <div className="result-cruise-row" style={{ display: 'flex', alignItems: 'center' }}>
                         <div className="result-cruise-values" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '2rem', alignItems: 'flex-end' }}>
                             <ResultValue label="TAS"
-                                value={cruiseResults ? cruiseResults.tas.toFixed(1) : '--'}
+                                value={cruiseResults?.tas != null ? cruiseResults.tas.toFixed(1) : '--'}
                                 unit="kts" />
                             <ResultValue label="CAS"
-                                value={cruiseResults ? cruiseResults.cas.toFixed(1) : '--'}
+                                value={cruiseResults?.cas != null ? cruiseResults.cas.toFixed(1) : '--'}
                                 unit="kts" />
                             <ResultValue label="IAS"
                                 value={cruiseResults?.ias != null ? cruiseResults.ias.toFixed(1) : '--'}
@@ -414,8 +432,17 @@ export default function App() {
                                 value={cruiseResults ? cruiseResults.fuelFlow.toFixed(1) : '--'}
                                 unit="GPH" />
                             {engineRPM?.outOfRange ? (
-                                <div style={{ color: '#dc2626', fontSize: '0.875rem', fontWeight: 600, alignSelf: 'center' }}>
-                                    RPM N/A
+                                <div style={{ alignSelf: 'center' }}>
+                                    <div className="result-label">
+                                        RPM{' '}
+                                        {powerFromMaxRPM?.power != null && (
+                                            <span style={{ color: '#dc2626' }}>{powerFromMaxRPM.power.toFixed(0)}%</span>
+                                        )}
+                                    </div>
+                                    <div className="result-value">
+                                        {engineRPM.rpm != null ? Math.round(engineRPM.rpm) : '--'}{' '}
+                                        <span className="unit">RPM</span>
+                                    </div>
                                 </div>
                             ) : (
                                 <ResultValue label={`RPM (${power}%)`}

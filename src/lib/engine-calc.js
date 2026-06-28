@@ -1,6 +1,6 @@
 function interpYRefAtT(points, T) {
     if (T <= points[0].t) return points[0].yRef;
-    if (T >= points.at(-1).t) return points.at(-1).yRef;
+    if (T > points.at(-1).t) return null;
     for (let i = 0; i < points.length - 1; i++) {
         if (T >= points[i].t && T <= points[i + 1].t) {
             const p0 = points[i], p1 = points[i + 1];
@@ -112,11 +112,12 @@ export function getEngineYRef(data, pa, T) {
     const { yRefLookup } = data;
     if (!yRefLookup || yRefLookup.length === 0) return null;
     if (pa <= yRefLookup[0].pa) return interpYRefAtT(yRefLookup[0].points, T);
-    if (pa >= yRefLookup.at(-1).pa) return interpYRefAtT(yRefLookup.at(-1).points, T);
+    if (pa > yRefLookup.at(-1).pa) return null;
     for (let i = 0; i < yRefLookup.length - 1; i++) {
         if (pa >= yRefLookup[i].pa && pa <= yRefLookup[i + 1].pa) {
             const yRef0 = interpYRefAtT(yRefLookup[i].points, T);
             const yRef1 = interpYRefAtT(yRefLookup[i + 1].points, T);
+            if (yRef0 === null || yRef1 === null) return null;
             return yRef0 + (yRef1 - yRef0) * (pa - yRefLookup[i].pa) / (yRefLookup[i + 1].pa - yRefLookup[i].pa);
         }
     }
