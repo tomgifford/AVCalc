@@ -9,13 +9,15 @@ import { climbRoutes } from './routes/climb.js';
 import { cruiseRoutes } from './routes/cruise.js';
 import { engineRoutes } from './routes/engine.js';
 import { airspeedRoutes } from './routes/airspeed.js';
+import { mcpRoutes } from './routes/mcp.js';
+import { loadSecrets } from './lib/config.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const isProd = process.env.NODE_ENV === 'production';
 
-const sessionSecret = process.env.SESSION_SECRET;
+const { sessionSecret } = await loadSecrets();
 if (isProd && !sessionSecret) {
-    console.error('SESSION_SECRET env var is required in production');
+    console.error('SESSION_SECRET could not be resolved (env or SSM)');
     process.exit(1);
 }
 
@@ -35,7 +37,10 @@ const allowedOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:5173,http:
 
 await fastify.register(cors, {
     origin: (origin, cb) => {
-        if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+        // In production the app is always served same-origin, so the allowlist below (meant for
+        // the local Vite dev server) doesn't apply — enforcing it here would reject same-origin
+        // requests that the browser tags as CORS mode anyway (e.g. <script crossorigin>).
+        if (isProd || !origin || allowedOrigins.includes(origin)) return cb(null, true);
         cb(new Error('Not allowed by CORS'), false);
     },
 });
@@ -70,6 +75,7 @@ fastify.register(climbRoutes,    { prefix: '/v1' });
 fastify.register(cruiseRoutes,   { prefix: '/v1' });
 fastify.register(engineRoutes,   { prefix: '/v1' });
 fastify.register(airspeedRoutes, { prefix: '/v1' });
+fastify.register(mcpRoutes,      { prefix: '/mcp' });
 
 fastify.get('/health', async () => ({ status: 'ok' }));
 

@@ -101,6 +101,38 @@ function AdBanner() {
     );
 }
 
+function EditableResultValue({ label, value, unit, onChange, step = 25, placeholder, inputClassName = '', seedValue }) {
+    function handleStep(delta) {
+        const current = parseFloat(value);
+        if (isNaN(current)) {
+            if (seedValue != null) onChange(String(Math.round(seedValue)));
+            return;
+        }
+        const rounded = Math.round(current / step) * step;
+        onChange(String(rounded + delta * step));
+    }
+
+    return (
+        <div>
+            <div className="result-label">{label}</div>
+            <div className="result-value result-stepper-row">
+                <button type="button" className="stepper-btn" onClick={() => handleStep(-1)} aria-label="Decrease">−</button>
+                <input
+                    type="number"
+                    value={value}
+                    onChange={e => onChange(e.target.value)}
+                    onFocus={e => e.target.select()}
+                    className={`result-editable-input${inputClassName ? ' ' + inputClassName : ''}`}
+                    step={step}
+                    placeholder={placeholder}
+                />
+                <button type="button" className="stepper-btn" onClick={() => handleStep(1)} aria-label="Increase">+</button>
+                <span className="unit">{unit}</span>
+            </div>
+        </div>
+    );
+}
+
 function ResultValue({ label, value, unit, prefix = '' }) {
     return (
         <div>
@@ -125,6 +157,7 @@ export default function App() {
     const [showDetails, setShowDetails]       = useState(false);
     const [expandedChart, setExpandedChart]   = useState(null);
     const [startTempFlash, setStartTempFlash] = useState(0);
+    const [rpmInput, setRpmInput]             = useState('');
 
     const [climbLimits, setClimbLimits] = useState({ minTemp: -40, maxTemp: 50 });
     const [results, setResults]         = useState(null);
@@ -188,6 +221,22 @@ export default function App() {
         scheduleStartClimbTempFetch(cruiseTemp, altitude, val, altimeter);
     }
 
+    function handlePowerChange(v) {
+        setPower(v);
+        setRpmInput('');
+    }
+
+    function handleRpmDisplayChange(val) {
+        setRpmInput(val);
+        if (val !== '') setPower(null);
+    }
+
+    function handleChartTypeChange(type) {
+        setChartType(type);
+        if (type !== 'engine') setRpmInput('');
+        if (type === 'cruise' && power === null) setPower(65);
+    }
+
     // Fetch calculation results whenever inputs change
     const T  = parseFloat(cruiseTemp);
     const ST = parseFloat(startClimbTemp);
@@ -223,13 +272,14 @@ export default function App() {
                     ]);
                     data = { ...climbData, cruise: cruiseData };
                 } else if (chartType === 'engine') {
+                    const rpmVal = rpmInput !== '' && !isNaN(parseFloat(rpmInput)) ? parseFloat(rpmInput) : undefined;
                     const [climbData, engineData] = await Promise.all([
                         fetchClimbResults(
                             { aircraftType, altitude: IA, altimeter: AS, cruiseTemp: T, startAlt: SA, startClimbTemp: ST },
                             controller.signal
                         ),
                         fetchEngineResults(
-                            { aircraftType, altitude: IA, altimeter: AS, oat: T, power },
+                            { aircraftType, altitude: IA, altimeter: AS, oat: T, power: power ?? 65, rpm: rpmVal },
                             controller.signal
                         ),
                     ]);
@@ -246,12 +296,16 @@ export default function App() {
         }, 200);
 
         return () => { clearTimeout(calcDebounce.current); controller.abort(); };
-    }, [aircraftType, chartType, wheelFairings, power, T, ST, IA, AS, SA, valid]);
+    }, [aircraftType, chartType, wheelFairings, power, rpmInput, T, ST, IA, AS, SA, valid]);
 
     // Re-run on initial mount
     useEffect(() => {
         scheduleStartClimbTempFetch(cruiseTemp, altitude, startAlt, altimeter);
     }, []);
+
+    const displayRPM = rpmInput !== ''
+        ? rpmInput
+        : (results?.engine && !results.engine.outOfRange ? String(Math.round(results.engine.rpm)) : '');
 
     return (
         <div className="page-wrapper">
@@ -289,7 +343,7 @@ export default function App() {
                         { value: 'engine', label: 'Engine' },
                     ]}
                     value={chartType}
-                    onChange={setChartType}
+                    onChange={handleChartTypeChange}
                     inline
                 />
 
@@ -325,7 +379,7 @@ export default function App() {
                         label="Power"
                         options={[{ value: 75, label: '75%' }, { value: 65, label: '65%' }, { value: 55, label: '55%' }]}
                         value={power}
-                        onChange={v => setPower(v)}
+                        onChange={handlePowerChange}
                     />
                 )}
             </div>
@@ -368,16 +422,28 @@ export default function App() {
                 )}
                 {chartType === 'engine' ? (
                     <div className="result-cruise-row" style={{ display: 'flex', alignItems: 'center' }}>
-                        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '2rem' }}>
-                            {results?.engine?.outOfRange ? (
-                                <div style={{ color: '#dc2626', fontSize: '0.875rem', fontWeight: 600 }}>
-                                    Out of range — {power}% power not achievable at these conditions
-                                </div>
-                            ) : (
-                                <ResultValue label={`RPM (${power}%)`}
-                                    value={results?.engine?.rpm ? Math.round(results.engine.rpm) : '--'}
-                                    unit="RPM" />
-                            )}
+                        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', alignItems: 'end' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <EditableResultValue
+                                    label="RPM"
+                                    value={displayRPM}
+                                    unit="RPM"
+                                    onChange={handleRpmDisplayChange}
+                                    placeholder="N/A"
+                                    inputClassName={displayRPM === '' && (!results?.engine || results.engine.outOfRange) ? 'input-na' : ''}
+                                    seedValue={results?.engine?.outOfRange ? results.engine.rpm : null}
+                                />
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <ResultValue
+                                    label="Power"
+                                    value={
+                                        rpmInput !== ''
+                                            ? (results?.engine?.powerFromRpm?.outOfRange ? '—' : (results?.engine?.powerFromRpm?.power?.toFixed(1) ?? '--'))
+                                            : (power !== null ? power : '--')
+                                    }
+                                    unit="%" />
+                            </div>
                         </div>
                     </div>
                 ) : chartType === 'cruise' ? (
@@ -396,8 +462,17 @@ export default function App() {
                                 value={results?.cruise?.fuelFlow != null ? results.cruise.fuelFlow.toFixed(1) : '--'}
                                 unit="GPH" />
                             {results?.cruise?.rpmOutOfRange ? (
-                                <div style={{ color: '#dc2626', fontSize: '0.875rem', fontWeight: 600, alignSelf: 'center' }}>
-                                    RPM N/A
+                                <div style={{ alignSelf: 'center' }}>
+                                    <div className="result-label">
+                                        RPM{' '}
+                                        {results?.cruise?.powerFromMaxRpm?.power != null && (
+                                            <span style={{ color: '#dc2626' }}>{results.cruise.powerFromMaxRpm.power.toFixed(0)}%</span>
+                                        )}
+                                    </div>
+                                    <div className="result-value">
+                                        {results?.cruise?.rpm != null ? Math.round(results.cruise.rpm) : '--'}{' '}
+                                        <span className="unit">RPM</span>
+                                    </div>
                                 </div>
                             ) : (
                                 <ResultValue label={`RPM (${power}%)`}

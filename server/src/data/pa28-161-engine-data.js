@@ -120,3 +120,14 @@ export const rpmLookup = {
          { yRef:  80, rpm: 2565 },
     ],
 };
+
+export const engineMaxRPM = [
+    { yRef:  0,    rpm: 2700 },  // chart anchor
+    { yRef: 50,    rpm: 2700 },  // cruise-engine derived (capped at redline)
+    { yRef: 55,    rpm: 2682 },  // cruise-engine derived
+    { yRef: 61,    rpm: 2663 },  // cruise-engine derived
+    { yRef: 67,    rpm: 2640 },  // 65% endpoint
+    { yRef: 71,    rpm: 2625 },
+    { yRef: 76,    rpm: 2600 },    
+    { yRef: 80,    rpm: 2565 },  // 55% endpoint
+];

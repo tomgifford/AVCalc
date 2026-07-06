@@ -57,3 +57,13 @@ export const rpmLookup = {
         { yRef: 24, rpm: 2400 },
     ],
 };
+
+export const engineMaxRPM = [
+    { yRef:  0,    rpm: 2700 },  // cruise-engine derived: ~88.8% power at yRef=0
+    { yRef: 16,    rpm: 2700 },  // 75% endpoint (capped at redline)
+    { yRef: 17,    rpm: 2700 },  // capped at redline
+    { yRef: 18,    rpm: 2700 },  // capped at redline
+    { yRef: 20,    rpm: 2700 },  // capped at redline
+    { yRef: 22.3,  rpm: 2687 },  // cruise-engine derived
+    { yRef: 24,    rpm: 2664 },  // 65% endpoint area, cruise-engine derived
+];

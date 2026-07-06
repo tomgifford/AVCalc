@@ -37,6 +37,6 @@ export function fetchCruiseResults({ aircraftType, altitude, altimeter, oat, pow
     return post('/cruise', { aircraftType, altitude, altimeter, oat, power, wheelFairings }, signal);
 }
 
-export function fetchEngineResults({ aircraftType, altitude, altimeter, oat, power }, signal) {
-    return post('/engine', { aircraftType, altitude, altimeter, oat, power }, signal);
+export function fetchEngineResults({ aircraftType, altitude, altimeter, oat, power, rpm }, signal) {
+    return post('/engine', { aircraftType, altitude, altimeter, oat, power, rpm }, signal);
 }

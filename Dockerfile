@@ -20,6 +20,9 @@ RUN npm run build --workspace=server
 FROM node:20-alpine
 WORKDIR /app
 
+# AWS Lambda Web Adapter — lets this ordinary Fastify container run on Lambda
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:1.0.1 /lambda-adapter /opt/extensions/lambda-adapter
+
 # Install production dependencies only
 COPY package*.json ./
 COPY app/package.json ./app/
@@ -33,6 +36,8 @@ COPY --from=builder /app/app/dist   ./app/dist
 
 WORKDIR /app/server
 ENV NODE_ENV=production
-EXPOSE 3000
-HEALTHCHECK --interval=30s --timeout=5s CMD wget -qO- http://localhost:3000/health || exit 1
+ENV PORT=8080
+ENV AWS_LWA_READINESS_CHECK_PATH=/health
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s CMD wget -qO- http://localhost:8080/health || exit 1
 CMD ["node", "dist/index.js"]

@@ -14,5 +14,5 @@
     "inlineSources": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "src/mcp.ts"]
+  "exclude": ["node_modules", "dist"]
 }

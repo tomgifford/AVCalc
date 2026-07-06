@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AVCalc Fastify app (REST + SPA + MCP) on Lambda via aws-lambda-web-adapter
+
+Globals:
+  Function:
+    Timeout: 15
+    MemorySize: 512
+    Architectures: [arm64]
+
+Resources:
+  AvCalcHttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      DefaultRouteSettings:
+        ThrottlingRateLimit: 5
+        ThrottlingBurstLimit: 10
+
+  AvCalcFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      # ReservedConcurrentExecutions: 5  # re-enable once the account's Lambda concurrency quota increase is approved (currently capped at 10 total, see AWS Service Quotas L-B99A9384)
+      Environment:
+        Variables:
+          SESSION_SECRET_PARAM: /avcalc/prod/session-secret
+          MCP_API_KEY_PARAM: /avcalc/prod/mcp-api-key
+      Policies:
+        - SSMParameterReadPolicy:
+            ParameterName: avcalc/prod/session-secret
+        - SSMParameterReadPolicy:
+            ParameterName: avcalc/prod/mcp-api-key
+      Events:
+        RootRoute:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref AvCalcHttpApi
+            Path: /
+            Method: ANY
+        ProxyRoute:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref AvCalcHttpApi
+            Path: /{proxy+}
+            Method: ANY
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: .
+      DockerTag: latest
+
+Outputs:
+  ApiUrl:
+    Description: Default API Gateway endpoint
+    Value: !Sub 'https://${AvCalcHttpApi}.execute-api.${AWS::Region}.amazonaws.com/'

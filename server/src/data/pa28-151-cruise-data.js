@@ -58,6 +58,16 @@ export const cruiseTASLookup = {
     ],
 };
 
+export const cruiseMaxTAS = [
+    { yRef:  0, tas: 117.2 },   // max curve lower anchor
+    { yRef: 16, tas: 115   },   // 75% intersection
+    { yRef: 17, tas: 114.9   },
+    { yRef: 18, tas: 114.8   },
+    { yRef: 20, tas: 114   },
+    { yRef: 22.3, tas: 112.5   },    
+    { yRef: 24, tas: 111   },   // 65%/55% intersection
+];
+
 // Fuel flow from chart legend (best power mixture) — values TBD
 export const cruiseFuelGPH = { 75: 9.2, 65: 8.0, 55: 6.7 };
 

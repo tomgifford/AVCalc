@@ -8,16 +8,17 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "start:mcp": "node dist/mcp.js",
-    "test": "node test/climb-scenario-test.js && node test/airspeed-test.js",
+    "test": "node test/climb-scenario-test.js && node test/airspeed-test.js && node test/cruise-scenario-test.js && node test/engine-scenario-test.js",
     "lint": "eslint ."
   },
   "dependencies": {
+    "@aws-sdk/client-ssm": "^3.1079.0",
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^10.0.2",
     "@fastify/static": "^9.1.3",
     "@modelcontextprotocol/sdk": "^1.12.0",
     "fastify": "^5.3.2",
-    "zod": "^3.24.0"
+    "zod": "^3.25.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
