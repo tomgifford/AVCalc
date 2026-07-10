@@ -9,9 +9,31 @@ import {
 } from './lib/api.js';
 import './App.css';
 
+// Safari re-collapses the text selection on the mouseup that follows a
+// focusing click, silently undoing a plain `onFocus={e => e.target.select()}`.
+// Firefox and Chrome don't have this problem. Suppressing that one mouseup
+// keeps the full-text selection so the user can type over it; a second click
+// still places the cursor normally.
+function useSelectAllOnFocus() {
+    const justFocusedRef = useRef(false);
+    return {
+        onFocus: e => {
+            justFocusedRef.current = true;
+            e.target.select();
+        },
+        onMouseUp: e => {
+            if (justFocusedRef.current) {
+                justFocusedRef.current = false;
+                e.preventDefault();
+            }
+        },
+    };
+}
+
 function NumericInput({ id, label, value, onChange, step = 1, placeholder, style, disabled, min, max, rangeHint, flashTrigger = 0 }) {
     const [flashing, setFlashing] = useState(false);
     const hasLimits = min !== undefined || max !== undefined;
+    const selectAllOnFocus = useSelectAllOnFocus();
 
     useEffect(() => {
         if (flashTrigger > 0 && !disabled) setFlashing(true);
@@ -33,8 +55,14 @@ function NumericInput({ id, label, value, onChange, step = 1, placeholder, style
         const base = isNaN(current) ? 0 : current;
         const decimals = (step.toString().split('.')[1] || '').length;
         const factor = Math.pow(10, decimals);
-        const next = Math.round((base + delta * step) * factor) / factor;
-        handleChange(String(next));
+        const scaledBase = Math.round(base * factor);
+        const scaledStep = Math.round(step * factor);
+        // Snap to the step grid first, then move by one step — so an off-grid
+        // value (e.g. 757 with a 500 step) lands on 1000/500 instead of 1257/257.
+        const scaledNext = delta > 0
+            ? Math.floor(scaledBase / scaledStep) * scaledStep + scaledStep
+            : Math.ceil(scaledBase / scaledStep) * scaledStep - scaledStep;
+        handleChange(String(scaledNext / factor));
     }
 
     return (
@@ -49,6 +77,7 @@ function NumericInput({ id, label, value, onChange, step = 1, placeholder, style
                     step={step}
                     value={value}
                     onChange={e => handleChange(e.target.value)}
+                    {...selectAllOnFocus}
                     disabled={disabled}
                     className={flashing && !disabled ? 'input-flash-invalid' : ''}
                     onAnimationEnd={() => setFlashing(false)}
@@ -102,6 +131,8 @@ function AdBanner() {
 }
 
 function EditableResultValue({ label, value, unit, onChange, step = 25, placeholder, inputClassName = '', seedValue }) {
+    const selectAllOnFocus = useSelectAllOnFocus();
+
     function handleStep(delta) {
         const current = parseFloat(value);
         if (isNaN(current)) {
@@ -121,7 +152,7 @@ function EditableResultValue({ label, value, unit, onChange, step = 25, placehol
                     type="number"
                     value={value}
                     onChange={e => onChange(e.target.value)}
-                    onFocus={e => e.target.select()}
+                    {...selectAllOnFocus}
                     className={`result-editable-input${inputClassName ? ' ' + inputClassName : ''}`}
                     step={step}
                     placeholder={placeholder}
