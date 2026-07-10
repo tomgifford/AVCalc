@@ -11,4 +11,11 @@ export async function aircraftRoutes(fastify: FastifyInstance) {
         if (!aircraftData) return reply.status(404).send({ error: `Unknown aircraft: ${id}` });
         return getClimbChartLimits(aircraftData.climb);
     });
+
+    fastify.get<{ Params: { id: string } }>('/aircraft/:id/refData', async (request, reply) => {
+        const { id } = request.params;
+        const aircraftData = getAircraftData(id);
+        if (!aircraftData) return reply.status(404).send({ error: `Unknown aircraft: ${id}` });
+        return aircraftData.refData;
+    });
 }

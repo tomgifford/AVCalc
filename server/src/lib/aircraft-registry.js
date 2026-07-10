@@ -8,11 +8,12 @@ import * as pa28181Climb from '../data/pa28-181-climb-data.js';
 import * as pa28181Cruise from '../data/pa28-181-cruise-data.js';
 import * as pa28181Engine from '../data/pa28-181-engine-data.js';
 import { airspeedCalData } from '../data/airspeedcal-data.js';
+import { aircraftRefData } from '../data/aircraft-ref-data.js';
 
 const REGISTRY = {
-    'pa28-151': { climb: pa28151Climb, cruise: pa28151Cruise, engine: pa28151Engine, airspeedCal: airspeedCalData['pa28-151'] },
-    'pa28-161': { climb: pa28161Climb, cruise: pa28161Cruise, engine: pa28161Engine, airspeedCal: airspeedCalData['pa28-161'] },
-    'pa28-181': { climb: pa28181Climb, cruise: pa28181Cruise, engine: pa28181Engine, airspeedCal: airspeedCalData['pa28-181'] },
+    'pa28-151': { climb: pa28151Climb, cruise: pa28151Cruise, engine: pa28151Engine, airspeedCal: airspeedCalData['pa28-151'], refData: aircraftRefData['pa28-151'] },
+    'pa28-161': { climb: pa28161Climb, cruise: pa28161Cruise, engine: pa28161Engine, airspeedCal: airspeedCalData['pa28-161'], refData: aircraftRefData['pa28-161'] },
+    'pa28-181': { climb: pa28181Climb, cruise: pa28181Cruise, engine: pa28181Engine, airspeedCal: airspeedCalData['pa28-181'], refData: aircraftRefData['pa28-181'] },
 };
 
 export const AIRCRAFT_LIST = [

@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "avcalc": {
+      "type": "http",
+      "url": "https://ui4myderm0.execute-api.us-east-2.amazonaws.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${AVCALC_MCP_API_KEY}"
+      }
+    },
+    "aviation-weather": {
+      "command": "node",
+      "args": [
+        "/workspaces/Code/aviation-mcp/dist/index.js"
+      ]
+    }
+  }
+}

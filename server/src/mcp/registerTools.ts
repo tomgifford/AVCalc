@@ -36,6 +36,19 @@ export function createAvCalcMcpServer(): McpServer {
     );
 
     server.registerTool(
+        'get_aircraft_ref_data',
+        {
+            description: 'Get reference data (Vy, Vx, and other POH constants) for an aircraft type. Speed values are in KIAS.',
+            inputSchema: { aircraftType: z.string().describe('Aircraft ID, e.g. pa28-161') },
+        },
+        async ({ aircraftType }) => {
+            const aircraftData = getAircraftData(aircraftType);
+            if (!aircraftData) return { content: [{ type: 'text', text: `Unknown aircraft: ${aircraftType}` }], isError: true };
+            return { content: [{ type: 'text', text: JSON.stringify(aircraftData.refData, null, 2) }] };
+        }
+    );
+
+    server.registerTool(
         'calculate_climb',
         {
             description: 'Calculate climb performance (time, distance, fuel) between two altitudes',
