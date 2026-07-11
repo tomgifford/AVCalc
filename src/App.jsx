@@ -188,6 +188,7 @@ export default function App() {
     const [expandedChart, setExpandedChart] = useState(null);
     const [startTempFlash, setStartTempFlash] = useState(0);
     const [rpmInput, setRpmInput] = useState('');
+    const [startTempManual, setStartTempManual] = useState(false);
 
     const chartsBannerRef = useRef(null);
     const chartsScrollAreaRef = useRef(null);
@@ -215,16 +216,34 @@ export default function App() {
         else { setStartClimbTemp(temp); }
     }
 
+    function handleAltitudeChange(val) {
+        setAltitude(val);
+        if (startTempManual) return;
+        const temp = calcStartClimbTemp(parseFloat(cruiseTemp), parseFloat(val), parseFloat(startAlt), parseFloat(altimeter));
+        if (temp !== null) applyStartClimbTemp(temp);
+    }
+
     function handleCruiseTempChange(val) {
         setCruiseTemp(val);
+        if (startTempManual) return;
         const temp = calcStartClimbTemp(parseFloat(val), parseFloat(altitude), parseFloat(startAlt), parseFloat(altimeter));
         if (temp !== null) applyStartClimbTemp(temp);
     }
 
     function handleStartAltChange(val) {
         setStartAlt(val);
+        const num = parseFloat(val);
+        const cruiseAlt = parseFloat(altitude);
+        if (startTempManual) {
+            return;
+        }
         const temp = calcStartClimbTemp(parseFloat(cruiseTemp), parseFloat(altitude), parseFloat(val), parseFloat(altimeter));
         if (temp !== null) applyStartClimbTemp(temp);
+    }
+
+    function handleStartClimbTempChange(val) {
+        setStartTempManual(true);
+        setStartClimbTemp(val);
     }
 
     function handlePowerChange(v) {
@@ -360,7 +379,8 @@ export default function App() {
 
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <NumericInput id="altitude" label="IA - Cruise (ft)" value={altitude}
-                            onChange={setAltitude} step={500} placeholder="e.g. 5000" style={{ flex: 1 }} />
+                            onChange={handleAltitudeChange} step={500} placeholder="e.g. 5000" style={{ flex: 1 }}
+                            min={0} rangeHint="Must be 0 ft or higher" />
                         <NumericInput id="cruise-temp" label="Temp (°C)" value={cruiseTemp}
                             onChange={handleCruiseTempChange} step={1} placeholder="e.g. 15" style={{ flex: 1 }}
                             min={minTemp} max={maxTemp} rangeHint={tempRangeHint} />
@@ -369,9 +389,10 @@ export default function App() {
                     {chartType === 'climb' && (
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <NumericInput id="start-altitude" label="IA - Start (ft)" value={startAlt}
-                            onChange={handleStartAltChange} step={500} placeholder="e.g. 0" style={{ flex: 1 }} />
+                            onChange={handleStartAltChange} step={500} placeholder="e.g. 0" style={{ flex: 1 }}
+                            min={0} rangeHint="Must be 0 ft or higher" />
                         <NumericInput id="start-climb-temp" label="Temp (°C)" value={startClimbTemp}
-                            onChange={setStartClimbTemp} step={1} placeholder="e.g. 15" style={{ flex: 1 }}
+                            onChange={handleStartClimbTempChange} step={1} placeholder="e.g. 15" style={{ flex: 1 }}
                             min={minTemp} max={maxTemp} rangeHint={tempRangeHint}
                             flashTrigger={startTempFlash} />
                     </div>
