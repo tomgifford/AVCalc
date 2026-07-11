@@ -25,3 +25,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local symlink into the nested FlightPlanner repo (see FlightPlanner/README.md
+# for how to recreate it) — FlightPlanner/SKILL.md is the single source of truth
+.claude/skills/flight-planner/SKILL.md
