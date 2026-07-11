@@ -189,6 +189,7 @@ export default function App() {
     const [expandedChart, setExpandedChart]   = useState(null);
     const [startTempFlash, setStartTempFlash] = useState(0);
     const [rpmInput, setRpmInput]             = useState('');
+    const [startTempManual, setStartTempManual] = useState(false);
 
     const [climbLimits, setClimbLimits] = useState({ minTemp: -40, maxTemp: 50 });
     const [results, setResults]         = useState(null);
@@ -198,6 +199,9 @@ export default function App() {
     const chartsScrollAreaRef = useRef(null);
     const startClimbTempDebounce = useRef(null);
     const calcDebounce           = useRef(null);
+    const startTempManualRef     = useRef(startTempManual);
+
+    useEffect(() => { startTempManualRef.current = startTempManual; }, [startTempManual]);
 
     function scrollToCharts() {
         chartsBannerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -235,21 +239,34 @@ export default function App() {
                 const { startClimbTemp: t } = await fetchStartClimbTemp({
                     cruiseTemp: vals[0], altitude: vals[1], startAlt: vals[2], altimeter: vals[3],
                 });
-                if (t !== null) applyStartClimbTemp(t);
+                if (t !== null && !startTempManualRef.current) applyStartClimbTemp(t);
             } catch (err) {
                 if (err.name !== 'AbortError') console.warn('Could not fetch start climb temp:', err.message);
             }
         }, 250);
     }
 
+    function handleAltitudeChange(val) {
+        setAltitude(val);
+        if (startTempManual) return;
+        scheduleStartClimbTempFetch(cruiseTemp, val, startAlt, altimeter);
+    }
+
     function handleCruiseTempChange(val) {
         setCruiseTemp(val);
+        if (startTempManual) return;
         scheduleStartClimbTempFetch(val, altitude, startAlt, altimeter);
     }
 
     function handleStartAltChange(val) {
         setStartAlt(val);
+        if (startTempManual) return;
         scheduleStartClimbTempFetch(cruiseTemp, altitude, val, altimeter);
+    }
+
+    function handleStartClimbTempChange(val) {
+        setStartTempManual(true);
+        setStartClimbTemp(val);
     }
 
     function handlePowerChange(v) {
@@ -387,7 +404,8 @@ export default function App() {
 
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <NumericInput id="altitude" label="IA - Cruise (ft)" value={altitude}
-                            onChange={setAltitude} step={500} placeholder="e.g. 5000" style={{ flex: 1 }} />
+                            onChange={handleAltitudeChange} step={500} placeholder="e.g. 5000" style={{ flex: 1 }}
+                            min={0} rangeHint="Must be 0 ft or higher" />
                         <NumericInput id="cruise-temp" label="Temp (°C)" value={cruiseTemp}
                             onChange={handleCruiseTempChange} step={1} placeholder="e.g. 15" style={{ flex: 1 }}
                             min={minTemp} max={maxTemp} rangeHint={tempRangeHint} />
@@ -396,9 +414,10 @@ export default function App() {
                     {chartType === 'climb' && (
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <NumericInput id="start-altitude" label="IA - Start (ft)" value={startAlt}
-                            onChange={handleStartAltChange} step={500} placeholder="e.g. 0" style={{ flex: 1 }} />
+                            onChange={handleStartAltChange} step={500} placeholder="e.g. 0" style={{ flex: 1 }}
+                            min={0} rangeHint="Must be 0 ft or higher" />
                         <NumericInput id="start-climb-temp" label="Temp (°C)" value={startClimbTemp}
-                            onChange={setStartClimbTemp} step={1} placeholder="e.g. 15" style={{ flex: 1 }}
+                            onChange={handleStartClimbTempChange} step={1} placeholder="e.g. 15" style={{ flex: 1 }}
                             min={minTemp} max={maxTemp} rangeHint={tempRangeHint}
                             flashTrigger={startTempFlash} />
                     </div>
