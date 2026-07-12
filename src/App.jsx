@@ -1,11 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { getClimbYRef, getDist, getTime, getFuel, calculateDensityAltitude, calcStartClimbTemp, calculatePressureAltitude, getClimbChartLimits } from './lib/climb-calc.js';
-import { getCruiseTAS, getCruiseYRef } from './lib/cruise-calc.js';
-import { convertTasToCas } from './lib/utility-calc.js';
-import { getIASfromCAS } from './lib/airspeedcal-calc.js';
-import { getEngineYRef, getEngineRPM, getPowerFromRPM } from './lib/engine-calc.js';
 import { getPerformanceChart } from './lib/performance-charts.js';
-import { getAircraftData } from './lib/aircraft-registry.js';
+import { getClimbChartLimits, calcStartClimbTemp, calculateClimb, calculateCruise, calculateEngine } from './lib/avcalc-engine-plugin.js';
 import './App.css';
 
 // Safari re-collapses the text selection on the mouseup that follows a
@@ -179,66 +174,98 @@ export default function App() {
     const [chartType, setChartType]           = useState('climb');
     const [wheelFairings, setWheelFairings]   = useState('no');
     const [power, setPower]                   = useState(65);
-    const [cruiseTemp, setCruiseTemp]           = useState('4');
-    const [startClimbTemp, setStartClimbTemp]   = useState('15');
-    const [altitude, setAltitude]               = useState('5500');
-    const [startAlt, setStartAlt]               = useState('0');
-    const [altimeter, setAltimeter] = useState('29.92');
-    const [showDetails, setShowDetails] = useState(false);
-    const [expandedChart, setExpandedChart] = useState(null);
+    const [cruiseTemp, setCruiseTemp]         = useState('4');
+    const [startClimbTemp, setStartClimbTemp] = useState('15');
+    const [altitude, setAltitude]             = useState('5500');
+    const [startAlt, setStartAlt]             = useState('0');
+    const [altimeter, setAltimeter]           = useState('29.92');
+    const [showDetails, setShowDetails]       = useState(false);
+    const [expandedChart, setExpandedChart]   = useState(null);
     const [startTempFlash, setStartTempFlash] = useState(0);
-    const [rpmInput, setRpmInput] = useState('');
+    const [rpmInput, setRpmInput]             = useState('');
     const [startTempManual, setStartTempManual] = useState(false);
+
+    // Results now arrive asynchronously from the native AvCalcEngine Capacitor plugin
+    // (see src/lib/avcalc-engine-plugin.js) rather than being computed inline during
+    // render — the calc engine + digitized POH data live natively, not in this bundle.
+    const [climbLimits, setClimbLimits] = useState({ minTemp: -40, maxTemp: 50 });
+    const [results, setResults] = useState(null);
+    const [cruiseResults, setCruiseResults] = useState(null);
+    // { yRef, rpm, outOfRange, powerFromRpm, powerFromRpmOutOfRange } for the selected `power`;
+    // powerFromRpm/powerFromRpmOutOfRange are populated either by the Engine chart's manual RPM
+    // entry, or (in Cruise mode) by the max-RPM cross-check when the selected power's RPM is
+    // out of range.
+    const [engineState, setEngineState] = useState(null);
 
     const chartsBannerRef = useRef(null);
     const chartsScrollAreaRef = useRef(null);
+    const startClimbTempDebounce = useRef(null);
+    const calcDebounce = useRef(null);
+    const startTempManualRef = useRef(startTempManual);
+    const requestIdRef = useRef(0);
+
+    useEffect(() => { startTempManualRef.current = startTempManual; }, [startTempManual]);
 
     function scrollToCharts() {
         chartsBannerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         chartsScrollAreaRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    const aircraftData = getAircraftData(aircraftType);
     const chart = getPerformanceChart(aircraftType, chartType);
     const engineChart = chartType === 'cruise' ? getPerformanceChart(aircraftType, 'engine') : null;
     const airspeedCalChart = chartType === 'cruise' ? getPerformanceChart(aircraftType, 'airspeedCal') : null;
-    const { minTemp, maxTemp } = getClimbChartLimits(aircraftData.climb);
+    const { minTemp, maxTemp } = climbLimits;
     const tempRangeHint = `Valid: ${minTemp} to ${maxTemp} °C`;
 
+    // Fetch climb chart limits when aircraft changes
     useEffect(() => {
-        handleCruiseTempChange(cruiseTemp);
-    }, []);
+        let cancelled = false;
+        getClimbChartLimits(aircraftType)
+            .then(limits => { if (!cancelled && limits) setClimbLimits(limits); })
+            .catch(err => console.warn('Could not fetch climb chart limits:', err));
+        return () => { cancelled = true; };
+    }, [aircraftType]);
 
     function applyStartClimbTemp(temp) {
         const num = parseFloat(temp);
         if (num < minTemp) { setStartClimbTemp(String(minTemp)); setStartTempFlash(f => f + 1); }
         else if (num > maxTemp) { setStartClimbTemp(String(maxTemp)); setStartTempFlash(f => f + 1); }
-        else { setStartClimbTemp(temp); }
+        else { setStartClimbTemp(String(temp)); }
+    }
+
+    function scheduleStartClimbTempFetch(cruiseTempVal, altitudeVal, startAltVal, altimeterVal) {
+        clearTimeout(startClimbTempDebounce.current);
+        startClimbTempDebounce.current = setTimeout(async () => {
+            const vals = [cruiseTempVal, altitudeVal, startAltVal, altimeterVal].map(parseFloat);
+            if (vals.some(isNaN)) return;
+            try {
+                const t = await calcStartClimbTemp(vals[0], vals[1], vals[2], vals[3]);
+                // Re-check startTempManualRef (not the closed-over `startTempManual`) since the
+                // user may have flipped into manual mode while this call was in flight — a stale
+                // response must not clobber a value they've since taken over.
+                if (t !== null && t !== undefined && !startTempManualRef.current) applyStartClimbTemp(t);
+            } catch (err) {
+                console.warn('Could not fetch start climb temp:', err);
+            }
+        }, 250);
     }
 
     function handleAltitudeChange(val) {
         setAltitude(val);
         if (startTempManual) return;
-        const temp = calcStartClimbTemp(parseFloat(cruiseTemp), parseFloat(val), parseFloat(startAlt), parseFloat(altimeter));
-        if (temp !== null) applyStartClimbTemp(temp);
+        scheduleStartClimbTempFetch(cruiseTemp, val, startAlt, altimeter);
     }
 
     function handleCruiseTempChange(val) {
         setCruiseTemp(val);
         if (startTempManual) return;
-        const temp = calcStartClimbTemp(parseFloat(val), parseFloat(altitude), parseFloat(startAlt), parseFloat(altimeter));
-        if (temp !== null) applyStartClimbTemp(temp);
+        scheduleStartClimbTempFetch(val, altitude, startAlt, altimeter);
     }
 
     function handleStartAltChange(val) {
         setStartAlt(val);
-        const num = parseFloat(val);
-        const cruiseAlt = parseFloat(altitude);
-        if (startTempManual) {
-            return;
-        }
-        const temp = calcStartClimbTemp(parseFloat(cruiseTemp), parseFloat(altitude), parseFloat(val), parseFloat(altimeter));
-        if (temp !== null) applyStartClimbTemp(temp);
+        if (startTempManual) return;
+        scheduleStartClimbTempFetch(cruiseTemp, altitude, val, altimeter);
     }
 
     function handleStartClimbTempChange(val) {
@@ -269,66 +296,76 @@ export default function App() {
     const SA = parseFloat(startAlt);
     const valid = [T, ST, IA, AS, SA].every(v => !isNaN(v));
 
-    let results = null;
-    if (valid) {
-        const { pa: paTarget, stdTemp: stdTempTarget } = calculatePressureAltitude(IA, AS, T);
-        const { pa: paStart,  stdTemp: stdTempStart  } = calculatePressureAltitude(SA, AS, ST);
-        
-        const yRefTarget = getClimbYRef(aircraftData.climb, paTarget, T);
-        const yRefStart  = getClimbYRef(aircraftData.climb, paStart,  ST);
+    // Fetch climb/cruise/engine results whenever the relevant inputs change. Debounced so a
+    // fast typist or stepper-button spam doesn't fire a native bridge call per keystroke, and
+    // guarded with a monotonically increasing request id so a slow, superseded response can't
+    // overwrite a newer one — Capacitor plugin calls aren't natively cancellable like
+    // `fetch`+`AbortController`, so this is the substitute.
+    useEffect(() => {
+        if (!valid) { setResults(null); setCruiseResults(null); setEngineState(null); return; }
 
-        const distTarget = getDist(aircraftData.climb, yRefTarget);
-        const distStart  = getDist(aircraftData.climb, yRefStart);
-        const timeTarget = getTime(aircraftData.climb, yRefTarget);
-        const timeStart  = getTime(aircraftData.climb, yRefStart);
-        const fuelTarget = getFuel(aircraftData.climb, yRefTarget);
-        const fuelStart  = getFuel(aircraftData.climb, yRefStart);
+        const requestId = ++requestIdRef.current;
+        clearTimeout(calcDebounce.current);
+        calcDebounce.current = setTimeout(async () => {
+            try {
+                const climbResult = await calculateClimb({
+                    aircraftType, altitude: IA, altimeter: AS, cruiseTemp: T, startAlt: SA, startClimbTemp: ST,
+                });
+                if (requestId !== requestIdRef.current) return;
+                setResults(climbResult);
 
-        const aboveMax = yRefTarget > aircraftData.climb.timeLookup.at(-1).yRef;
+                if (chartType === 'cruise') {
+                    const [cruiseResult, firstEngineResult] = await Promise.all([
+                        calculateCruise({ aircraftType, altitude: IA, altimeter: AS, oat: T, power, wheelFairings }),
+                        calculateEngine({ aircraftType, altitude: IA, altimeter: AS, oat: T, power }),
+                    ]);
+                    if (requestId !== requestIdRef.current) return;
+                    setCruiseResults(cruiseResult && cruiseResult.tas != null ? cruiseResult : null);
 
-        results = {
-            paTarget, paStart,
-            distTarget, distStart, netDist: Math.max(0, distTarget - distStart),
-            timeTarget, timeStart, netTime: Math.max(0, timeTarget - timeStart),
-            fuelTarget, fuelStart, netFuel: Math.max(0, fuelTarget - fuelStart),
-            prefix: aboveMax ? '> ' : '',
-        };
-    }
+                    let finalEngineResult = firstEngineResult;
+                    if (firstEngineResult?.outOfRange && firstEngineResult?.rpm != null) {
+                        finalEngineResult = await calculateEngine({
+                            aircraftType, altitude: IA, altimeter: AS, oat: T, power, rpm: firstEngineResult.rpm,
+                        });
+                        if (requestId !== requestIdRef.current) return;
+                    }
+                    setEngineState(finalEngineResult);
+                } else if (chartType === 'engine') {
+                    const rpmVal = rpmInput !== '' && !isNaN(parseFloat(rpmInput)) ? parseFloat(rpmInput) : undefined;
+                    const engineResult = await calculateEngine({
+                        aircraftType, altitude: IA, altimeter: AS, oat: T, power: power ?? 65, rpm: rpmVal,
+                    });
+                    if (requestId !== requestIdRef.current) return;
+                    setEngineState(engineResult);
+                    setCruiseResults(null);
+                } else {
+                    setCruiseResults(null);
+                    setEngineState(null);
+                }
+            } catch (err) {
+                if (requestId === requestIdRef.current) console.warn('Calculation failed:', err);
+            }
+        }, 200);
 
-    let engineYRef = null;
-    let engineRPM = null;
-    if ((chartType === 'engine' || chartType === 'cruise') && valid) {
-        engineYRef = getEngineYRef(aircraftData.engine, results.paTarget, T);
-        engineRPM = getEngineRPM(aircraftData.engine, engineYRef, power);
-    }
+        return () => clearTimeout(calcDebounce.current);
+    }, [aircraftType, chartType, wheelFairings, power, rpmInput, T, ST, IA, AS, SA, valid]);
 
-    let powerFromMaxRPM = null;
-    if (chartType === 'cruise' && engineRPM?.outOfRange && engineRPM?.rpm != null && engineYRef !== null) {
-        powerFromMaxRPM = getPowerFromRPM(aircraftData.engine, engineYRef, engineRPM.rpm);
-    }
+    // Re-run on initial mount
+    useEffect(() => {
+        scheduleStartClimbTempFetch(cruiseTemp, altitude, startAlt, altimeter);
+    }, []);
 
-    let enginePowerResult = null;
-    if (chartType === 'engine' && valid && rpmInput !== '') {
-        const rpm = parseFloat(rpmInput);
-        if (!isNaN(rpm)) {
-            enginePowerResult = getPowerFromRPM(aircraftData.engine, engineYRef, rpm);
-        }
-    }
+    const engineRPM = engineState ? { rpm: engineState.rpm, outOfRange: engineState.outOfRange } : null;
+    const powerFromMaxRPM = engineState?.powerFromRpm != null
+        ? { power: engineState.powerFromRpm, outOfRange: engineState.powerFromRpmOutOfRange }
+        : null;
+    const enginePowerResult = chartType === 'engine' && rpmInput !== '' && engineState
+        ? { power: engineState.powerFromRpm, outOfRange: engineState.powerFromRpmOutOfRange }
+        : null;
 
     const displayRPM = rpmInput !== ''
         ? rpmInput
         : (engineRPM && !engineRPM.outOfRange ? String(Math.round(engineRPM.rpm)) : '');
-
-    let cruiseResults = null;
-    if (chartType === 'cruise' && valid) {
-        const yRef = getCruiseYRef(aircraftData.cruise, results.paTarget, T);
-        const tas = getCruiseTAS(aircraftData.cruise, results.paTarget, T, power, wheelFairings);
-        if (tas !== null) {
-            const cas = convertTasToCas(tas, results.paTarget, T);
-            const ias = getIASfromCAS(aircraftData.airspeedCal, cas, 'flapsUp');
-            cruiseResults = { tas, cas, ias, fuelFlow: aircraftData.cruise.cruiseFuelGPH[power], yRef };
-        }
-    }
 
     return (
         <div className="page-wrapper">
@@ -518,13 +555,13 @@ export default function App() {
                         <div className="result-main-values" style={{ display: 'flex', justifyContent: 'center', gap: '2rem' }}>
                             <ResultValue label="Est. Time to Climb"
                                 value={results ? results.netTime.toFixed(0) : '--'}
-                                unit="min" prefix={results?.prefix} />
+                                unit="min" prefix={results?.aboveMax ? '> ' : ''} />
                             <ResultValue label="Est. Distance to Climb"
                                 value={results ? results.netDist.toFixed(1) : '--'}
-                                unit="nm" prefix={results?.prefix} />
+                                unit="nm" prefix={results?.aboveMax ? '> ' : ''} />
                             <ResultValue label="Est. Fuel to Climb"
                                 value={results ? results.netFuel.toFixed(2) : '--'}
-                                unit="gal" prefix={results?.prefix} />
+                                unit="gal" prefix={results?.aboveMax ? '> ' : ''} />
                         </div>
 
                         <div className="details-toggle-desktop" style={{ marginTop: '0.75rem' }}>
