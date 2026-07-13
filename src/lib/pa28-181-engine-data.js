@@ -27,7 +27,7 @@ export const yRefLookup = [
     ]},
     { pa:  5000, points: [
         { t: -28.9, yRef:  1.6 },
-        { t: 5, yRef:  10 },
+        { t: 5, yRef:  9.8 },
         { t:  37.8, yRef: 17.3 },
     ]},
     { pa:  6000, points: [
@@ -38,20 +38,40 @@ export const yRefLookup = [
         { t:  10, yRef: 13.6 },
         { t:  37.8, yRef: 19.6 },
     ]},
+    { pa:  7000, points: [
+        { t: -28.9, yRef: 6.5 },
+        { t:  -12.2, yRef: 10.8 },
+        { t:  10, yRef: 16 },
+        { t:  21.1, yRef: 18.6 },
+        { t:  37.8, yRef: 21.9 },
+    ]},
     { pa:  8000, points: [
         { t: -28.9, yRef: 9 },
         { t:  -17, yRef: 12 },
-        { t:  -6.7, yRef: 14.8 },
-        { t:  -1, yRef: 16.3 },
-        { t:  10, yRef: 18.7 },
-        { t:  21, yRef: 21 },
+        { t:  -6.7, yRef: 14.7 },
+        { t:  -1.1, yRef: 16.0 },
+        { t:  10, yRef: 18.6 },
+        { t:  21.1, yRef: 21 },
         { t:  37.8, yRef: 24.5 },
+    ]},
+    { pa:  9000, points: [
+        { t: -28.9, yRef: 11.5 },
+        { t:  -12.2, yRef: 15.8 },
+        { t:  10, yRef: 20.8 },
+        { t:  21.1, yRef: 23.4 },
+        { t:  37.8, yRef: 26.9 },
     ]},
     { pa: 10000, points: [
         { t: -28.9, yRef: 14 },
         { t: -5, yRef:  20 },
         { t:  32, yRef: 28 },
 
+    ]},
+    { pa:  11000, points: [
+        { t: -28.9, yRef: 16.7 },
+        { t:  -12.2, yRef: 20.7 },
+        { t:  10, yRef: 25.8 },
+        { t:  20.5, yRef: 28 },
     ]},
     { pa: 12000, points: [
         { t: -28.9, yRef: 19 },

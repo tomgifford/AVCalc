@@ -9,8 +9,8 @@ import { useMemo } from 'react';
 import { fitAffine, dataToPx } from './lib/chart-calibration.js';
 
 const TRACE_STYLES = {
-    cruise: { stroke: '#2563eb', dash: null },
-    start:  { stroke: '#ea580c', dash: '10 7' },
+    cruise: { stroke: '#FF0000', dash: null },
+    start:  { stroke: '#16a34a', dash: null },
 };
 
 /*

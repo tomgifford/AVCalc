@@ -250,14 +250,22 @@ const CALIBRATIONS = {
                 },
             },
         },
-        // PA28-161-ClimbPerformanceChart.png. Grid pitch is 12.75 px/line in both
+        // PA28-161-ClimbPerformanceChart.png. Grid pitch is ~12.9 px/line in both
         // directions; yRef = printed line count (1/line), output axis = 2 units/
-        // line. y anchored on the bottom frame (yRef 0) and Piper's printed
-        // CRUISE ALTITUDE example dash, which sits exactly on printed line 28
-        // (= the 5000 ft / 16 °C example's yRef 28) at y = 775.1. Output x
-        // anchored on the printed 0 tick and the 80 line at the panel's right
-        // frame (1688.0) — an earlier anchor mistakenly snapped to the page
-        // sidebar rule at ~1988, which stretched all output values rightward.
+        // line. y anchored on the bottom frame (yRef 0, full-width row detection:
+        // 1132.65-1132.7, matches prior anchor) and printed gridline 28, counted
+        // up from that same bottom frame through a clean, gap-free, evenly-spaced
+        // (~12.5-14.3px) sequence of 34 full-width-detected horizontal lines —
+        // lands at y=781.25, not the previously anchored 775.1 (roughly half a
+        // gridline higher: 775.1 sits in the trough between real lines 28
+        // (781.25) and 29 (767.95), which had been silently pulling every yRef
+        // in both panels ~half a line high). Independently confirmed against the
+        // printed CRUISE ALTITUDE example (5000 ft / 16 °C -> yRef 28 via
+        // getClimbYRef) and against left/right-half row detection agreeing to
+        // ~1px (no meaningful skew in this panel). Output x anchored on the
+        // printed 0 tick and the 80 line at the panel's right frame (1688.0) —
+        // an earlier anchor mistakenly snapped to the page sidebar rule at
+        // ~1988, which stretched all output values rightward.
         climb: {
             image: { width: 2022, height: 1228 },
             panels: {
@@ -267,8 +275,8 @@ const CALIBRATIONS = {
                     refPoints: [
                         { data: { x: -40, y: 0 },  px: { x: 289.1, y: 1132.7 } },
                         { data: { x: 40,  y: 0 },  px: { x: 794.4, y: 1132.7 } },
-                        { data: { x: -40, y: 28 }, px: { x: 289.1, y: 775.1 } },
-                        { data: { x: 40,  y: 28 }, px: { x: 794.4, y: 775.1 } },
+                        { data: { x: -40, y: 28 }, px: { x: 289.1, y: 781.25 } },
+                        { data: { x: 40,  y: 28 }, px: { x: 794.4, y: 781.25 } },
                     ],
                 },
                 output: {
@@ -277,8 +285,8 @@ const CALIBRATIONS = {
                     refPoints: [
                         { data: { x: 0,  y: 0 },  px: { x: 1177.5, y: 1132.7 } },
                         { data: { x: 80, y: 0 },  px: { x: 1688.0, y: 1132.7 } },
-                        { data: { x: 0,  y: 28 }, px: { x: 1177.5, y: 775.1 } },
-                        { data: { x: 80, y: 28 }, px: { x: 1688.0, y: 775.1 } },
+                        { data: { x: 0,  y: 28 }, px: { x: 1177.5, y: 781.25 } },
+                        { data: { x: 80, y: 28 }, px: { x: 1688.0, y: 781.25 } },
                     ],
                 },
             },
