@@ -110,27 +110,29 @@ function RadioGroup({ label, options, value, onChange, inline }) {
 }
 
 // TODO: Replace ca-pub-XXXXXXXXXXXXXXXX and data-ad-slot value with your AdSense IDs
-function AdBanner() {
-    useEffect(() => {
-        try {
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-        } catch (e) {}
-    }, []);
-
-    return (
-        <div className="ad-banner">
-            <div className="ad-label">Advertisement</div>
-            <ins
-                className="adsbygoogle"
-                style={{ display: 'block' }}
-                data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-                data-ad-slot="XXXXXXXXXX"
-                data-ad-format="auto"
-                data-full-width-responsive="true"
-            />
-        </div>
-    );
-}
+// Ad block disabled for now — see CLAUDE.md/chat history. Re-enable by uncommenting
+// this function and its <AdBanner /> render call below.
+// function AdBanner() {
+//     useEffect(() => {
+//         try {
+//             (window.adsbygoogle = window.adsbygoogle || []).push({});
+//         } catch (e) {}
+//     }, []);
+//
+//     return (
+//         <div className="ad-banner">
+//             <div className="ad-label">Advertisement</div>
+//             <ins
+//                 className="adsbygoogle"
+//                 style={{ display: 'block' }}
+//                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+//                 data-ad-slot="XXXXXXXXXX"
+//                 data-ad-format="auto"
+//                 data-full-width-responsive="true"
+//             />
+//         </div>
+//     );
+// }
 
 function EditableResultValue({ label, value, unit, onChange, step = 25, placeholder, inputClassName = '', seedValue }) {
     const selectAllOnFocus = useSelectAllOnFocus();
@@ -611,7 +613,7 @@ export default function App() {
             </div>
             </div>
         </div>
-        <AdBanner />
+        {/* <AdBanner /> */}
         </div>
     );
 }
