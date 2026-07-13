@@ -194,7 +194,6 @@ export default function App() {
     const [startTempFlash, setStartTempFlash] = useState(0);
     const [rpmInput, setRpmInput] = useState('');
     const [startTempManual, setStartTempManual] = useState(false);
-    const [showTrace, setShowTrace] = useState(true);
 
     const chartsBannerRef = useRef(null);
     const chartsScrollAreaRef = useRef(null);
@@ -347,7 +346,7 @@ export default function App() {
     let primaryTraces = null;
     let engineChartTraces = null;
     let airspeedChartTraces = null;
-    if (showTrace && valid && results) {
+    if (valid && results) {
         if (chartType === 'climb' && primaryCalibration) {
             primaryTraces = buildClimbTraces(aircraftData.climb, primaryCalibration,
                 { T, ST, paTarget: results.paTarget, paStart: results.paStart });
@@ -368,8 +367,6 @@ export default function App() {
                 { cas: cruiseResults.cas, flaps: 'flapsUp' });
         }
     }
-    const anyCalibration = primaryCalibration || engineChartCalibration || airspeedChartCalibration;
-
     return (
         <div className="page-wrapper">
         <div className="app-layout">
@@ -460,12 +457,6 @@ export default function App() {
                     <ChartTraceOverlay chart={chart} calibration={primaryCalibration} traces={primaryTraces}
                         onImageClick={() => setExpandedChart(chart)} imgTitle="Click to expand" />
                     <span className="chart-tap-hint">Tap to expand</span>
-                    {anyCalibration && results && (
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', justifyContent: 'center', fontSize: '0.75rem', color: '#64748b', cursor: 'pointer', marginTop: '0.25rem' }}>
-                            <input type="checkbox" checked={showTrace} onChange={e => setShowTrace(e.target.checked)} />
-                            Show result trace
-                        </label>
-                    )}
                 </div>
             )}
             {engineChart && (
