@@ -6,6 +6,9 @@ import { getIASfromCAS } from './lib/airspeedcal-calc.js';
 import { getEngineYRef, getEngineRPM, getPowerFromRPM } from './lib/engine-calc.js';
 import { getPerformanceChart } from './lib/performance-charts.js';
 import { getAircraftData } from './lib/aircraft-registry.js';
+import { getChartCalibration } from './lib/chart-calibrations.js';
+import { buildClimbTraces, buildCruiseTraces, buildEngineTraces, buildAirspeedCalTrace } from './lib/chart-trace.js';
+import ChartTraceOverlay from './ChartTraceOverlay.jsx';
 import './App.css';
 
 // Safari re-collapses the text selection on the mouseup that follows a
@@ -189,6 +192,7 @@ export default function App() {
     const [startTempFlash, setStartTempFlash] = useState(0);
     const [rpmInput, setRpmInput] = useState('');
     const [startTempManual, setStartTempManual] = useState(false);
+    const [showTrace, setShowTrace] = useState(true);
 
     const chartsBannerRef = useRef(null);
     const chartsScrollAreaRef = useRef(null);
@@ -330,6 +334,40 @@ export default function App() {
         }
     }
 
+    // Trace-overlay geometry. Gated by which charts have a calibration entry in
+    // chart-calibrations.js — uncalibrated charts render exactly as before. The
+    // builders recompute their lookups through the same calc modules the results
+    // above use, so traces are consistent with displayed numbers by construction.
+    const primaryCalibration = getChartCalibration(aircraftType, chartType);
+    const engineChartCalibration = engineChart ? getChartCalibration(aircraftType, 'engine') : null;
+    const airspeedChartCalibration = airspeedCalChart ? getChartCalibration(aircraftType, 'airspeedCal') : null;
+
+    let primaryTraces = null;
+    let engineChartTraces = null;
+    let airspeedChartTraces = null;
+    if (showTrace && valid && results) {
+        if (chartType === 'climb' && primaryCalibration) {
+            primaryTraces = buildClimbTraces(aircraftData.climb, primaryCalibration,
+                { T, ST, paTarget: results.paTarget, paStart: results.paStart });
+        } else if (chartType === 'cruise' && primaryCalibration) {
+            primaryTraces = buildCruiseTraces(aircraftData.cruise, primaryCalibration,
+                { oat: T, pa: results.paTarget, power });
+        } else if (chartType === 'engine' && primaryCalibration) {
+            const manualRpm = rpmInput !== '' && !isNaN(parseFloat(rpmInput)) ? parseFloat(rpmInput) : undefined;
+            primaryTraces = buildEngineTraces(aircraftData.engine, primaryCalibration,
+                { oat: T, pa: results.paTarget, power: power ?? 65, rpm: manualRpm });
+        }
+        if (engineChartCalibration) {
+            engineChartTraces = buildEngineTraces(aircraftData.engine, engineChartCalibration,
+                { oat: T, pa: results.paTarget, power });
+        }
+        if (airspeedChartCalibration && cruiseResults) {
+            airspeedChartTraces = buildAirspeedCalTrace(aircraftData.airspeedCal, airspeedChartCalibration,
+                { cas: cruiseResults.cas, flaps: 'flapsUp' });
+        }
+    }
+    const anyCalibration = primaryCalibration || engineChartCalibration || airspeedChartCalibration;
+
     return (
         <div className="page-wrapper">
         <div className="app-layout">
@@ -417,28 +455,45 @@ export default function App() {
             {chart && (
                 <div className="chart-panel">
                     <div className="chart-title">{chart.title}</div>
-                    <img src={chart.src} alt={chart.alt} onClick={() => setExpandedChart(chart)} title="Click to expand" />
+                    <ChartTraceOverlay chart={chart} calibration={primaryCalibration} traces={primaryTraces}
+                        onImageClick={() => setExpandedChart(chart)} imgTitle="Click to expand" />
                     <span className="chart-tap-hint">Tap to expand</span>
+                    {anyCalibration && results && (
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', justifyContent: 'center', fontSize: '0.75rem', color: '#64748b', cursor: 'pointer', marginTop: '0.25rem' }}>
+                            <input type="checkbox" checked={showTrace} onChange={e => setShowTrace(e.target.checked)} />
+                            Show result trace
+                        </label>
+                    )}
                 </div>
             )}
             {engineChart && (
                 <div className="chart-panel">
                     <div className="chart-title">{engineChart.title}</div>
-                    <img src={engineChart.src} alt={engineChart.alt} onClick={() => setExpandedChart(engineChart)} title="Click to expand" />
+                    <ChartTraceOverlay chart={engineChart} calibration={engineChartCalibration} traces={engineChartTraces}
+                        onImageClick={() => setExpandedChart(engineChart)} imgTitle="Click to expand" />
                     <span className="chart-tap-hint">Tap to expand</span>
                 </div>
             )}
             {airspeedCalChart && (
                 <div className="chart-panel">
                     <div className="chart-title">{airspeedCalChart.title}</div>
-                    <img src={airspeedCalChart.src} alt={airspeedCalChart.alt} onClick={() => setExpandedChart(airspeedCalChart)} title="Click to expand" />
+                    <ChartTraceOverlay chart={airspeedCalChart} calibration={airspeedChartCalibration} traces={airspeedChartTraces}
+                        onImageClick={() => setExpandedChart(airspeedCalChart)} imgTitle="Click to expand" />
                     <span className="chart-tap-hint">Tap to expand</span>
                 </div>
             )}
             </div>
             {expandedChart && (
                 <div className="chart-modal-overlay" onClick={() => setExpandedChart(null)}>
-                    <img src={expandedChart.src} alt={expandedChart.alt} />
+                    {expandedChart === chart ? (
+                        <ChartTraceOverlay chart={expandedChart} calibration={primaryCalibration} traces={primaryTraces} />
+                    ) : expandedChart === engineChart ? (
+                        <ChartTraceOverlay chart={expandedChart} calibration={engineChartCalibration} traces={engineChartTraces} />
+                    ) : expandedChart === airspeedCalChart ? (
+                        <ChartTraceOverlay chart={expandedChart} calibration={airspeedChartCalibration} traces={airspeedChartTraces} />
+                    ) : (
+                        <img src={expandedChart.src} alt={expandedChart.alt} />
+                    )}
                 </div>
             )}
             <div className="result-area">

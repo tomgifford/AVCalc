@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Trace Overlay Calibration — Airspeed System Calibration</title>
+<link rel="stylesheet" href="trace-overlay-common.css">
+<style>h2 { font-size: 0.95rem; color: #1e40af; text-align: center; margin: 1.5rem 0 0.5rem; }</style>
+</head>
+<body>
+<h1>Trace Overlay Calibration — Airspeed System Calibration (all aircraft)</h1>
+<p class="subtitle">
+  Digitized IAS↔CAS curves from <code>airspeedcal-data.js</code> drawn through the calibrations
+  over each scan, with a KTS lattice every 20 kt and an example CAS→IAS trace at 100 kt CAS.
+  NOTE (PA-28-181): that chart's axes are MPH with KTS rulers, and the digitized pairs match MPH
+  readings 1:1 while being consumed as knots — expect its curves to sit visibly offset from the
+  print until that data question is resolved. The 181's two sub-charts (flaps 0° bottom,
+  flaps 40° top) are calibrated as separate panels.
+</p>
+
+<div id="stages"></div>
+
+<div class="readout">
+  <div>Last click (natural px): <code id="clickPx">click an image</code></div>
+  <div class="legend">
+    <span><span class="swatch" style="background:#dc2626"></span> lattice</span>
+    <span><span class="swatch" style="background:#2563eb"></span> flaps up</span>
+    <span><span class="swatch" style="background:#ea580c"></span> flaps 40°</span>
+    <span><span class="swatch" style="background:#0f766e; height:5px"></span> CAS 100 kt example trace</span>
+  </div>
+</div>
+
+<script type="module">
+import { fitPanels, addPolyline, drawLattice, drawTraces, installClickReadout, renderTracePoints } from './trace-overlay-common.js';
+import { getChartCalibration } from '../src/lib/chart-calibrations.js';
+import { buildAirspeedCalTrace } from '../src/lib/chart-trace.js';
+import { airspeedCalData } from '../src/lib/airspeedcal-data.js';
+
+const AIRCRAFT = [
+    { id: 'pa28-151', img: 'PA28-151-AirspeedCalChart.png', label: 'PA-28-151 Warrior I' },
+    { id: 'pa28-161', img: 'PA28-161-AirspeedCalChart.png', label: 'PA-28-161 Warrior II' },
+    { id: 'pa28-181', img: 'PA28-181-AirspeedCalChart.png', label: 'PA-28-181 Archer II' },
+];
+
+const container = document.getElementById('stages');
+const clickEl = document.getElementById('clickPx');
+
+for (const a of AIRCRAFT) {
+    const cal = getChartCalibration(a.id, 'airspeedCal');
+    const data = airspeedCalData[a.id];
+
+    const h2 = document.createElement('h2');
+    h2.textContent = a.label;
+    container.appendChild(h2);
+
+    const stage = document.createElement('div');
+    stage.className = 'stage';
+    stage.innerHTML = `<img alt="${a.label} airspeed calibration chart"><svg preserveAspectRatio="none"></svg>`;
+    container.appendChild(stage);
+
+    const img = stage.querySelector('img');
+    const svg = stage.querySelector('svg');
+    img.src = `${import.meta.env.BASE_URL}charts/${a.img}`;
+    svg.setAttribute('viewBox', `0 0 ${cal.image.width} ${cal.image.height}`);
+
+    const { transforms, residualText } = fitPanels(cal);
+
+    for (const [panelName, panel] of Object.entries(cal.panels)) {
+        drawLattice(svg, transforms[panelName], panel, 20, 20);
+        // Draw each flap curve in the panel that owns it: single-panel charts
+        // ('cal') carry both curves; the 181 has one panel per flap setting.
+        const curvesHere = panelName === 'cal' ? ['flapsUp', 'flaps40'] : [panelName];
+        for (const flaps of curvesHere) {
+            addPolyline(svg, transforms[panelName],
+                data[flaps].map(p => ({ x: p.ias, y: p.cas })),
+                flaps === 'flapsUp' ? '#2563eb' : '#ea580c', 2, flaps === 'flaps40' ? '6 5' : null);
+        }
+    }
+
+    const traces = buildAirspeedCalTrace(data, cal, { cas: 100, flaps: 'flapsUp' });
+    drawTraces(svg, transforms, traces);
+    installClickReadout(img, cal, clickEl);
+
+    const pts = document.createElement('div');
+    pts.className = 'trace-points';
+    pts.innerHTML = '<b>Points depicted by the example trace</b> (data-space coordinates):<div></div>';
+    renderTracePoints(traces, pts.lastElementChild);
+    container.appendChild(pts);
+
+    const res = document.createElement('p');
+    res.className = 'subtitle';
+    res.textContent = `Fit RMS residual: ${residualText}`;
+    container.appendChild(res);
+}
+</script>
+</body>
+</html>

@@ -46,15 +46,15 @@ export const yRefLookup = [
 export const rpmLookup = {
     75: [
         { yRef:  0, rpm: 2440 },
-        { yRef: 16, rpm: 2700 },
+        { yRef: 15.85, rpm: 2700 },
     ],
     65: [
         { yRef:  0, rpm: 2320 },
-        { yRef: 24, rpm: 2610 },
+        { yRef: 24, rpm: 2609 },
     ],
     55: [
         { yRef:  0, rpm: 2194 },
-        { yRef: 24, rpm: 2400 },
+        { yRef: 24, rpm: 2402 },
     ],
 };
 

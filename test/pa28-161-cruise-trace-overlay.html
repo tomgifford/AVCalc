@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Trace Overlay Calibration — PA-28-161 Best Power Cruise</title>
+<link rel="stylesheet" href="trace-overlay-common.css">
+</head>
+<body>
+<h1>Trace Overlay Calibration — PA-28-161 Best Power Cruise</h1>
+<p class="subtitle">
+  Red lattice (OAT verticals every 10 °C) + digitized curves drawn through
+  <code>src/lib/chart-calibrations.js</code> over the actual scan. yRef 0–80 spans bottom to top frame; the printed example dash sits at exactly yRef 28.
+  The teal trace is the printed example (5000 ft / 16 °C, 75% → 122.5 KTS). Click the image to read natural-pixel coordinates.
+</p>
+
+<div class="stage"><img id="chartImg" alt="PA-28-161 Best Power Cruise chart"><svg id="overlay" preserveAspectRatio="none"></svg></div>
+
+<div class="readout">
+  <div>Fit RMS residual: <code id="res">–</code></div>
+  <div>Last click (natural px): <code id="clickPx">click the image</code></div>
+  <div class="legend">
+    <span><span class="swatch" style="background:#dc2626"></span> lattice</span>
+    <span><span class="swatch" style="background:#2563eb"></span> PA curves</span>
+    <span><span class="swatch" style="background:#16a34a"></span> 55%</span>
+    <span><span class="swatch" style="background:#ea580c"></span> 65%</span>
+    <span><span class="swatch" style="background:#9333ea"></span> 75%</span>
+    <span><span class="swatch" style="background:#64748b"></span> max curve</span>
+    <span><span class="swatch" style="background:#0f766e; height:5px"></span> example trace</span>
+  </div>
+</div>
+
+<div class="trace-points"><b>Points depicted by the example trace</b> (data-space coordinates; the drawn dots must sit at these axis positions):<div id="tracePts"></div></div>
+
+<script type="module">
+import { fitPanels, addPolyline, drawLattice, drawTraces, installClickReadout, renderTracePoints, setupStage } from './trace-overlay-common.js';
+import { getChartCalibration } from '../src/lib/chart-calibrations.js';
+import { buildCruiseTraces } from '../src/lib/chart-trace.js';
+import * as chartData from '../src/lib/pa28-161-cruise-data.js';
+
+const POWER_COLORS = {"55":"#16a34a","60":"#0891b2","65":"#ea580c","70":"#be185d","75":"#9333ea"};
+const cal = getChartCalibration('pa28-161', 'cruise');
+const { img, svg } = setupStage('chartImg', 'overlay', cal, 'PA28-161-CruisePerfPowerChart.png');
+const { transforms, residualText } = fitPanels(cal);
+document.getElementById('res').textContent = residualText;
+
+drawLattice(svg, transforms.oat, cal.panels.oat, 10, 10);
+drawLattice(svg, transforms.tas, cal.panels.tas, 10, 10);
+
+const yRefLookup = chartData.cruiseYRefLookup ?? chartData.yRefLookup;
+for (const row of yRefLookup) {
+    addPolyline(svg, transforms.oat, row.points.map(p => ({ x: p.t, y: p.yRef })), '#2563eb', 2);
+}
+for (const [power, table] of Object.entries(chartData.cruiseTASLookup)) {
+    addPolyline(svg, transforms.tas, table.map(p => ({ x: p.tas, y: p.yRef })), POWER_COLORS[power] ?? '#0e7490', 2);
+}
+addPolyline(svg, transforms.tas, chartData.cruiseMaxTAS.map(p => ({ x: p.tas, y: p.yRef })), '#64748b', 2, '6 5');
+
+const traces = buildCruiseTraces(chartData, cal, { oat: 16, pa: 5000, power: 75 });
+drawTraces(svg, transforms, traces);
+renderTracePoints(traces, document.getElementById('tracePts'));
+installClickReadout(img, cal, document.getElementById('clickPx'));
+</script>
+</body>
+</html>

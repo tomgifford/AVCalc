@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Trace Overlay Calibration — PA-28-181 Climb</title>
+<link rel="stylesheet" href="trace-overlay-common.css">
+</head>
+<body>
+<h1>Trace Overlay Calibration — PA-28-181 Time/Distance/Fuel to Climb</h1>
+<p class="subtitle">
+  Red lattice + digitized curves drawn through <code>src/lib/chart-calibrations.js</code> over the
+  actual scan. OAT lattice verticals sit at the printed °F major gridlines (-20 °F = -28.9 °C …
+  100 °F = 37.8 °C). This chart's yRef unit is not gridline-aligned, so horizontal lattice lines
+  are drawn only at yRef 0/14/28 — the curves are the primary validation. The teal trace
+  approximates the chart's printed example arrows (2000 ft / 21 °C → 6000 ft / 9 °C).
+</p>
+
+<div class="stage"><img id="chartImg" alt="PA-28-181 climb chart"><svg id="overlay" preserveAspectRatio="none"></svg></div>
+
+<div class="readout">
+  <div>Fit RMS residual: <code id="res">–</code></div>
+  <div>Last click (natural px): <code id="clickPx">click the image</code></div>
+  <div class="legend">
+    <span><span class="swatch" style="background:#dc2626"></span> lattice</span>
+    <span><span class="swatch" style="background:#2563eb"></span> PA curves</span>
+    <span><span class="swatch" style="background:#16a34a"></span> fuel</span>
+    <span><span class="swatch" style="background:#ea580c"></span> time</span>
+    <span><span class="swatch" style="background:#9333ea"></span> distance</span>
+    <span><span class="swatch" style="background:#0f766e; height:5px"></span> example trace (approx. printed arrows)</span>
+  </div>
+</div>
+
+<div class="trace-points"><b>Points depicted by the example trace</b> (data-space coordinates; the drawn dots must sit at these axis positions):<div id="tracePts"></div></div>
+
+<script type="module">
+import { fitPanels, addPolyline, drawLattice, drawTraces, installClickReadout, renderTracePoints, setupStage } from './trace-overlay-common.js';
+import { getChartCalibration } from '../src/lib/chart-calibrations.js';
+import { buildClimbTraces } from '../src/lib/chart-trace.js';
+import * as climbData from '../src/lib/pa28-181-climb-data.js';
+
+const cal = getChartCalibration('pa28-181', 'climb');
+const { img, svg } = setupStage('chartImg', 'overlay', cal, 'PA28-181-ClimbPerformanceChart.png');
+const { transforms, residualText } = fitPanels(cal);
+document.getElementById('res').textContent = residualText;
+
+drawLattice(svg, transforms.oat, cal.panels.oat, 11.1167 /* 20 °F in °C */, 14);
+drawLattice(svg, transforms.output, cal.panels.output, 5, 14);
+
+for (const row of climbData.yRefLookup) {
+    addPolyline(svg, transforms.oat, row.points.map(p => ({ x: p.t, y: p.yRef })), '#2563eb', 2);
+}
+addPolyline(svg, transforms.output, climbData.fuelLookup.map(p => ({ x: p.fuel, y: p.yRef })), '#16a34a', 2);
+addPolyline(svg, transforms.output, climbData.timeLookup.map(p => ({ x: p.time, y: p.yRef })), '#ea580c', 2);
+addPolyline(svg, transforms.output, climbData.climbDistLookup.map(p => ({ x: p.dist, y: p.yRef })), '#9333ea', 2);
+
+const traces = buildClimbTraces(climbData, cal, { T: 9, ST: 21, paTarget: 6000, paStart: 2000 });
+drawTraces(svg, transforms, traces);
+renderTracePoints(traces, document.getElementById("tracePts"));
+installClickReadout(img, cal, document.getElementById('clickPx'));
+</script>
+</body>
+</html>

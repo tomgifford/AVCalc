@@ -16,7 +16,7 @@ export const climbDistLookup = [
     { yRef: 24, dist:  43.2 },
     { yRef: 26, dist:  52.5 },
     { yRef: 27, dist:  57.9 },
-    { yRef: 28, dist:  68.0 },
+    { yRef: 28, dist:  64.0 },
 
 ];
 export const timeLookup = [

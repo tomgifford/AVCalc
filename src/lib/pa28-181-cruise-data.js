@@ -70,13 +70,13 @@ export const cruiseTASLookup = {
         { yRef: 18, tas: 125 },
     ],
     65: [
-        { yRef:  0, tas: 103 },
+        { yRef:  0, tas: 102.5 },
         { yRef: 14, tas: 113 },
         { yRef: 24, tas: 120.5 },
     ],
     55: [
         { yRef:  0, tas:  91.5 },
-        { yRef: 28, tas: 109 },
+        { yRef: 28, tas: 109.5 },
     ],
 };
 
