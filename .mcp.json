@@ -7,6 +7,13 @@
         "Authorization": "Bearer ${AVCALC_MCP_API_KEY}"
       }
     },
+    "avcalc-local": {
+      "type": "http",
+      "url": "http://localhost:3000/mcp",
+      "headers": {
+        "Authorization": "Bearer ${AVCALC_MCP_API_KEY_LOCAL}"
+      }
+    },
     "aviation-weather": {
       "command": "node",
       "args": [
