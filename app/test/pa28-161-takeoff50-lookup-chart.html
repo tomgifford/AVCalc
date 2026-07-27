@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lookup Table Validation — PA-28-161 Takeoff 50 ft Obstacle</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: sans-serif; background: #f8fafc; margin: 0; padding: 2rem; }
+  h1 { font-size: 1.2rem; color: #1e40af; margin: 0 0 0.25rem; text-align: center; }
+  p.subtitle { font-size: 0.78rem; color: #64748b; text-align: center; margin: 0 0 1.5rem; }
+  .draft-banner {
+    background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px;
+    padding: 0.5rem 1rem; margin: 0 auto 1.5rem; max-width: 900px;
+    font-size: 0.8rem; color: #92400e; text-align: center;
+  }
+  .charts { display: flex; flex-direction: column; gap: 2rem; align-items: center; }
+  .chart-card {
+    background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.1);
+    padding: 1.25rem 1.5rem; width: 700px;
+  }
+  .chart-card h2 { font-size: 0.9rem; font-weight: 600; margin: 0 0 0.75rem; text-align: center; }
+  .legend { display: flex; gap: 1rem; justify-content: center; font-size: 0.72rem; color: #475569; margin-top: 0.75rem; }
+  .legend span { display: flex; align-items: center; gap: 0.3rem; }
+  .dot-filled { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+</style>
+</head>
+<body>
+<h1>PA-28-161 Takeoff — 50 ft Obstacle Lookup Table Validation</h1>
+<p class="subtitle">Live data from pa28-161-takeoff50-data.js · yRef on Y axis</p>
+<div class="draft-banner">
+  ⚠ DRAFT data — placeholder estimates only. Validate against the actual POH chart
+  using the trace overlay before using these values for flight planning.
+</div>
+
+<div class="charts">
+
+  <div class="chart-card" style="width:860px">
+    <h2 style="color:#334155">yRef1 Lookup — OAT vs yRef1 by Pressure Altitude (Left Pane)</h2>
+    <canvas id="chartYRef1"></canvas>
+  </div>
+
+  <div class="chart-card" style="width:860px">
+    <h2 style="color:#334155">yRef2 Lookup — Weight vs yRef2 by yRef1 level (Middle Pane)</h2>
+    <canvas id="chartWeight"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <h2 style="color:#1982c4">Headwind Correction — yRef2 vs Distance by Wind Speed</h2>
+    <canvas id="chartHW"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <h2 style="color:#e63946">Tailwind Correction — yRef2 vs Distance by Wind Speed</h2>
+    <canvas id="chartTW"></canvas>
+  </div>
+
+</div>
+
+<script type="module">
+import Chart from 'chart.js/auto';
+const { yRef1Lookup, weightLookup, headwindLookup, tailwindLookup } =
+    await fetch('/v1/aircraft/pa28-161/takeoff/obstacle/data').then(r => r.json());
+
+const PA_COLORS = ['#e63946','#f4a261','#e9c46a','#2a9d8f','#457b9d','#6a0572'];
+const WIND_COLORS = ['#1e40af','#2563eb','#60a5fa','#93c5fd'];
+
+// yRef1 lookup (left pane): OAT × PA → yRef1
+new Chart(document.getElementById('chartYRef1'), {
+    type: 'line',
+    data: {
+        datasets: yRef1Lookup.map((row, i) => ({
+            label: `PA ${row.pa.toLocaleString()} ft`,
+            data: row.points.map(p => ({ x: p.t, y: p.yRef })),
+            borderColor: PA_COLORS[i % PA_COLORS.length],
+            borderWidth: 1.5, tension: 0, pointRadius: 3, fill: false,
+        })),
+    },
+    options: {
+        responsive: true, maintainAspectRatio: true, aspectRatio: 2,
+        plugins: {
+            legend: { display: true, position: 'right', labels: { font: { size: 10 }, boxWidth: 14 } },
+            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}  T: ${ctx.parsed.x}°C  yRef1: ${ctx.parsed.y.toFixed(1)}` } },
+        },
+        scales: {
+            x: { type: 'linear', title: { display: true, text: 'OAT (°C)' }, ticks: { font: { size: 10 } }, grid: { color: '#e2e8f0' } },
+            y: { type: 'linear', title: { display: true, text: 'yRef1' }, min: 0, ticks: { font: { size: 10 } }, grid: { color: '#e2e8f0' } },
+        },
+    },
+});
+
+// Weight lookup (middle pane): weight × yRef1 → yRef2
+new Chart(document.getElementById('chartWeight'), {
+    type: 'line',
+    data: {
+        datasets: weightLookup.map((row, i) => ({
+            label: `yRef1=${row.yRef1}`,
+            data: row.points.map(p => ({ x: p.weight, y: p.yRef2 })),
+            borderColor: PA_COLORS[i % PA_COLORS.length],
+            borderWidth: 1.5, tension: 0, pointRadius: 3, fill: false,
+        })),
+    },
+    options: {
+        responsive: true, maintainAspectRatio: true, aspectRatio: 2,
+        plugins: {
+            legend: { display: true, position: 'right', labels: { font: { size: 10 }, boxWidth: 14 } },
+            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}  wt: ${ctx.parsed.x} lbs  yRef2: ${ctx.parsed.y.toFixed(1)}` } },
+        },
+        scales: {
+            x: { type: 'linear', title: { display: true, text: 'Weight (lbs)' }, ticks: { font: { size: 10 } }, grid: { color: '#e2e8f0' } },
+            y: { type: 'linear', title: { display: true, text: 'yRef2' }, min: 0, ticks: { font: { size: 10 } }, grid: { color: '#e2e8f0' } },
+        },
+    },
+});
+
+function makeWindChart(canvasId, lookup, color, xLabel) {
+    new Chart(document.getElementById(canvasId), {
+        type: 'line',
+        data: {
+            datasets: lookup.map((row, i) => ({
+                label: `yRef2=${row.yRef2}`,
+                data: row.points.map(p => ({ x: p.windKts, y: p.dist })),
+                borderColor: WIND_COLORS[i % WIND_COLORS.length],
+                borderWidth: 1.5, tension: 0, pointRadius: 3, fill: false,
+            })),
+        },
+        options: {
+            responsive: true, maintainAspectRatio: true, aspectRatio: 1,
+            plugins: {
+                legend: { display: true, position: 'right', labels: { font: { size: 10 }, boxWidth: 14 } },
+                tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}  wind: ${ctx.parsed.x} kt  dist: ${ctx.parsed.y} ft` } },
+            },
+            scales: {
+                x: { type: 'linear', title: { display: true, text: xLabel }, ticks: { font: { size: 10 } }, grid: { color: '#e2e8f0' } },
+                y: { type: 'linear', title: { display: true, text: 'Distance over 50 ft (ft)' }, min: 0, ticks: { font: { size: 10 } }, grid: { color: '#e2e8f0' } },
+            },
+        },
+    });
+}
+
+makeWindChart('chartHW', headwindLookup, '#1982c4', 'Headwind (kts)');
+makeWindChart('chartTW', tailwindLookup, '#e63946', 'Tailwind (kts)');
+</script>
+</body>
+</html>

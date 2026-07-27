@@ -2,15 +2,15 @@
 // Add new keys here; no other code changes needed.
 export const aircraftRefData = {
     'pa28-151': {
-        Vy: 75,  // TODO: fill from POH — best rate of climb speed (KIAS)
-        Vx: 63,  // TODO: fill from POH — best angle of climb speed (KIAS)
+        Vy: 75,
+        Vx: 63,
     },
     'pa28-161': {
-        Vy: 79,  // TODO: fill from POH — best rate of climb speed (KIAS)
-        Vx: 63,  // TODO: fill from POH — best angle of climb speed (KIAS)
+        Vy: 79,
+        Vx: 63,
     },
     'pa28-181': {
-        Vy: 76,  // TODO: fill from POH — best rate of climb speed (KIAS)
-        Vx: 64,  // TODO: fill from POH — best angle of climb speed (KIAS)
+        Vy: 76,
+        Vx: 64,
     },
 };

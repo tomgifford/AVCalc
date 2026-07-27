@@ -6,6 +6,7 @@ import { getCruiseTAS } from '../lib/cruise-calc.js';
 import { getEngineYRef, getEngineRPM, getPowerFromRPM } from '../lib/engine-calc.js';
 import { convertTasToCas } from '../lib/utility-calc.js';
 import { getCASfromIAS, getIASfromCAS } from '../lib/airspeedcal-calc.js';
+import { calculateTakeoffPerformance } from '../lib/takeoff-calc.js';
 
 export function createAvCalcMcpServer(): McpServer {
     const server = new McpServer({
@@ -169,6 +170,45 @@ export function createAvCalcMcpServer(): McpServer {
                 return { content: [{ type: 'text', text: JSON.stringify({ ias: getIASfromCAS(aircraftData.airspeedCal, cas, flaps) }, null, 2) }] };
             }
             return { content: [{ type: 'text', text: 'Provide either ias or cas' }], isError: true };
+        }
+    );
+
+    const takeoffInputSchema = {
+        aircraftType: z.string().describe('Aircraft ID, e.g. pa28-161'),
+        altitude:     z.number().describe('Field indicated altitude (ft MSL)'),
+        altimeter:    z.number().describe('Altimeter setting (inHg)'),
+        oat:          z.number().describe('Outside air temperature at field (°C)'),
+        weight:       z.number().describe('Gross weight at takeoff (lbs)'),
+        windKts:      z.number().describe('Wind component on takeoff heading (positive = headwind, negative = tailwind, 0 = calm)'),
+    };
+
+    server.registerTool(
+        'calculate_takeoff_obstacle',
+        {
+            description: 'Calculate takeoff distance over a 50 ft obstacle (0° flaps, paved level dry runway, full power before brake release)',
+            inputSchema: takeoffInputSchema,
+        },
+        async ({ aircraftType, altitude, altimeter, oat, weight, windKts }) => {
+            const aircraftData = getAircraftData(aircraftType);
+            if (!aircraftData) return { content: [{ type: 'text', text: `Unknown aircraft: ${aircraftType}` }], isError: true };
+            if (!aircraftData.takeoff50) return { content: [{ type: 'text', text: `Takeoff obstacle data not available for ${aircraftType}` }], isError: true };
+            const result = calculateTakeoffPerformance(aircraftData.takeoff50, altitude, altimeter, oat, weight, windKts);
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+        }
+    );
+
+    server.registerTool(
+        'calculate_takeoff_roll',
+        {
+            description: 'Calculate takeoff ground roll distance (0° flaps, paved level dry runway, full power before brake release)',
+            inputSchema: takeoffInputSchema,
+        },
+        async ({ aircraftType, altitude, altimeter, oat, weight, windKts }) => {
+            const aircraftData = getAircraftData(aircraftType);
+            if (!aircraftData) return { content: [{ type: 'text', text: `Unknown aircraft: ${aircraftType}` }], isError: true };
+            if (!aircraftData.takeoffRoll) return { content: [{ type: 'text', text: `Takeoff roll data not available for ${aircraftType}` }], isError: true };
+            const result = calculateTakeoffPerformance(aircraftData.takeoffRoll, altitude, altimeter, oat, weight, windKts);
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
         }
     );
 

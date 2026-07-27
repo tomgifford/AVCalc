@@ -4,6 +4,8 @@ import * as pa28151Engine from '../data/pa28-151-engine-data.js';
 import * as pa28161Climb from '../data/pa28-161-climb-data.js';
 import * as pa28161Cruise from '../data/pa28-161-cruise-data.js';
 import * as pa28161Engine from '../data/pa28-161-engine-data.js';
+import * as pa28161Takeoff50 from '../data/pa28-161-takeoff50-data.js';
+import * as pa28161TakeoffRoll from '../data/pa28-161-takeoffroll-data.js';
 import * as pa28181Climb from '../data/pa28-181-climb-data.js';
 import * as pa28181Cruise from '../data/pa28-181-cruise-data.js';
 import * as pa28181Engine from '../data/pa28-181-engine-data.js';
@@ -12,7 +14,7 @@ import { aircraftRefData } from '../data/aircraft-ref-data.js';
 
 const REGISTRY = {
     'pa28-151': { climb: pa28151Climb, cruise: pa28151Cruise, engine: pa28151Engine, airspeedCal: airspeedCalData['pa28-151'], refData: aircraftRefData['pa28-151'] },
-    'pa28-161': { climb: pa28161Climb, cruise: pa28161Cruise, engine: pa28161Engine, airspeedCal: airspeedCalData['pa28-161'], refData: aircraftRefData['pa28-161'] },
+    'pa28-161': { climb: pa28161Climb, cruise: pa28161Cruise, engine: pa28161Engine, airspeedCal: airspeedCalData['pa28-161'], refData: aircraftRefData['pa28-161'], takeoff50: pa28161Takeoff50, takeoffRoll: pa28161TakeoffRoll },
     'pa28-181': { climb: pa28181Climb, cruise: pa28181Cruise, engine: pa28181Engine, airspeedCal: airspeedCalData['pa28-181'], refData: aircraftRefData['pa28-181'] },
 };
 

@@ -45,8 +45,9 @@ for (const s of SCENARIOS) {
 // Tests use explicit yRef so they don't depend on yRefLookup accuracy.
 // Format: { name, aircraft, yRef, power, expected: { rpm, outOfRange } }
 const MAX_CURVE_TESTS = [
-    // PA-28-151: boundary fix — exact endpoint yRef=16 on 75% line
-    { name: 'PA28-151 — yRef=16, 75%: endpoint → in-range',    aircraft: pa28151Engine, yRef: 16,   power: 75, expected: { rpm: 2700, outOfRange: false } },
+    // PA-28-151: boundary fix — exact endpoint yRef=15.85 on 75% line (corrected
+    // from 16 when pa28-151-engine-data.js was synced from main's digitized data)
+    { name: 'PA28-151 — yRef=15.85, 75%: endpoint → in-range', aircraft: pa28151Engine, yRef: 15.85, power: 75, expected: { rpm: 2700, outOfRange: false } },
     // PA-28-151: max curve — yRef=17 is beyond 75% end, falls back to max curve (65% line)
     { name: 'PA28-151 — yRef=17, 75%: beyond end → max curve', aircraft: pa28151Engine, yRef: 17,   power: 75, expected: { rpm: 2700, outOfRange: true  } },
     // PA-28-151: yRef=17 is in-range on 65% line

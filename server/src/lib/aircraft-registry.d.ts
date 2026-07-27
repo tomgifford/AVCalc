@@ -6,4 +6,6 @@ export declare function getAircraftData(aircraftType: string): {
     engine: any;
     airspeedCal: any;
     refData: Record<string, unknown>;
+    takeoff50?: any;
+    takeoffRoll?: any;
 } | null;

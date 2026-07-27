@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Trace Overlay Calibration — PA-28-161 Takeoff Ground Roll</title>
+<link rel="stylesheet" href="trace-overlay-common.css">
+</head>
+<body>
+<h1>Trace Overlay Calibration — PA-28-161 Takeoff Ground Roll (Figure 5-7)</h1>
+<p class="subtitle">
+  Red lattice drawn through <code>src/lib/chart-calibrations.js</code> over the actual scan.
+  Colored curves are digitized data from <code>pa28-161-takeoffroll-data.js</code>.
+  The teal trace is the chart's printed example:
+  PA 1500 ft / OAT 27 °C / Weight 2316 lbs / 15 kts headwind → 1150 ft ground roll.
+  Click the image to read natural-pixel coordinates for anchor tuning.
+  <br><strong>Note:</strong> pixel anchors in chart-calibrations.js are initial estimates — tune until
+  the red lattice sits on the printed gridlines and the colored curves match the printed curves.
+</p>
+
+<div class="stage"><img id="chartImg" alt="PA-28-161 Ground Roll chart"><svg id="overlay" preserveAspectRatio="none"></svg></div>
+
+<div class="readout">
+  <div>Fit RMS residual: <code id="res">–</code></div>
+  <button class="lattice-toggle" id="latticeBtn">Hide lattice</button>
+  <button class="lattice-toggle" id="traceBtn">Hide trace</button>
+  <div>Last click (natural px): <code id="clickPx">click the image</code></div>
+  <div class="legend">
+    <span><span class="swatch" style="background:#dc2626"></span> lattice</span>
+    <span><span class="swatch" style="background:#2563eb"></span> yRef1 PA lines</span>
+    <span><span class="swatch" style="background:#16a34a"></span> weight reference curves</span>
+    <span><span class="swatch" style="background:#ea580c"></span> headwind reference lines</span>
+    <span><span class="swatch" style="background:#9333ea"></span> tailwind reference lines</span>
+    <span><span class="swatch" style="background:#0f766e; height:5px"></span> printed example trace</span>
+  </div>
+</div>
+
+<div class="trace-points">
+  <b>Points depicted by the example trace</b>
+  (PA 1500 ft / 27 °C / 2316 lbs / 15 kts HW → 1150 ft ground roll):
+  <div id="tracePts"></div>
+</div>
+
+<script type="module">
+import { fitPanels, addPolyline, drawLattice, drawTraces, installClickReadout, renderTracePoints, setupStage } from './trace-overlay-common.js';
+import { getChartCalibration } from '../src/lib/chart-calibrations.js';
+import { buildTakeoffTraces } from '../src/lib/takeoff-trace.js';
+const { yRef1Lookup, weightLookup, headwindLookup, tailwindLookup } =
+    await fetch('/v1/aircraft/pa28-161/takeoff/roll/data').then(r => r.json());
+
+const cal = getChartCalibration('pa28-161', 'takeoffRoll');
+const { img, svg } = setupStage('chartImg', 'overlay', cal, 'PA28-161TakeoffGroundRollChart.png');
+const { transforms, residualText } = fitPanels(cal);
+document.getElementById('res').textContent = residualText;
+
+// Lattice for each panel
+drawLattice(svg, transforms.oat,    cal.panels.oat,    10, 10);
+drawLattice(svg, transforms.weight, cal.panels.weight, 100, 10);
+drawLattice(svg, transforms.wind,   cal.panels.wind,   5, 10);
+drawLattice(svg, transforms.dist,   cal.panels.dist,   250, 10);
+
+// yRef1 PA curves (left pane)
+for (const row of yRef1Lookup) {
+    addPolyline(svg, transforms.oat, row.points.map(p => ({ x: p.t, y: p.yRef })), '#2563eb', 2);
+}
+
+// Weight reference curves (middle pane)
+for (const row of weightLookup) {
+    addPolyline(svg, transforms.weight, row.points.map(p => ({ x: p.weight, y: p.yRef2 })), '#16a34a', 1.5);
+}
+
+// Headwind reference lines
+for (const row of headwindLookup) {
+    addPolyline(svg, transforms.wind, row.points.map(p => ({ x: p.windKts, y: row.yRef2 - (p.windKts / 15) * (row.yRef2 * 0.25) })), '#ea580c', 1.5);
+}
+
+// Tailwind reference lines
+for (const row of tailwindLookup) {
+    addPolyline(svg, transforms.wind, row.points.map(p => ({ x: p.windKts, y: row.yRef2 + (p.windKts / 15) * (row.yRef2 * 0.12) })), '#9333ea', 1.5);
+}
+
+// Example trace: PA 1500 ft, OAT 27°C, weight 2316 lbs, 15 kts HW
+const traces = await buildTakeoffTraces(
+    'pa28-161', 'roll', cal,
+    { altitudeFt: 1500, altimeterInHg: 29.92, oatC: 27, weightLbs: 2316, windKts: 15 }
+);
+drawTraces(svg, transforms, traces);
+renderTracePoints(traces, document.getElementById('tracePts'));
+installClickReadout(img, cal, document.getElementById('clickPx'));
+
+let latticeVisible = true;
+const latticeBtn = document.getElementById('latticeBtn');
+latticeBtn.addEventListener('click', () => {
+    latticeVisible = !latticeVisible;
+    svg.querySelectorAll('.lattice-group').forEach(g => g.classList.toggle('lattice-hidden', !latticeVisible));
+    latticeBtn.textContent = latticeVisible ? 'Hide lattice' : 'Show lattice';
+    latticeBtn.classList.toggle('hidden', !latticeVisible);
+});
+
+let traceVisible = true;
+const traceBtn = document.getElementById('traceBtn');
+traceBtn.addEventListener('click', () => {
+    traceVisible = !traceVisible;
+    svg.querySelectorAll('.trace-group').forEach(g => g.classList.toggle('trace-hidden', !traceVisible));
+    traceBtn.textContent = traceVisible ? 'Hide trace' : 'Show trace';
+    traceBtn.classList.toggle('hidden', !traceVisible);
+});
+</script>
+</body>
+</html>

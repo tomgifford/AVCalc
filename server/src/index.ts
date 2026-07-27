@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import cookiePlugin from '@fastify/cookie';
@@ -9,6 +10,8 @@ import { climbRoutes } from './routes/climb.js';
 import { cruiseRoutes } from './routes/cruise.js';
 import { engineRoutes } from './routes/engine.js';
 import { airspeedRoutes } from './routes/airspeed.js';
+import { takeoffRoutes } from './routes/takeoff.js';
+import { takeoffDevRoutes } from './routes/takeoff-dev.js';
 import { mcpRoutes } from './routes/mcp.js';
 import { loadSecrets } from './lib/config.js';
 
@@ -75,6 +78,8 @@ fastify.register(climbRoutes,    { prefix: '/v1' });
 fastify.register(cruiseRoutes,   { prefix: '/v1' });
 fastify.register(engineRoutes,   { prefix: '/v1' });
 fastify.register(airspeedRoutes, { prefix: '/v1' });
+fastify.register(takeoffRoutes,  { prefix: '/v1' });
+if (!isProd) fastify.register(takeoffDevRoutes, { prefix: '/v1' });
 fastify.register(mcpRoutes,      { prefix: '/mcp' });
 
 fastify.get('/health', async () => ({ status: 'ok' }));
