@@ -6,11 +6,12 @@
  * Params: aircraftType — e.g. 'pa28-161'.
  *         chartType    — 'obstacle' or 'roll'.
  *         calibration  — getChartCalibration() result for this chart.
- *         inputs       — { altitudeFt, altimeterInHg, oatC, weightLbs, windKts }
+ *         inputs       — { altitudeFt, altimeterInHg, oatC, weightLbs, windKts, flapDeg }
  *                        windKts > 0 = headwind, < 0 = tailwind, 0 = calm.
+ *                        flapDeg defaults to 0 if omitted.
  * Returns: Promise resolving to an array of trace objects for drawTraces().
  */
-export async function buildTakeoffTraces(aircraftType, chartType, calibration, { altitudeFt, altimeterInHg, oatC, weightLbs, windKts }) {
+export async function buildTakeoffTraces(aircraftType, chartType, calibration, { altitudeFt, altimeterInHg, oatC, weightLbs, windKts, flapDeg = 0 }) {
     const params = new URLSearchParams({
         aircraftType,
         altitude: altitudeFt,
@@ -18,6 +19,7 @@ export async function buildTakeoffTraces(aircraftType, chartType, calibration, {
         oat: oatC,
         weight: weightLbs,
         windKts,
+        flapDeg,
     });
     const res = await fetch(`/v1/aircraft/${aircraftType}/takeoff/${chartType}?${params}`);
     if (!res.ok) throw new Error(`Takeoff API error: ${res.status}`);

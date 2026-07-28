@@ -387,6 +387,82 @@ const CALIBRATIONS = {
                 },
             },
         },
+        // PA28-161TakeoffPerfChart25Flap.png (Figure 5-10) — 25° flap obstacle distance.
+        // UNCALIBRATED STUB — image dimensions and refPoints copied from takeoff50 (0° flap)
+        // as a placeholder. Replace both once the actual PNG scan is available.
+        takeoff50_25flap: {
+            image: { width: 1963, height: 1263 },
+            panels: {
+                oat: {
+                    xRange: [-40, 40],
+                    yRange: [0, 70],
+                    refPoints: [
+                        { data: { x: -40, y:  0 }, px: { x:  445, y: 1095 } },
+                        { data: { x:  40, y:  0 }, px: { x:  946, y: 1094 } },
+                        { data: { x: -40, y: 70 }, px: { x:  445, y:  164 } },
+                        { data: { x:  40, y: 70 }, px: { x:  946, y:  164 } },
+                    ],
+                },
+                weight: {
+                    xRange: [1600, 2440],
+                    yRange: [0, 70],
+                    refPoints: [
+                        { data: { x: 2400, y:  0 }, px: { x:  1008, y: 1095 } },
+                        { data: { x: 1600, y:  0 }, px: { x: 1508, y: 1095 } },
+                        { data: { x: 2400, y: 70 }, px: { x:  1010, y:  164 } },
+                        { data: { x: 1600, y: 70 }, px: { x: 1503, y:  164 } },
+                    ],
+                },
+                wind: {
+                    xRange: [0, 15],
+                    yRange: [0, 70],
+                    refPoints: [
+                        { data: { x:  0, y:  0 }, px: { x: 1508, y: 1095 } },
+                        { data: { x: 15, y:  0 }, px: { x: 1691, y: 1095 } },
+                        { data: { x:  0, y: 70 }, px: { x: 1503, y:  164 } },
+                        { data: { x: 15, y: 70 }, px: { x: 1694, y:  164 } },
+                    ],
+                },
+            },
+        },
+        // PA28-161TakeoffGroundRollChart25Flap.png (Figure 5-8) — 25° flap ground roll.
+        // UNCALIBRATED STUB — image dimensions and refPoints copied from takeoffRoll (0° flap)
+        // as a placeholder. Replace both once the actual PNG scan is available.
+        takeoffRoll_25flap: {
+            image: { width: 1968, height: 1239 },
+            panels: {
+                oat: {
+                    xRange: [-40, 40],
+                    yRange: [0, 60],
+                    refPoints: [
+                        { data: { x: -40, y:  0 }, px: { x:  267, y: 1092 } },
+                        { data: { x:  40, y:  0 }, px: { x:  769, y: 1094 } },
+                        { data: { x: -40, y: 60 }, px: { x:  274, y:  310 } },
+                        { data: { x:  40, y: 60 }, px: { x:  766, y:  310 } },
+                    ],
+                },
+                weight: {
+                    xRange: [1600, 2440],
+                    yRange: [0, 60],
+                    refPoints: [
+                        { data: { x: 2400, y:  0 }, px: { x:  830, y: 1094 } },
+                        { data: { x: 1600, y:  0 }, px: { x: 1327, y: 1094 } },
+                        { data: { x: 2400, y: 60 }, px: { x:  830, y:  310 } },
+                        { data: { x: 1600, y: 60 }, px: { x: 1328, y:  310 } },
+                    ],
+                },
+                wind: {
+                    xRange: [0, 15],
+                    yRange: [0, 60],
+                    refPoints: [
+                        { data: { x:  0, y:  0 }, px: { x: 1327, y: 1094 } },
+                        { data: { x: 15, y:  0 }, px: { x: 1516, y: 1094 } },
+                        { data: { x:  0, y: 60 }, px: { x: 1327, y:  310 } },
+                        { data: { x: 15, y: 60 }, px: { x: 1516, y:  310 } },
+                    ],
+                },
+            },
+        },
     },
     'pa28-181': {
         // PA28-181-CruisePerfPowerChart.png. °F-primary OAT + MPH-primary TAS with

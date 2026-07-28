@@ -12,53 +12,53 @@
 
 // yRef1Lookup — left pane: OAT (°C) × pressure altitude (ft) → yRef1 (0–80 scale)
 export const yRef1Lookup = [
-    { pa: 0,    points: [{ t: -13, yRef:  12 }, /*{ t: -20, yRef: 11 },*/ { t: 0, yRef: 16.8 }, { t: 20, yRef: 24.5 }, { t: 40, yRef: 32.7 }] },
-    { pa: 1000, points: [{ t: -25.5, yRef: 12 }, { t: -20, yRef: 14 }, { t: 0, yRef: 21.3 }, { t: 20, yRef: 29 }, { t: 40, yRef: 36.8 }] },
-    { pa: 2000, points: [{ t: -40, yRef: 12 }, { t: -20, yRef: 18.4 }, { t: 0, yRef: 25.5 }, { t: 20, yRef: 33 }, { t: 40, yRef: 40.7 }] },
-    { pa: 3000, points: [{ t: -40, yRef: 17 }, { t: -20, yRef: 23 }, { t: 0, yRef: 29.8 }, { t: 20, yRef: 37 }, { t: 40, yRef: 44.5 }] },
-    { pa: 4000, points: [{ t: -40, yRef: 20.8 }, { t: -20, yRef: 27 }, { t: 0, yRef: 34 }, { t: 20, yRef: 41.3 }, { t: 40, yRef: 49 }] },
-    { pa: 5000, points: [{ t: -40, yRef: 25.5 }, { t: -20, yRef: 31.4 }, { t: 0, yRef: 38.2 }, { t: 20, yRef: 45.5 }, { t: 37.8, yRef: 52 }] },
-    { pa: 6000, points: [{ t: -40, yRef: 29 }, { t: -20, yRef: 35.4 }, { t: 0, yRef: 42.3 }, { t: 20, yRef: 49.5 }, { t: 27, yRef: 52 }] },
-    { pa: 7000, points: [{ t: -40, yRef: 33.5 }, { t: -20, yRef: 39 }, { t: 0, yRef: 45.9 }, { t: 17.6, yRef: 52 }] },
+    { pa: 0,    points: [{ t: 10, yRef:  19.5 }, /*{ t: -20, yRef: 11 }, { t: 0, yRef: 16.8 }, { t: 20, yRef: 24.5 }, */{ t: 40, yRef: 28 }] },
+    { pa: 1000, points: [{ t: 0, yRef: 20 }, /*{ t: -20, yRef: 14 }, { t: 0, yRef: 21.3 }, { t: 20, yRef: 29 }, */{ t: 40, yRef: 32 }] },
+    { pa: 2000, points: [{ t: -14, yRef: 20 }, /*{ t: -20, yRef: 18.4 }, { t: 0, yRef: 25.5 }, { t: 20, yRef: 33 }, */ { t: 40, yRef: 35 }] },
+    { pa: 3000, points: [{ t: -26, yRef: 20 }, { t: -20, yRef: 21.8 }, { t: 0, yRef: 28 }, { t: 20, yRef: 33.8 }, { t: 40, yRef: 39 }] },
+    { pa: 4000, points: [{ t: -40, yRef: 19 }, /*{ t: -20, yRef: 27 }, */{ t: 0, yRef: 31.4 }, { t: 20, yRef: 37 },  { t: 40, yRef: 42 }] },
+    { pa: 5000, points: [{ t: -40, yRef: 23 }, /* { t: -20, yRef: 31.4 }, */{ t: 0, yRef: 34.9 }, /*{ t: 20, yRef: 45.5 }, */{ t: 40, yRef: 47 }] },
+    { pa: 6000, points: [{ t: -40, yRef: 26.5 },  { t: -20, yRef: 32.3 }, { t: 0, yRef: 38.5 }, /*{ t: 20, yRef: 45.5 }, */{ t: 40, yRef: 51.5 }] },
+    { pa: 7000, points: [{ t: -40, yRef: 30 }, { t: -20, yRef: 36.1 }, { t: 0, yRef: 42.5 }, { t: 20, yRef: 49 }, { t: 28, yRef: 52 }] },
+//    { pa: 7000, points: [{ t: -40, yRef: 33.5 }, { t: -20, yRef: 39 }, { t: 0, yRef: 45.9 }, { t: 17.6, yRef: 52 }] },
 ];
 
 // weightLookup — middle pane: yRef1 × weight (lbs) → yRef2 (0–80 scale)
 // Weight axis runs RIGHT (1700 lbs) to LEFT (2440 lbs).
 export const weightLookup = [
-    { yRef1: 22, points: [{ weight: 1600, yRef2:  9 }, { weight: 1700, yRef2: 9.7 }, { weight: 1800, yRef2: 10.5 }, { weight: 2000, yRef2: 13.2 }, { weight: 2200, yRef2: 17 }, { weight: 2440, yRef2: 22 }] },
-    { yRef1: 30, points: [{ weight: 1600, yRef2:  12.2 }, { weight: 1700, yRef2: 13.2 }, { weight: 1800, yRef2: 14.5 }, { weight: 2000, yRef2: 18.5 }, { weight: 2200, yRef2: 23.2 }, { weight: 2440, yRef2: 30 }] },
-    { yRef1: 37.8, points: [{ weight: 1600, yRef2: 15.5 }, { weight: 1700, yRef2: 16.8 }, { weight: 1800, yRef2: 18.8 }, { weight: 2000, yRef2: 23.6 }, { weight: 2200, yRef2: 30 }, { weight: 2440, yRef2: 37.8 }] },
-    { yRef1: 45, points: [{ weight: 1600, yRef2: 18.1 }, { weight: 1700, yRef2: 20 }, { weight: 1800, yRef2: 22.7 }, { weight: 2000, yRef2: 29 }, { weight: 2200, yRef2: 36 }, { weight: 2440, yRef2: 45 }] },
-    { yRef1: 45, points: [{ weight: 1600, yRef2: 20.9 }, { weight: 1700, yRef2: 23.3 }, { weight: 1800, yRef2: 26.5 }, { weight: 2000, yRef2: 34.2 }, { weight: 2200, yRef2: 42.8 }, { weight: 2400, yRef2: 52 }] },
+    { yRef1: 21, points: [{ weight: 1600, yRef2:  10 }, { weight: 1700, yRef2: 11 }, { weight: 1800, yRef2: 12 }, { weight: 2000, yRef2: 14.5 }, { weight: 2200, yRef2: 17 }, { weight: 2440, yRef2: 21 }] },
+    { yRef1: 28.5, points: [{ weight: 1600, yRef2:  13.8 }, { weight: 1700, yRef2: 15 }, { weight: 1800, yRef2: 16.8 }, { weight: 2000, yRef2: 20 }, { weight: 2200, yRef2: 23.8 }, { weight: 2440, yRef2: 28.5 }] },
+    { yRef1: 37, points: [{ weight: 1600, yRef2: 17 }, { weight: 1700, yRef2: 18.9 }, { weight: 1800, yRef2: 21 }, { weight: 2000, yRef2: 25.4 }, { weight: 2200, yRef2: 30.4 }, { weight: 2440, yRef2: 37 }] },
+    { yRef1: 45, points: [{ weight: 1600, yRef2: 20.5 }, { weight: 1700, yRef2: 22.6 }, { weight: 1800, yRef2: 25 }, { weight: 2000, yRef2: 30.9 }, { weight: 2200, yRef2: 37.1 }, { weight: 2440, yRef2: 45 }] },
+    { yRef1: 52, points: [{ weight: 1600, yRef2: 24.1 }, { weight: 1700, yRef2: 26.7 }, { weight: 1800, yRef2: 29.4 }, { weight: 2000, yRef2: 36 }, { weight: 2200, yRef2: 43.5 }, { weight: 2420, yRef2: 52 }] },
 ];
 
 // headwindLookup — right pane, headwind section:
 // yRef2 × windKts (0–15) → ground roll distance (ft)
 export const headwindLookup = [
-    { yRef2:  8, points: [{ windKts:  0, dist:  400 }, { windKts: 15, dist:  280 }] },
+//    { yRef2:  8, points: [{ windKts:  0, dist:  400 }, { windKts: 15, dist:  280 }] },
     { yRef2: 12, points: [{ windKts:  0, dist:  600 }, { windKts: 15, dist:  450 }] },
     { yRef2: 16, points: [{ windKts:  0, dist:  800 }, { windKts: 15, dist:  600 }] },
     { yRef2: 20, points: [{ windKts:  0, dist:  1000 }, { windKts: 15, dist:  750 }] },
     { yRef2: 23.8, points: [{ windKts:  0, dist:  1180 }, { windKts: 15, dist:  925 }] },
     { yRef2: 28, points: [{ windKts:  0, dist:  1400 }, { windKts: 15, dist:  1100 }] },
     { yRef2: 31.8, points: [{ windKts:  0, dist:  1600 }, { windKts: 15, dist:  1240 }] },
-    { yRef2: 36, points: [{ windKts:  0, dist:  1800 }, { windKts: 15, dist:  1400 }] },
-    { yRef2: 40, points: [{ windKts:  0, dist:  2000 }, { windKts: 15, dist:  1570 }] },
-    { yRef2: 44, points: [{ windKts:  0, dist:  2200 }, { windKts: 15, dist:  1725 }] },
-    { yRef2: 48, points: [{ windKts:  0, dist:  2400 }, { windKts: 15, dist:  1925 }] },
+    { yRef2: 36, points: [{ windKts:  0, dist:  1800 }, { windKts: 15, dist:  1430 }] },
+    { yRef2: 40, points: [{ windKts:  0, dist:  2000 }, { windKts: 15, dist:  1580 }] },
+    { yRef2: 44, points: [{ windKts:  0, dist:  2200 }, { windKts: 15, dist:  1770 }] },
+    { yRef2: 48, points: [{ windKts:  0, dist:  2400 }, { windKts: 15, dist:  1950 }] },
 ];
 
 // tailwindLookup — right pane, tailwind section:
 // yRef2 × windKts (0–15) → ground roll distance (ft)
 export const tailwindLookup = [
-    { yRef2:  8, points: [{ windKts:  0, dist:  400 }, { windKts: 5, dist:  525 }] },
     { yRef2: 12, points: [{ windKts:  0, dist:  600 }, { windKts: 5, dist:  775 }] },
-    { yRef2: 16, points: [{ windKts:  0, dist:  800 }, { windKts: 5, dist:  1060 }] },
-    { yRef2: 20, points: [{ windKts:  0, dist:  1000 }, { windKts: 5, dist:  1280 }] },
+    { yRef2: 16, points: [{ windKts:  0, dist:  800 }, { windKts: 5, dist:  995 }] },
+    { yRef2: 20, points: [{ windKts:  0, dist:  1000 }, { windKts: 5, dist:  1300 }] },
     { yRef2: 23.8, points: [{ windKts:  0, dist:  1180 }, { windKts: 5, dist:  1500 }] },
     { yRef2: 28, points: [{ windKts:  0, dist:  1400 }, { windKts: 5, dist:  1750 }] },
     { yRef2: 31.8, points: [{ windKts:  0, dist:  1600 }, { windKts: 5, dist:  2000 }] },
-    { yRef2: 36, points: [{ windKts:  0, dist:  1800 }, { windKts: 5, dist:  2250 }] },
-    { yRef2: 40, points: [{ windKts:  0, dist:  2000 }, { windKts: 5, dist:  2500 }] },
-    { yRef2: 44, points: [{ windKts:  0, dist:  2200 }, { windKts: 3.7, dist:  2600 }] },
+    { yRef2: 36, points: [{ windKts:  0, dist:  1800 }, { windKts: 5, dist:  2220 }] },
+    { yRef2: 40, points: [{ windKts:  0, dist:  2000 }, { windKts: 5, dist:  2490 }] },
+    { yRef2: 44, points: [{ windKts:  0, dist:  2200 }, { windKts: 4.2, dist:  2600 }] },
 ];
