@@ -56,7 +56,6 @@ document.getElementById('res').textContent = residualText;
 drawLattice(svg, transforms.oat,    cal.panels.oat,    10, 10);
 drawLattice(svg, transforms.weight, cal.panels.weight, 100, 10);
 drawLattice(svg, transforms.wind,   cal.panels.wind,   5, 10);
-drawLattice(svg, transforms.dist,   cal.panels.dist,   250, 10);
 
 // yRef1 PA curves (left pane)
 for (const row of yRef1Lookup) {
@@ -68,14 +67,14 @@ for (const row of weightLookup) {
     addPolyline(svg, transforms.weight, row.points.map(p => ({ x: p.weight, y: p.yRef2 })), '#16a34a', 1.5);
 }
 
-// Headwind reference lines
+// Headwind reference lines — dist/50 maps feet to the 0–60 reference scale (3000 ft / 60 units)
 for (const row of headwindLookup) {
-    addPolyline(svg, transforms.wind, row.points.map(p => ({ x: p.windKts, y: row.yRef2 - (p.windKts / 15) * (row.yRef2 * 0.25) })), '#ea580c', 1.5);
+    addPolyline(svg, transforms.wind, row.points.map(p => ({ x: p.windKts, y: p.dist / 50 })), '#ea580c', 1.5);
 }
 
 // Tailwind reference lines
 for (const row of tailwindLookup) {
-    addPolyline(svg, transforms.wind, row.points.map(p => ({ x: p.windKts, y: row.yRef2 + (p.windKts / 15) * (row.yRef2 * 0.12) })), '#9333ea', 1.5);
+    addPolyline(svg, transforms.wind, row.points.map(p => ({ x: p.windKts, y: p.dist / 50 })), '#9333ea', 1.5);
 }
 
 // Example trace: PA 1500 ft, OAT 27°C, weight 2316 lbs, 15 kts HW

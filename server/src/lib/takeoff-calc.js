@@ -62,13 +62,20 @@ function interpWeightAtW(points, weight) {
  * getTakeoffYRef2(data, yRef1, weight)
  * Intent: Map yRef1 and gross weight through the middle pane to produce yRef2.
  *         Bilinear interpolation: outer dim = yRef1, inner dim = weight.
+ *         When yRef1 falls below the lowest table row, extrapolates using the
+ *         slope between the first two rows (parallel to the bottom reference
+ *         line on the printed chart) rather than clamping.
  * Params: data — takeoff data module (weightLookup required).
  *         yRef1 — output of getTakeoffYRef1; weight — gross weight (lbs).
  * Returns: interpolated yRef2 value.
  */
 export function getTakeoffYRef2(data, yRef1, weight) {
     const { weightLookup } = data;
-    if (yRef1 <= weightLookup[0].yRef1) return interpWeightAtW(weightLookup[0].points, weight);
+    if (yRef1 <= weightLookup[0].yRef1) {
+        const lo = interpWeightAtW(weightLookup[0].points, weight);
+        const hi = interpWeightAtW(weightLookup[1].points, weight);
+        return lo + (hi - lo) * (yRef1 - weightLookup[0].yRef1) / (weightLookup[1].yRef1 - weightLookup[0].yRef1);
+    }
     if (yRef1 >= weightLookup.at(-1).yRef1) return interpWeightAtW(weightLookup.at(-1).points, weight);
     for (let i = 0; i < weightLookup.length - 1; i++) {
         if (yRef1 >= weightLookup[i].yRef1 && yRef1 <= weightLookup[i + 1].yRef1) {

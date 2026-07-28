@@ -85,7 +85,7 @@ const SCENARIOS = [
         oatC:          0,
         weightLbs:     2440,
         windKts:       5,
-        expected:      1880,
+        expected:      1539,
     },
     {
         name: 'PA28-161 Takeoff50 — 0 ft / 0°C / 2440 lbs / 3 kt TW  [below yRef1=20]',
@@ -95,7 +95,7 @@ const SCENARIOS = [
         oatC:          0,
         weightLbs:     2440,
         windKts:       -3,
-        expected:      2228,
+        expected:      1885,
     },
 
     // === yRef1 band 20–26 + ISA PA=2000 ===   [Req 1+2+3: PA 2000 ft, ISA=11°C, yRef1≈25.0]
@@ -254,6 +254,34 @@ const SCENARIOS = [
         weightLbs:     2440,
         windKts:       -3,
         expected:      4441,
+    },
+
+    // === Boundary: lowest reachable obstacle distance ===
+    // PA=0, OAT=-6°C (yRef1Lookup floor at PA=0 → yRef1=15), lightest weight (1600 lbs), max HW (15 kt).
+    // yRef2 extrapolates below weight table floor and hits headwindLookup floor (yRef2=5).
+    {
+        name: 'PA28-161 Takeoff50 — 0 ft / -6°C / 1600 lbs / 15 kt HW  [lowest reachable dist]',
+        data:          pa28161Takeoff50,
+        altitudeFt:    0,
+        altimeterInHg: 29.92,
+        oatC:          -6,
+        weightLbs:     1600,
+        windKts:       15,
+        expected:      300,
+    },
+
+    // === Boundary: highest reachable obstacle distance ===
+    // PA=7000, OAT=11°C (yRef1Lookup ceiling at PA=7000 → yRef1=44.8), max weight (2440 lbs), max TW (5 kt).
+    // yRef2 clamps at weight table ceiling (44.4); tailwindLookup ceiling hit.
+    {
+        name: 'PA28-161 Takeoff50 — 7000 ft / 11°C / 2440 lbs / 5 kt TW  [highest reachable dist]',
+        data:          pa28161Takeoff50,
+        altitudeFt:    7000,
+        altimeterInHg: 29.92,
+        oatC:          11,
+        weightLbs:     2440,
+        windKts:       -5,
+        expected:      4500,
     },
 
 ];

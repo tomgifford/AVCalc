@@ -180,19 +180,21 @@ export function createAvCalcMcpServer(): McpServer {
         oat:          z.number().describe('Outside air temperature at field (°C)'),
         weight:       z.number().describe('Gross weight at takeoff (lbs)'),
         windKts:      z.number().describe('Wind component on takeoff heading (positive = headwind, negative = tailwind, 0 = calm)'),
+        flapDeg:      z.number().optional().describe('Flap setting in degrees (default 0; supported values depend on aircraft)'),
     };
 
     server.registerTool(
         'calculate_takeoff_obstacle',
         {
-            description: 'Calculate takeoff distance over a 50 ft obstacle (0° flaps, paved level dry runway, full power before brake release)',
+            description: 'Calculate takeoff distance over a 50 ft obstacle (paved level dry runway, full power before brake release). Use flapDeg to select flap configuration (default 0°).',
             inputSchema: takeoffInputSchema,
         },
-        async ({ aircraftType, altitude, altimeter, oat, weight, windKts }) => {
+        async ({ aircraftType, altitude, altimeter, oat, weight, windKts, flapDeg = 0 }) => {
             const aircraftData = getAircraftData(aircraftType);
             if (!aircraftData) return { content: [{ type: 'text', text: `Unknown aircraft: ${aircraftType}` }], isError: true };
-            if (!aircraftData.takeoff50) return { content: [{ type: 'text', text: `Takeoff obstacle data not available for ${aircraftType}` }], isError: true };
-            const result = calculateTakeoffPerformance(aircraftData.takeoff50, altitude, altimeter, oat, weight, windKts);
+            const flapData = aircraftData.takeoff?.[flapDeg];
+            if (!flapData?.obstacle) return { content: [{ type: 'text', text: `Takeoff obstacle data not available for ${aircraftType} with ${flapDeg}° flaps` }], isError: true };
+            const result = calculateTakeoffPerformance(flapData.obstacle, altitude, altimeter, oat, weight, windKts);
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
         }
     );
@@ -200,14 +202,15 @@ export function createAvCalcMcpServer(): McpServer {
     server.registerTool(
         'calculate_takeoff_roll',
         {
-            description: 'Calculate takeoff ground roll distance (0° flaps, paved level dry runway, full power before brake release)',
+            description: 'Calculate takeoff ground roll distance (paved level dry runway, full power before brake release). Use flapDeg to select flap configuration (default 0°).',
             inputSchema: takeoffInputSchema,
         },
-        async ({ aircraftType, altitude, altimeter, oat, weight, windKts }) => {
+        async ({ aircraftType, altitude, altimeter, oat, weight, windKts, flapDeg = 0 }) => {
             const aircraftData = getAircraftData(aircraftType);
             if (!aircraftData) return { content: [{ type: 'text', text: `Unknown aircraft: ${aircraftType}` }], isError: true };
-            if (!aircraftData.takeoffRoll) return { content: [{ type: 'text', text: `Takeoff roll data not available for ${aircraftType}` }], isError: true };
-            const result = calculateTakeoffPerformance(aircraftData.takeoffRoll, altitude, altimeter, oat, weight, windKts);
+            const flapData = aircraftData.takeoff?.[flapDeg];
+            if (!flapData?.roll) return { content: [{ type: 'text', text: `Takeoff roll data not available for ${aircraftType} with ${flapDeg}° flaps` }], isError: true };
+            const result = calculateTakeoffPerformance(flapData.roll, altitude, altimeter, oat, weight, windKts);
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
         }
     );

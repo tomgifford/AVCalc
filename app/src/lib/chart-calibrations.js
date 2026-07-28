@@ -343,16 +343,6 @@ const CALIBRATIONS = {
                         { data: { x: 15, y: 70 }, px: { x: 1516.8, y:  185.6 } },
                     ],
                 },
-                dist: {
-                    xRange: [0, 4000],
-                    yRange: [0, 70],
-                    refPoints: [
-                        { data: { x:    0, y:  0 }, px: { x: 1516.8, y: 1043.6 } },
-                        { data: { x: 4000, y:  0 }, px: { x: 1831.0, y: 1043.6 } },
-                        { data: { x:    0, y: 70 }, px: { x: 1516.8, y:  185.6 } },
-                        { data: { x: 4000, y: 70 }, px: { x: 1831.0, y:  185.6 } },
-                    ],
-                },
             },
         },
         // PA28-161TakeoffGroundRollChart.png (Figure 5-7) — ground roll distance.
@@ -390,19 +380,9 @@ const CALIBRATIONS = {
                     yRange: [0, 60],
                     refPoints: [
                         { data: { x:  0, y:  0 }, px: { x: 1488.0, y: 1114.0 } },
-                        { data: { x: 15, y:  0 }, px: { x: 1671.7, y: 1114.0 } },
+                        { data: { x: 15, y:  0 }, px: { x: 1671.7, y: 1117.0 } },
                         { data: { x:  0, y: 60 }, px: { x: 1487.9, y:  381 } },
-                        { data: { x: 15, y: 60 }, px: { x: 1673.6, y:  381 } },
-                    ],
-                },
-                dist: {
-                    xRange: [0, 2500],
-                    yRange: [0, 60],
-                    refPoints: [
-                        { data: { x:    0, y:  0 }, px: { x: 1671.7, y: 1114.0 } },
-                        { data: { x: 2500, y:  0 }, px: { x: 1816.0, y: 1114.0 } },
-                        { data: { x:    0, y: 60 }, px: { x: 1673.6, y:  381 } },
-                        { data: { x: 2500, y: 60 }, px: { x: 1816.0, y:  381 } },
+                        { data: { x: 15, y: 60 }, px: { x: 1673.6, y:  377 } },
                     ],
                 },
             },

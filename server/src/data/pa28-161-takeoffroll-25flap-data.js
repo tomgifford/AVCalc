@@ -1,17 +1,14 @@
-// PA-28-161 Takeoff Performance — Ground Roll (Figure 5-7)
-// 0° Flaps, Paved Level Dry Runway, Full Power Before Brake Release
+// PA-28-161 Takeoff Performance — Ground Roll (Figure 5-8)
+// 25° Flaps, Paved Level Dry Runway, Full Power Before Brake Release
 //
-// DRAFT — data values are placeholder estimates. Validate against the actual
-// chart using the trace overlay at app/test/pa28-161-takeoffroll-trace-overlay.html
-// before using in flight planning.
+// DRAFT — data values are placeholder copies from the 0° flap chart (Figure 5-7).
+// Validate and replace against the actual chart using the trace overlay at
+// app/test/pa28-161-takeoffroll25flap-trace-overlay.html before using in flight planning.
 //
 // Three-pane chart pipeline:
 //   pane 1 (left):   OAT × PA              → yRef1  (chart reference scale 0–80)
 //   pane 2 (middle): yRef1 × Weight        → yRef2  (chart reference scale 0–80)
 //   pane 3 (right):  yRef2 × Wind (HW/TW) → ground roll distance (ft)
-//
-// POH worked example (Figure 5-7):
-//   PA 1500 ft, OAT 27 °C, Weight 2316 lbs, 15 kts headwind → 1150 ft
 
 // yRef1Lookup — left pane: OAT (°C) × pressure altitude (ft) → yRef1 (0–80 scale)
 export const yRef1Lookup = [

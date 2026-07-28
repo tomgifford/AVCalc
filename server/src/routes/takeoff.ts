@@ -9,14 +9,16 @@ interface TakeoffQuery {
     oat: number;
     weight: number;
     windKts: number;
+    flapDeg?: number;
 }
 
 /*
  * takeoffRoutes(fastify)
  * Intent: Register REST routes for takeoff performance calculations. Two separate
  *         routes serve the two charts: obstacle clearance (50 ft) and ground roll.
- *         Both accept the same query parameters but return distances from their
- *         respective POH chart data.
+ *         Both accept the same query parameters including an optional flapDeg
+ *         (default 0) that selects which flap-setting chart to use, so a single
+ *         route handles all supported flap configurations without duplication.
  * Params: fastify — Fastify instance.
  * Returns: nothing (registers routes as side effect).
  */
@@ -28,13 +30,15 @@ export async function takeoffRoutes(fastify: FastifyInstance) {
         const oat       = Number(request.query.oat);
         const weight    = Number(request.query.weight);
         const windKts   = Number(request.query.windKts);
+        const flapDeg   = Number(request.query.flapDeg ?? 0);
 
         const aircraftData = getAircraftData(aircraftType);
         if (!aircraftData) return reply.status(400).send({ error: `Unknown aircraft: ${aircraftType}` });
-        if (!aircraftData.takeoff50) return reply.status(400).send({ error: `Takeoff obstacle data not available for ${aircraftType}` });
+        const flapData = aircraftData.takeoff?.[flapDeg];
+        if (!flapData?.obstacle) return reply.status(400).send({ error: `Takeoff obstacle data not available for ${aircraftType} with ${flapDeg}° flaps` });
 
         const result = calculateTakeoffPerformance(
-            aircraftData.takeoff50, altitude, altimeter, oat, weight, windKts
+            flapData.obstacle, altitude, altimeter, oat, weight, windKts
         );
         return reply.send(result);
     });
@@ -46,13 +50,15 @@ export async function takeoffRoutes(fastify: FastifyInstance) {
         const oat       = Number(request.query.oat);
         const weight    = Number(request.query.weight);
         const windKts   = Number(request.query.windKts);
+        const flapDeg   = Number(request.query.flapDeg ?? 0);
 
         const aircraftData = getAircraftData(aircraftType);
         if (!aircraftData) return reply.status(400).send({ error: `Unknown aircraft: ${aircraftType}` });
-        if (!aircraftData.takeoffRoll) return reply.status(400).send({ error: `Takeoff roll data not available for ${aircraftType}` });
+        const flapData = aircraftData.takeoff?.[flapDeg];
+        if (!flapData?.roll) return reply.status(400).send({ error: `Takeoff roll data not available for ${aircraftType} with ${flapDeg}° flaps` });
 
         const result = calculateTakeoffPerformance(
-            aircraftData.takeoffRoll, altitude, altimeter, oat, weight, windKts
+            flapData.roll, altitude, altimeter, oat, weight, windKts
         );
         return reply.send(result);
     });
