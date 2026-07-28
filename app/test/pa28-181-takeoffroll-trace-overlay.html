@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Trace Overlay Calibration — PA-28-161 Takeoff 50 ft Obstacle 25° Flaps</title>
+<title>Trace Overlay Calibration — PA-28-181 Takeoff Ground Roll</title>
 <link rel="stylesheet" href="trace-overlay-common.css">
 </head>
 <body>
-<h1>Trace Overlay Calibration — PA-28-161 Takeoff Over 50 ft Obstacle, 25° Flaps (Figure 5-10)</h1>
+<h1>Trace Overlay Calibration — PA-28-181 Takeoff Ground Roll, 0° Flaps</h1>
 <p class="subtitle">
   Red lattice drawn through <code>src/lib/chart-calibrations.js</code> over the actual scan.
-  Colored curves are digitized data from <code>pa28-161-takeoff50-25flap-data.js</code>.
-  The teal trace uses POH example inputs (TBD — update once Figure 5-10 worked example is confirmed).
+  Colored curves are digitized data from <code>pa28-181-takeoffroll-data.js</code>.
+  The teal trace uses POH example inputs (TBD — update once PA-28-181 POH worked example is confirmed).
   Click the image to read natural-pixel coordinates for anchor tuning.
-  <br><strong>Note:</strong> calibration refPoints and image dimensions in chart-calibrations.js are
-  placeholder copies from the 0° flap chart — replace once the actual PNG scan is provided.
+  <br><strong>Note:</strong> calibration refPoints and image dimensions are UNCALIBRATED STUBS
+  copied from the PA-28-161 — replace once the actual PA-28-181 PNG scan is provided.
 </p>
 
-<div class="stage"><img id="chartImg" alt="PA-28-161 Takeoff 50 ft 25° Flap chart"><svg id="overlay" preserveAspectRatio="none"></svg></div>
+<div class="stage"><img id="chartImg" alt="PA-28-181 Ground Roll chart"><svg id="overlay" preserveAspectRatio="none"></svg></div>
 
 <div class="readout">
   <div>Fit RMS residual: <code id="res">–</code></div>
@@ -35,7 +35,7 @@
 
 <div class="trace-points">
   <b>Points depicted by the example trace</b>
-  (PA 1500 ft / 27 °C / 2175 lbs / 15 kts HW — expected output TBD from Figure 5-10):
+  (PA 2000 ft / 21.1 °C (70 °F) / 2400 lbs / 8 kts HW — expected output 1100 ft per PA-28-181 POH):
   <div id="tracePts"></div>
 </div>
 
@@ -44,42 +44,33 @@ import { fitPanels, addPolyline, drawLattice, drawTraces, installClickReadout, r
 import { getChartCalibration } from '../src/lib/chart-calibrations.js';
 import { buildTakeoffTraces } from '../src/lib/takeoff-trace.js';
 const { yRef1Lookup, weightLookup, headwindLookup, tailwindLookup } =
-    await fetch('/v1/aircraft/pa28-161/takeoff/obstacle/data?flapDeg=25').then(r => r.json());
+    await fetch('/v1/aircraft/pa28-181/takeoff/roll/data').then(r => r.json());
 
-const cal = getChartCalibration('pa28-161', 'takeoff50_25flap');
-const { img, svg } = setupStage('chartImg', 'overlay', cal, 'PA28-161TakeoffPerfChart25Flap.png');
+const cal = getChartCalibration('pa28-181', 'takeoffRoll');
+const { img, svg } = setupStage('chartImg', 'overlay', cal, 'PA28-181-TakeoffGroundRollChart.png');
 const { transforms, residualText } = fitPanels(cal);
 document.getElementById('res').textContent = residualText;
 
-// Lattice for each panel
 drawLattice(svg, transforms.oat,    cal.panels.oat,    10, 10);
 drawLattice(svg, transforms.weight, cal.panels.weight, 100, 10);
 drawLattice(svg, transforms.wind,   cal.panels.wind,   5, 10);
 
-// yRef1 PA curves (left pane)
 for (const row of yRef1Lookup) {
     addPolyline(svg, transforms.oat, row.points.map(p => ({ x: p.t, y: p.yRef })), '#2563eb', 2);
 }
-
-// Weight reference curves (middle pane)
 for (const row of weightLookup) {
     addPolyline(svg, transforms.weight, row.points.map(p => ({ x: p.weight, y: p.yRef2 })), '#16a34a', 1.5);
 }
-
-// Headwind reference lines (right/wind pane) — y = dist/100 (scale: 100 ft per unit)
 for (const row of headwindLookup) {
-    addPolyline(svg, transforms.wind, row.points.map(p => ({ x: p.windKts, y: p.dist / 100 })), '#ea580c', 1.5);
+    addPolyline(svg, transforms.wind, row.points.map(p => ({ x: p.windKts, y: (p.dist - 400) / 100 })), '#ea580c', 1.5);
 }
-
-// Tailwind reference lines
 for (const row of tailwindLookup) {
-    addPolyline(svg, transforms.wind, row.points.map(p => ({ x: p.windKts, y: p.dist / 100 })), '#9333ea', 1.5);
+    addPolyline(svg, transforms.wind, row.points.map(p => ({ x: p.windKts, y: (p.dist - 400) / 100 })), '#9333ea', 1.5);
 }
 
-// Example trace: PA 1500 ft, OAT 27°C, weight 2316 lbs, 15 kts HW, 25° flaps
 const traces = await buildTakeoffTraces(
-    'pa28-161', 'obstacle', cal,
-    { altitudeFt: 1500, altimeterInHg: 29.92, oatC: 27, weightLbs: 2175, windKts: 15, flapDeg: 25 }
+    'pa28-181', 'roll', cal,
+    { altitudeFt: 2000, altimeterInHg: 29.92, oatC: 21.1, weightLbs: 2400, windKts: 8 }
 );
 drawTraces(svg, transforms, traces);
 renderTracePoints(traces, document.getElementById('tracePts'));

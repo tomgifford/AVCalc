@@ -33,6 +33,9 @@ export async function buildTakeoffTraces(aircraftType, chartType, calibration, {
 
     const isHeadwind = windKts >= 0;
     const absWind = Math.abs(windKts);
+    const distOffset = windPanel.distOffset ?? 0;
+    const distScale  = windPanel.distScale  ?? 100;
+    const distToY = d => (d - distOffset) / distScale;
 
     return [{
         id: 'cruise',
@@ -51,22 +54,22 @@ export async function buildTakeoffTraces(aircraftType, chartType, calibration, {
                 { x: weightLbs, y: yRef2 },
                 { x: weightPanel.xRange[0], y: yRef2 },
             ] },
-            // Pane 3 (wind): slope from (0, yRef2) down the wind curve to
-            // (absWind, distanceFt/100), matching how the overlay draws the curves.
+            // Pane 3 (wind): slope from (0, yRef2) along the wind curve to the
+            // final distance, using per-chart distOffset/distScale from calibration.
             { panel: 'wind', points: [
                 { x: windPanel.xRange[0], y: yRef2 },
-                { x: absWind, y: distanceFt / 100 },
+                { x: absWind, y: distToY(distanceFt) },
             ] },
             // Drop from wind intercept down to wind axis.
             { panel: 'wind', points: [
-                { x: absWind, y: distanceFt / 100 },
+                { x: absWind, y: distToY(distanceFt) },
                 { x: absWind, y: windPanel.yRange[0] },
             ] },
         ],
         dots: [
-            { panel: 'oat',    x: oatC,      y: yRef1, label: `yRef1 ${yRef1.toFixed(1)} (PA ${Math.round(pa)} ft, ${oatC} °C)` },
-            { panel: 'weight', x: weightLbs, y: yRef2,  label: `yRef2 ${yRef2.toFixed(1)} at ${weightLbs} lbs` },
-            { panel: 'wind',   x: absWind,   y: distanceFt / 100,  label: `${distanceFt != null ? Math.round(distanceFt) : '?'} ft @ ${absWind} kt ${isHeadwind ? 'HW' : 'TW'}` },
+            { panel: 'oat',    x: oatC,      y: yRef1,            label: `yRef1 ${yRef1.toFixed(1)} (PA ${Math.round(pa)} ft, ${oatC} °C)` },
+            { panel: 'weight', x: weightLbs, y: yRef2,            label: `yRef2 ${yRef2.toFixed(1)} at ${weightLbs} lbs` },
+            { panel: 'wind',   x: absWind,   y: distToY(distanceFt), label: `${distanceFt != null ? Math.round(distanceFt) : '?'} ft @ ${absWind} kt ${isHeadwind ? 'HW' : 'TW'}` },
         ],
     }];
 }

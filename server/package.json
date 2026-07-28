@@ -8,7 +8,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "start:mcp": "node dist/mcp.js",
-    "test": "node test/climb-scenario-test.js && node test/airspeed-test.js && node test/cruise-scenario-test.js && node test/engine-scenario-test.js && node test/takeoff-scenario-test.js && node test/takeoffroll-scenario-test.js && node test/takeoff25flap-scenario-test.js && node test/takeoffroll25flap-scenario-test.js",
+    "test": "node test/climb-scenario-test.js && node test/airspeed-test.js && node test/cruise-scenario-test.js && node test/engine-scenario-test.js && node test/takeoff-scenario-test.js && node test/takeoffroll-scenario-test.js && node test/takeoff25flap-scenario-test.js && node test/takeoffroll25flap-scenario-test.js && node test/pa28-181-takeoff-scenario-test.js && node test/pa28-181-takeoffroll-scenario-test.js && node test/pa28-181-takeoff25flap-scenario-test.js && node test/pa28-181-takeoffroll25flap-scenario-test.js",
     "lint": "eslint ."
   },
   "dependencies": {

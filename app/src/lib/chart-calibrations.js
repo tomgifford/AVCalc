@@ -318,29 +318,29 @@ const CALIBRATIONS = {
                     refPoints: [
                         { data: { x: -40, y:  0 }, px: { x:  286.9, y: 1043.6 } },
                         { data: { x:  40, y:  0 }, px: { x:  782, y: 1043.6 } },
-                        { data: { x: -40, y: 70 }, px: { x:  286.9, y:  185.6 } },
-                        { data: { x:  40, y: 70 }, px: { x:  782, y:  185.6 } },
+                        { data: { x: -40, y: 70 }, px: { x:  286.9, y:  140 } },
+                        { data: { x:  40, y: 70 }, px: { x:  782, y:  140 } },
 
                     ],
                 },
                 weight: {
-                    xRange: [1600, 2440],
+                    xRange: [2050, 2440],
                     yRange: [0, 70],
                     refPoints: [
-                        { data: { x: 2400, y:  0 }, px: { x:  842.0, y: 1046.6 } },
-                        { data: { x: 1600, y:  0 }, px: { x: 1330.8, y: 1046.6 } },
-                        { data: { x: 2400, y: 70 }, px: { x:  842.0, y:  185.6 } },
-                        { data: { x: 1600, y: 70 }, px: { x: 1333.5, y:  185.6 } },
+                        { data: { x: 2550, y:  0 }, px: { x:  842.0, y: 933 } },
+                        { data: { x: 2050, y:  0 }, px: { x: 1330.8, y: 933 } },
+                        { data: { x: 2550, y: 70 }, px: { x:  842.0, y:  140 } },
+                        { data: { x: 2050, y: 70 }, px: { x: 1333.5, y:  140 } },
                     ],
                 },
                 wind: {
                     xRange: [0, 15],
                     yRange: [0, 70],
                     refPoints: [
-                        { data: { x:  0, y:  0 }, px: { x: 1330.8, y: 1046.6 } },
-                        { data: { x: 15, y:  0 }, px: { x: 1515.8, y: 1046.6 } },
-                        { data: { x:  0, y: 70 }, px: { x: 1333.5, y:  185.6 } },
-                        { data: { x: 15, y: 70 }, px: { x: 1516.8, y:  185.6 } },
+                        { data: { x:  0, y:  0 }, px: { x: 1330.8, y: 933 } },
+                        { data: { x: 15, y:  0 }, px: { x: 1515.8, y: 933 } },
+                        { data: { x:  0, y: 70 }, px: { x: 1333.5, y:  140 } },
+                        { data: { x: 15, y: 70 }, px: { x: 1516.8, y:  140 } },
                     ],
                 },
             },
@@ -376,6 +376,7 @@ const CALIBRATIONS = {
                     ],
                 },
                 wind: {
+                    distOffset: 0, distScale: 50,
                     xRange: [0, 15],
                     yRange: [0, 60],
                     refPoints: [
@@ -454,6 +455,7 @@ const CALIBRATIONS = {
                 wind: {
                     xRange: [0, 15],
                     yRange: [0, 60],
+                    distOffset: 0, distScale: 50,
                     refPoints: [
                         { data: { x:  0, y:  0 }, px: { x: 1327, y: 1094 } },
                         { data: { x: 15, y:  0 }, px: { x: 1516, y: 1094 } },
@@ -619,6 +621,163 @@ const CALIBRATIONS = {
                         { data: { x: 20, y: 28 }, px: { x: 849.5,  y: 147.0 } },
                         { data: { x: 40, y: 28 }, px: { x: 1134.0, y: 147.0 } },
                         { data: { x: 60, y: 28 }, px: { x: 1419.6, y: 147.0 } },
+                    ],
+                },
+            },
+        },
+        // PA28-181-TakeoffPerfChart.png — 0° flap obstacle distance.
+        // Image: 1685×1239 px. Outer frame measured by full-height/full-width detection.
+        // Left frame: x=295.5(top)/294.4(bot), slope −0.00144, RMS 0.56px.
+        // Right frame: x=1569.0(top)/1561.2(bot), slope −0.0098, RMS 0.25px (real lean ~8px).
+        // yRef 0→30 bottom→top: y=951.5 (yRef=0), y=156.4 (yRef=30). Pitch 26.5 px/yRef.
+        // OAT/weight and weight/wind interior boundaries are PLACEHOLDER — tune via overlay.
+        takeoff50: {
+            image: { width: 1685, height: 1239 },
+            panels: {
+                oat: {
+                    xRange: [-40, 26.7],
+                    yRange: [0, 30],
+                    refPoints: [
+                        { data: { x: -40, y:  0 }, px: { x:  294.4, y: 951.5 } },
+                        { data: { x:  40, y:  0 }, px: { x:  672,   y: 951.5 } },  // placeholder
+                        { data: { x: -40, y: 30 }, px: { x:  295.5, y: 156.4 } },
+                        { data: { x:  40, y: 30 }, px: { x:  672,   y: 156.4 } },  // placeholder
+                    ],
+                },
+                weight: {
+                    xRange: [2050, 2550],
+                    yRange: [0, 30],
+                    refPoints: [
+                        { data: { x: 2550, y:  0 }, px: { x:  658,   y: 953 } },  // placeholder
+                        { data: { x: 2050, y:  0 }, px: { x: 1185,   y: 953 } },  // placeholder
+                        { data: { x: 2550, y: 30 }, px: { x:  658,   y: 156.4 } },  // placeholder
+                        { data: { x: 2050, y: 30 }, px: { x: 1174,   y: 158 } },  // placeholder
+                    ],
+                },
+                wind: {
+                    distOffset: 1600, distScale: 100,
+                    xRange: [0, 15],
+                    yRange: [0, 30],
+                    refPoints: [
+                        { data: { x:  0, y:  0 }, px: { x: 1185,   y: 953 } },  // placeholder
+                        { data: { x: 15, y:  0 }, px: { x: 1335, y: 953 } },
+                        { data: { x:  0, y: 30 }, px: { x: 1174,   y: 158 } },  // placeholder
+                        { data: { x: 15, y: 30 }, px: { x: 1338, y: 162 } },
+                    ],
+                },
+            },
+        },
+        // PA28-181-TakeoffGroundRollChart.png — 0° flap ground roll.
+        // UNCALIBRATED STUB — image dimensions and refPoints copied from pa28-161 takeoffRoll.
+        // Replace both once the actual PA-28-181 PNG scan is available.
+        takeoffRoll: {
+            image: { width: 1706, height: 1221 },
+            panels: {
+                oat: {
+                    xRange: [-40, 37.8],
+                    yRange: [0, 28],
+                    refPoints: [
+                        { data: { x: -40, y:  0 }, px: { x:  317, y: 860 } },
+                        { data: { x:  37.8, y:  0 }, px: { x:  683, y: 860 } },
+                        { data: { x: -40, y: 28 }, px: { x:  318, y:  117 } },
+                        { data: { x:  37.8, y: 28 }, px: { x:  684, y:  120 } },
+                    ],
+                },
+                weight: {
+                    xRange: [2050, 2550],
+                    yRange: [0, 28],
+                    refPoints: [
+                        { data: { x: 2550, y:  0 }, px: { x:  734, y: 862 } },
+                        { data: { x: 2050, y:  0 }, px: { x: 1253, y: 862 } },
+                        { data: { x: 2550, y: 28 }, px: { x:  734, y:  116 } },
+                        { data: { x: 2050, y: 28 }, px: { x: 1260, y:  117 } },
+                    ],
+                },
+                wind: {
+                    distOffset: 400, distScale: 100,
+                    xRange: [0, 15],
+                    yRange: [0, 28],
+                    refPoints: [
+                        { data: { x:  0, y:  0 }, px: { x: 1253, y: 862 } },
+                        { data: { x: 15, y:  0 }, px: { x: 1414, y: 863 } },
+                        { data: { x:  0, y: 28 }, px: { x: 1260, y:  118 } },
+                        { data: { x: 15, y: 28 }, px: { x: 1416, y:  116 } },
+                    ],
+                },
+            },
+        },
+        // PA28-181-TakeoffPerfChart25Flap.png — 25° flap obstacle distance.
+        // UNCALIBRATED STUB — copied from pa28-161 takeoff50_25flap.
+        takeoff50_25flap: {
+            image: { width: 1683, height: 1224 },
+            panels: {
+                oat: {
+                    xRange: [-40, 26.7],
+                    yRange: [0, 30],
+                    refPoints: [
+                        { data: { x: -40, y:  0 }, px: { x:  360, y: 930 } },
+                        { data: { x:  26.7, y:  0 }, px: { x:  673, y: 930 } },
+                        { data: { x: -40, y: 30 }, px: { x:  362, y:  129 } },
+                        { data: { x:  26.7, y: 30 }, px: { x:  673, y:  137 } },
+                    ],
+                },
+                weight: {
+                    xRange: [2050, 2550],
+                    yRange: [0, 30],
+                    refPoints: [
+                        { data: { x: 2550, y:  0 }, px: { x:  722, y: 933 } },
+                        { data: { x: 2050, y:  0 }, px: { x: 1247, y: 930 } },
+                        { data: { x: 2550, y: 30 }, px: { x:  722, y:  134 } },
+                        { data: { x: 2050, y: 30 }, px: { x: 1245, y:  140 } },
+                    ],
+                },
+                wind: {
+                    distOffset: 1000, distScale: 100,
+                    xRange: [0, 15],
+                    yRange: [0, 30],
+                    refPoints: [
+                        { data: { x:  0, y:  0 }, px: { x: 1245, y: 933 } },
+                        { data: { x: 15, y:  0 }, px: { x: 1402, y: 933 } },
+                        { data: { x:  0, y: 30 }, px: { x: 1245, y:  140 } },
+                        { data: { x: 15, y: 30 }, px: { x: 1402, y:  140 } },
+                    ],
+                },
+            },
+        },
+        // PA28-181-TakeoffGroundRollChart25Flap.png — 25° flap ground roll.
+        // UNCALIBRATED STUB — copied from pa28-161 takeoffRoll_25flap.
+        takeoffRoll_25flap: {
+            image: { width: 1968, height: 1239 },
+            panels: {
+                oat: {
+                    xRange: [-40, 37.8],
+                    yRange: [0, 28],
+                    refPoints: [
+                        { data: { x: -40, y:  0 }, px: { x:  362, y: 849 } },
+                        { data: { x:  37.8, y:  0 }, px: { x:  795, y: 858 } },
+                        { data: { x: -40, y: 28 }, px: { x:  360, y:  101 } },
+                        { data: { x:  37.8, y: 28 }, px: { x:  795, y:  97 } },
+                    ],
+                },
+                weight: {
+                    xRange: [2050, 2550],
+                    yRange: [0, 28],
+                    refPoints: [
+                        { data: { x: 2550, y:  0 }, px: { x:  857, y: 858 } },
+                        { data: { x: 2050, y:  0 }, px: { x: 1470, y: 858 } },
+                        { data: { x: 2550, y: 28 }, px: { x:  855, y:  97 } },
+                        { data: { x: 2050, y: 28 }, px: { x: 1470, y:  100 } },
+                    ],
+                },
+                wind: {
+                    distOffset: 400, distScale: 100,
+                    xRange: [0, 15],
+                    yRange: [0, 28],
+                    refPoints: [
+                        { data: { x:  0, y:  0 }, px: { x: 1470, y: 858 } },
+                        { data: { x: 15, y:  0 }, px: { x: 1652, y: 860 } },
+                        { data: { x:  0, y: 28 }, px: { x: 1470, y:  101 } },
+                        { data: { x: 15, y: 28 }, px: { x: 1652, y:  101 } },
                     ],
                 },
             },

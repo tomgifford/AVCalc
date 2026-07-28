@@ -11,6 +11,10 @@ import * as pa28161TakeoffRollFlap25 from '../data/pa28-161-takeoffroll-25flap-d
 import * as pa28181Climb from '../data/pa28-181-climb-data.js';
 import * as pa28181Cruise from '../data/pa28-181-cruise-data.js';
 import * as pa28181Engine from '../data/pa28-181-engine-data.js';
+import * as pa28181Takeoff50 from '../data/pa28-181-takeoff50-data.js';
+import * as pa28181TakeoffRoll from '../data/pa28-181-takeoffroll-data.js';
+import * as pa28181Takeoff50Flap25 from '../data/pa28-181-takeoff50-25flap-data.js';
+import * as pa28181TakeoffRollFlap25 from '../data/pa28-181-takeoffroll-25flap-data.js';
 import { airspeedCalData } from '../data/airspeedcal-data.js';
 import { aircraftRefData } from '../data/aircraft-ref-data.js';
 
@@ -31,7 +35,14 @@ const REGISTRY = {
             25: { obstacle: pa28161Takeoff50Flap25, roll: pa28161TakeoffRollFlap25 },
         },
     },
-    'pa28-181': { climb: pa28181Climb, cruise: pa28181Cruise, engine: pa28181Engine, airspeedCal: airspeedCalData['pa28-181'], refData: aircraftRefData['pa28-181'] },
+    'pa28-181': {
+        climb: pa28181Climb, cruise: pa28181Cruise, engine: pa28181Engine,
+        airspeedCal: airspeedCalData['pa28-181'], refData: aircraftRefData['pa28-181'],
+        takeoff: {
+            0:  { obstacle: pa28181Takeoff50,       roll: pa28181TakeoffRoll },
+            25: { obstacle: pa28181Takeoff50Flap25, roll: pa28181TakeoffRollFlap25 },
+        },
+    },
 };
 
 export const AIRCRAFT_LIST = [

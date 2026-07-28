@@ -35,7 +35,7 @@
 
 <div class="trace-points">
   <b>Points depicted by the example trace</b>
-  (PA 1500 ft / 27 °C / 2316 lbs / 15 kts HW — expected output TBD from Figure 5-8):
+  (PA 1500 ft / 27 °C / 2175 lbs / 15 kts HW — expected output TBD from Figure 5-8):
   <div id="tracePts"></div>
 </div>
 
@@ -76,10 +76,10 @@ for (const row of tailwindLookup) {
     addPolyline(svg, transforms.wind, row.points.map(p => ({ x: p.windKts, y: p.dist / 50 })), '#9333ea', 1.5);
 }
 
-// Example trace: PA 1500 ft, OAT 27°C, weight 2316 lbs, 15 kts HW, 25° flaps
+// Example trace: PA 1500 ft, OAT 27°C, weight 2175 lbs, 15 kts HW, 25° flaps
 const traces = await buildTakeoffTraces(
     'pa28-161', 'roll', cal,
-    { altitudeFt: 1500, altimeterInHg: 29.92, oatC: 27, weightLbs: 2316, windKts: 15, flapDeg: 25 }
+    { altitudeFt: 1500, altimeterInHg: 29.92, oatC: 27, weightLbs: 2175, windKts: 15, flapDeg: 25 }
 );
 drawTraces(svg, transforms, traces);
 renderTracePoints(traces, document.getElementById('tracePts'));
