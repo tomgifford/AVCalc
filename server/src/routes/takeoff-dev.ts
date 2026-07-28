@@ -15,8 +15,9 @@ export async function takeoffDevRoutes(fastify: FastifyInstance) {
         const { type } = request.params as { type: string };
         const aircraftData = getAircraftData(type);
         if (!aircraftData) return reply.status(400).send({ error: `Unknown aircraft: ${type}` });
-        if (!aircraftData.takeoff50) return reply.status(400).send({ error: `Takeoff obstacle data not available for ${type}` });
-        const { yRef1Lookup, weightLookup, headwindLookup, tailwindLookup } = aircraftData.takeoff50;
+        const obstacleData = aircraftData.takeoff?.[0]?.obstacle;
+        if (!obstacleData) return reply.status(400).send({ error: `Takeoff obstacle data not available for ${type}` });
+        const { yRef1Lookup, weightLookup, headwindLookup, tailwindLookup } = obstacleData;
         return reply.send({ yRef1Lookup, weightLookup, headwindLookup, tailwindLookup });
     });
 
@@ -24,8 +25,9 @@ export async function takeoffDevRoutes(fastify: FastifyInstance) {
         const { type } = request.params as { type: string };
         const aircraftData = getAircraftData(type);
         if (!aircraftData) return reply.status(400).send({ error: `Unknown aircraft: ${type}` });
-        if (!aircraftData.takeoffRoll) return reply.status(400).send({ error: `Takeoff roll data not available for ${type}` });
-        const { yRef1Lookup, weightLookup, headwindLookup, tailwindLookup } = aircraftData.takeoffRoll;
+        const rollData = aircraftData.takeoff?.[0]?.roll;
+        if (!rollData) return reply.status(400).send({ error: `Takeoff roll data not available for ${type}` });
+        const { yRef1Lookup, weightLookup, headwindLookup, tailwindLookup } = rollData;
         return reply.send({ yRef1Lookup, weightLookup, headwindLookup, tailwindLookup });
     });
 }

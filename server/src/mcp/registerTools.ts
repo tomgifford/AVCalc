@@ -4,9 +4,10 @@ import { getAircraftData, AIRCRAFT_LIST } from '../lib/aircraft-registry.js';
 import { getClimbYRef, getDist, getTime, getFuel, calculatePressureAltitude, calcStartClimbTemp, getClimbChartLimits } from '../lib/climb-calc.js';
 import { getCruiseTAS } from '../lib/cruise-calc.js';
 import { getEngineYRef, getEngineRPM, getPowerFromRPM } from '../lib/engine-calc.js';
-import { convertTasToCas } from '../lib/utility-calc.js';
+import { convertTasToCas, convertCasToTas } from '../lib/utility-calc.js';
 import { getCASfromIAS, getIASfromCAS } from '../lib/airspeedcal-calc.js';
 import { calculateTakeoffPerformance } from '../lib/takeoff-calc.js';
+import { calculateWindTriangle, calculateGreatCircle, interpolateWindsAloft } from '../lib/nav-calc.js';
 
 export function createAvCalcMcpServer(): McpServer {
     const server = new McpServer({
@@ -212,6 +213,78 @@ export function createAvCalcMcpServer(): McpServer {
             if (!flapData?.roll) return { content: [{ type: 'text', text: `Takeoff roll data not available for ${aircraftType} with ${flapDeg}° flaps` }], isError: true };
             const result = calculateTakeoffPerformance(flapData.roll, altitude, altimeter, oat, weight, windKts);
             return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+        }
+    );
+
+    server.registerTool(
+        'calculate_wind_triangle',
+        {
+            description: 'Solve the E6B wind triangle: given TAS, wind (direction FROM and speed), and desired true course, return the true heading to fly and the resulting ground speed. All directions in degrees true (0–360), speeds in knots.',
+            inputSchema: {
+                tas:           z.number().describe('True airspeed (knots)'),
+                windDir:       z.number().describe('Wind direction FROM (degrees true, 0–360)'),
+                windSpeed:     z.number().describe('Wind speed (knots)'),
+                trueCourse:    z.number().describe('Desired true course (degrees true, 0–360)'),
+            },
+        },
+        async ({ tas, windDir, windSpeed, trueCourse }) => {
+            const result = calculateWindTriangle(tas, windDir, windSpeed, trueCourse);
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+        }
+    );
+
+    server.registerTool(
+        'calculate_great_circle',
+        {
+            description: 'Compute the great-circle distance (nautical miles) and initial true course (degrees) between two geographic coordinates using the haversine formula.',
+            inputSchema: {
+                lat1: z.number().describe('Departure latitude (decimal degrees, + = N)'),
+                lon1: z.number().describe('Departure longitude (decimal degrees, + = E)'),
+                lat2: z.number().describe('Destination latitude (decimal degrees, + = N)'),
+                lon2: z.number().describe('Destination longitude (decimal degrees, + = E)'),
+            },
+        },
+        async ({ lat1, lon1, lat2, lon2 }) => {
+            const result = calculateGreatCircle(lat1, lon1, lat2, lon2);
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+        }
+    );
+
+    server.registerTool(
+        'interpolate_winds_aloft',
+        {
+            description: 'Interpolate wind direction, speed, and temperature between two altitude levels. Uses vector interpolation for direction to correctly handle the 0°/360° boundary (e.g. 350° and 010° interpolate to 000°, not 180°). Temperatures are optional; include both or neither.',
+            inputSchema: {
+                lowAlt:    z.number().describe('Lower altitude (ft MSL)'),
+                lowDir:    z.number().describe('Wind direction FROM at lower altitude (degrees true)'),
+                lowSpd:    z.number().describe('Wind speed at lower altitude (knots)'),
+                highAlt:   z.number().describe('Upper altitude (ft MSL)'),
+                highDir:   z.number().describe('Wind direction FROM at upper altitude (degrees true)'),
+                highSpd:   z.number().describe('Wind speed at upper altitude (knots)'),
+                targetAlt: z.number().describe('Target altitude to interpolate to (ft MSL)'),
+                lowTempC:  z.number().optional().describe('OAT at lower altitude (°C)'),
+                highTempC: z.number().optional().describe('OAT at upper altitude (°C)'),
+            },
+        },
+        async ({ lowAlt, lowDir, lowSpd, highAlt, highDir, highSpd, targetAlt, lowTempC, highTempC }) => {
+            const result = interpolateWindsAloft(lowAlt, lowDir, lowSpd, highAlt, highDir, highSpd, targetAlt, lowTempC, highTempC);
+            return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+        }
+    );
+
+    server.registerTool(
+        'convert_cas_to_tas',
+        {
+            description: 'Convert Calibrated Airspeed (CAS) to True Airspeed (TAS) using the standard ICAO compressibility formula. Use this to convert Vy or other IAS/CAS speeds to TAS for wind-triangle ground-speed calculations.',
+            inputSchema: {
+                casKt:        z.number().describe('Calibrated Airspeed (knots)'),
+                pressureAltFt: z.number().describe('Pressure altitude (feet)'),
+                oatC:          z.number().describe('Outside air temperature (°C)'),
+            },
+        },
+        async ({ casKt, pressureAltFt, oatC }) => {
+            const tasKt = convertCasToTas(casKt, pressureAltFt, oatC);
+            return { content: [{ type: 'text', text: JSON.stringify({ tasKt: Math.round(tasKt * 10) / 10 }, null, 2) }] };
         }
     );
 
