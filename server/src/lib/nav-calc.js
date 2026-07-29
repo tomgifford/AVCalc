@@ -14,7 +14,7 @@
  * @param {number} trueCourseDeg - Desired true course (degrees true, 0–360)
  * @returns {{ trueHeading: number, windCorrectionAngle: number, groundSpeed: number }}
  *          trueHeading: heading to fly (degrees true, 0–360)
- *          windCorrectionAngle: correction applied (positive = wind from left, i.e. turn right)
+ *          windCorrectionAngle: WCA in degrees (positive = wind from right of course, TH > TC; negative = wind from left, TH < TC)
  *          groundSpeed: resulting ground speed (knots)
  */
 export function calculateWindTriangle(tas, windDirDeg, windSpeedKt, trueCourseDeg) {
@@ -28,8 +28,8 @@ export function calculateWindTriangle(tas, windDirDeg, windSpeedKt, trueCourseDe
     const sinWCA = (windSpeedKt * Math.sin(alpha)) / tas;
     const wcaDeg = toDeg(Math.asin(Math.max(-1, Math.min(1, sinWCA))));
 
-    const trueHeading = ((trueCourseDeg - wcaDeg) + 360) % 360;
-    const groundSpeed = tas * Math.cos(toRad(wcaDeg)) + windSpeedKt * Math.cos(alpha);
+    const trueHeading = ((trueCourseDeg + wcaDeg) + 360) % 360;
+    const groundSpeed = tas * Math.cos(toRad(wcaDeg)) - windSpeedKt * Math.cos(alpha);
 
     return {
         trueHeading: Math.round(trueHeading * 10) / 10,
