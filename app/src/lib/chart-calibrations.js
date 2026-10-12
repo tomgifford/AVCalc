@@ -115,6 +115,118 @@ const CALIBRATIONS = {
                 },
             },
         },
+        // PA28-151-TakeoffChart.png — 0° flap combined chart (50 ft obstacle + ground roll).
+        // Image: 927×1254 px. PA-28-151 uses a 2-panel model: OAT×PA→yRef (left),
+        // then yRef×{3 wind curves}→distance for obstacle (right) and roll (lower).
+        // The obstacle and roll charts occupy different y-regions of the same image,
+        // so two calibration entries are used: 'takeoff' (obstacle, upper) and
+        // 'takeoffRoll' (ground roll, lower).
+        //
+        // 'takeoff' — obstacle section (upper portion, y: 83.5–752.1).
+        // OAT panel: gridline-detected values (full-height darkness profile, see
+        // session notes). Obstacle distance panel (takeoffperf): STUB — pixel
+        // positions from prior session, xRange/distScale need calibration against chart.
+        takeoff: {
+            image: { width: 927, height: 1254 },
+            panels: {
+                oat: {
+                    xRange: [-28.9, 37.8],
+                    yRange: [0, 28],
+                    refPoints: [
+                        { data: { x: -28.9, y:  0 }, px: { x:  70.0, y: 752.1 } },
+                        { data: { x:  37.8, y:  0 }, px: { x: 330.0, y: 752.1 } },
+                        { data: { x: -28.9, y: 28 }, px: { x:  70.0, y:  83.5 } },
+                        { data: { x:  37.8, y: 28 }, px: { x: 330.0, y:  83.5 } },
+                    ],
+                },
+                takeoffperf: {
+                    // STUB — x = (dist - distOffset) / distScale. Pixel positions from
+                    // prior session; actual dist scale needs chart measurement.
+                    distOffset: 1600, distScale: 200,
+                    xRange: [0, 14],
+                    yRange: [0, 28],
+                    refPoints: [
+                        { data: { x:  0, y:  0 }, px: { x: 472.0, y: 752.1 } },
+                        { data: { x: 14, y:  0 }, px: { x: 872.6, y: 752.1 } },
+                        { data: { x:  0, y: 28 }, px: { x: 472.0, y:  83.5 } },
+                        { data: { x: 14, y: 28 }, px: { x: 872.6, y:  83.5 } },
+                    ],
+                },
+            },
+        },
+        // 'takeoffRoll' — ground roll section (lower portion, y: 170–1050).
+        // UNCALIBRATED STUB — all refPoints are placeholder estimates.
+        takeoffRoll: {
+            image: { width: 927, height: 1254 },
+            panels: {
+                oat: {
+                    xRange: [-28.9, 37.8],
+                    yRange: [0, 20],
+                    refPoints: [
+                        { data: { x: -28.9, y:  0 }, px: { x:  65, y: 1050 } },
+                        { data: { x:  37.8, y:  0 }, px: { x: 335, y: 1050 } },
+                        { data: { x: -28.9, y: 20 }, px: { x:  65, y:  170 } },
+                        { data: { x:  37.8, y: 20 }, px: { x: 335, y:  170 } },
+                    ],
+                },
+                groundroll: {
+                    // STUB — x = (dist - distOffset) / distScale.
+                    distOffset: 400, distScale: 100,
+                    xRange: [0, 20],
+                    yRange: [0, 20],
+                    refPoints: [
+                        { data: { x:  0, y:  0 }, px: { x: 680, y: 1050 } },
+                        { data: { x: 20, y:  0 }, px: { x: 870, y: 1050 } },
+                        { data: { x:  0, y: 20 }, px: { x: 680, y:  170 } },
+                        { data: { x: 20, y: 20 }, px: { x: 870, y:  170 } },
+                    ],
+                },
+            },
+        },
+        // PA28-151-TakeoffChart25Flap.png — 25° flap combined chart (50 ft obstacle
+        // + ground roll). Image: 948×1256 px. Unlike the 0° chart, both distance
+        // sections share the same y-region, so a single calibration entry covers all
+        // three panels: oat (left), groundroll (middle), takeoffperf (right).
+        // All pixel positions entered by user — correctly aligned to chart gridlines.
+        // xRange values for groundroll and takeoffperf are stubs pending chart measurement.
+        takeoff_25flap: {
+            image: { width: 948, height: 1256 },
+            panels: {
+                oat: {
+                    xRange: [-28.9, 37.8],
+                    yRange: [0, 28],
+                    refPoints: [
+                        { data: { x: -28.9, y:  0 }, px: { x:  48, y: 825 } },
+                        { data: { x:  37.8, y:  0 }, px: { x: 293, y: 824 } },
+                        { data: { x: -28.9, y: 28 }, px: { x:  41, y: 242 } },
+                        { data: { x:  37.8, y: 28 }, px: { x: 293, y: 242 } },
+                    ],
+                },
+                groundroll: {
+                    // Pixel positions user-calibrated. xRange is stub dist (ft) until measured.
+                    xRange: [400, 1800],
+                    yRange: [0, 28],
+                    refPoints: [
+                        { data: { x:  400, y:  0 }, px: { x: 377, y: 824 } },
+                        { data: { x: 1800, y:  0 }, px: { x: 505, y: 824 } },
+                        { data: { x:  400, y: 28 }, px: { x: 374, y: 242 } },
+                        { data: { x: 1800, y: 28 }, px: { x: 502, y: 242 } },
+                    ],
+                },
+                takeoffperf: {
+                    // Pixel positions user-calibrated. distOffset/distScale are stubs.
+                    distOffset: 1000, distScale: 100,
+                    xRange: [0, 15],
+                    yRange: [0, 28],
+                    refPoints: [
+                        { data: { x:  0, y:  0 }, px: { x: 634, y: 822 } },
+                        { data: { x: 15, y:  0 }, px: { x: 796, y: 822 } },
+                        { data: { x:  0, y: 28 }, px: { x: 624, y: 240 } },
+                        { data: { x: 15, y: 28 }, px: { x: 796, y: 239 } },
+                    ],
+                },
+            },
+        },
         // PA28-151-ClimbPerformanceChart.png. Primary OAT axis is °F; our data is
         // °C, so anchors use the °C-exact °F gridlines: -28.9 °C = -20 °F (left
         // frame) and 37.8 °C = 100 °F. Output axis: values 20/40 (2.5-unit minor

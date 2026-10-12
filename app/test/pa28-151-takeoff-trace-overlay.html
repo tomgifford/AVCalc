@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Trace Overlay Calibration — PA-28-151 Takeoff 0° Flaps</title>
+<link rel="stylesheet" href="trace-overlay-common.css">
+</head>
+<body>
+<h1>Trace Overlay Calibration — PA-28-151 Takeoff, 0° Flaps</h1>
+<p class="subtitle">
+  Red lattice drawn through <code>src/lib/chart-calibrations.js</code> over the actual scan.
+  Colored curves are digitized data from <code>pa28-151-takeoff-data.js</code>.
+  The teal trace uses the example inputs below.
+  Click the image to read natural-pixel coordinates for anchor tuning.
+  <br><strong>Note:</strong> Two calibration regions on one image —
+  obstacle section (<code>takeoff</code>) and ground roll section (<code>takeoffRoll</code>).
+  Both are UNCALIBRATED STUBS pending chart measurement.
+</p>
+
+<div class="stage"><img id="chartImg" alt="PA-28-151 Takeoff 0° Flap chart"><svg id="overlay" preserveAspectRatio="none"></svg></div>
+
+<div class="readout">
+  <div>Obstacle fit RMS: <code id="res-obs">–</code> &nbsp; Roll fit RMS: <code id="res-roll">–</code></div>
+  <button class="lattice-toggle" id="latticeBtn">Hide lattice</button>
+  <button class="lattice-toggle" id="traceBtn">Hide trace</button>
+  <div>Last click (natural px): <code id="clickPx">click the image</code></div>
+  <div class="legend">
+    <span><span class="swatch" style="background:#dc2626"></span> lattice</span>
+    <span><span class="swatch" style="background:#2563eb"></span> OAT lines (PA)</span>
+    <span><span class="swatch" style="background:#6b7280"></span> calm</span>
+    <span><span class="swatch" style="background:#ea580c"></span> 15 kt headwind</span>
+    <span><span class="swatch" style="background:#9333ea"></span> 5 kt tailwind</span>
+    <span><span class="swatch" style="background:#0f766e; height:5px"></span> example trace</span>
+  </div>
+</div>
+
+<div class="trace-points">
+  <b>Points depicted by the example trace</b>
+  (PA 2000 ft / 21.1 °C (70 °F) / 8 kts HW — expected output TBD):
+  <div id="tracePts"></div>
+</div>
+
+<script type="module">
+import { fitPanels, addPolyline, drawLattice, installClickReadout, setupStage } from './trace-overlay-common.js';
+import { getChartCalibration } from '../src/lib/chart-calibrations.js';
+
+const { yRef1Lookup, groundRollLookup, takeoffPerfLookup } =
+    await fetch('/v1/aircraft/pa28-151/takeoff/obstacle/data').then(r => r.json());
+
+const calObs  = getChartCalibration('pa28-151', 'takeoff');
+const calRoll = getChartCalibration('pa28-151', 'takeoffRoll');
+
+const { img, svg } = setupStage('chartImg', 'overlay', calObs, 'PA28-151-TakeoffChart.png');
+
+const { transforms: tObs,  residualText: rObs  } = fitPanels(calObs);
+const { transforms: tRoll, residualText: rRoll } = fitPanels(calRoll);
+document.getElementById('res-obs').textContent  = rObs;
+document.getElementById('res-roll').textContent = rRoll;
+
+drawLattice(svg, tObs.oat,         calObs.panels.oat,         10, 2);
+drawLattice(svg, tObs.takeoffperf,  calObs.panels.takeoffperf,  1, 2);
+drawLattice(svg, tRoll.oat,         calRoll.panels.oat,         10, 2);
+drawLattice(svg, tRoll.groundroll,   calRoll.panels.groundroll,   1, 2);
+
+for (const row of yRef1Lookup) {
+    addPolyline(svg, tObs.oat,  row.points.map(p => ({ x: p.t, y: p.yRef })), '#2563eb', 2);
+    addPolyline(svg, tRoll.oat, row.points.map(p => ({ x: p.t, y: p.yRef })), '#2563eb', 2);
+}
+
+const CURVE_COLORS = { calm: '#6b7280', hw15: '#ea580c', tw5: '#9333ea' };
+
+const obsOffset = calObs.panels.takeoffperf.distOffset ?? 0;
+const obsScale  = calObs.panels.takeoffperf.distScale  ?? 1;
+for (const curve of takeoffPerfLookup) {
+    addPolyline(svg, tObs.takeoffperf,
+        curve.points.map(p => ({ x: (p.dist - obsOffset) / obsScale, y: p.yRef })),
+        CURVE_COLORS[curve.name] ?? '#000', 1.5);
+}
+
+const rollOffset = calRoll.panels.groundroll.distOffset ?? 0;
+const rollScale  = calRoll.panels.groundroll.distScale  ?? 1;
+for (const curve of groundRollLookup) {
+    addPolyline(svg, tRoll.groundroll,
+        curve.points.map(p => ({ x: (p.dist - rollOffset) / rollScale, y: p.yRef })),
+        CURVE_COLORS[curve.name] ?? '#000', 1.5);
+}
+
+const exInputs = { altitudeFt: 2000, altimeterInHg: 29.92, oatC: 21.1, windKts: 8, flapDeg: 0 };
+const params = new URLSearchParams({ aircraftType: 'pa28-151', altitude: exInputs.altitudeFt, altimeter: exInputs.altimeterInHg, oat: exInputs.oatC, windKts: exInputs.windKts, flapDeg: exInputs.flapDeg, weight: 2325 });
+const [obsResult, rollResult] = await Promise.all([
+    fetch(`/v1/aircraft/pa28-151/takeoff/obstacle?${params}`).then(r => r.json()),
+    fetch(`/v1/aircraft/pa28-151/takeoff/roll?${params}`).then(r => r.json()),
+]);
+
+const traceG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+traceG.classList.add('trace-group');
+svg.appendChild(traceG);
+const TRACE_COLOR = '#0f766e';
+const tracePtsEl = document.getElementById('tracePts');
+
+if (obsResult.yRef != null && obsResult.distanceFt != null) {
+    const yRef  = obsResult.yRef;
+    const dNorm = (obsResult.distanceFt - obsOffset) / obsScale;
+    addPolyline(traceG, tObs.oat, [{ x: exInputs.oatC, y: calObs.panels.oat.yRange[0] }, { x: exInputs.oatC, y: yRef }, { x: calObs.panels.oat.xRange[1], y: yRef }], TRACE_COLOR, 2.5);
+    addPolyline(traceG, tObs.takeoffperf, [{ x: 0, y: yRef }, { x: dNorm, y: yRef }, { x: dNorm, y: calObs.panels.takeoffperf.yRange[0] }], TRACE_COLOR, 2.5);
+    const div = document.createElement('div');
+    div.innerHTML = `<b>Obstacle:</b> yRef ${yRef.toFixed(2)}, dist <b>${Math.round(obsResult.distanceFt)} ft</b> (PA ${Math.round(obsResult.pa)} ft, ${exInputs.oatC} °C, ${exInputs.windKts} kt HW) [TBD]`;
+    tracePtsEl.appendChild(div);
+}
+if (rollResult.yRef != null && rollResult.distanceFt != null) {
+    const yRef  = rollResult.yRef;
+    const dNorm = (rollResult.distanceFt - rollOffset) / rollScale;
+    addPolyline(traceG, tRoll.oat, [{ x: exInputs.oatC, y: calRoll.panels.oat.yRange[0] }, { x: exInputs.oatC, y: yRef }, { x: calRoll.panels.oat.xRange[1], y: yRef }], TRACE_COLOR, 2.5);
+    addPolyline(traceG, tRoll.groundroll, [{ x: 0, y: yRef }, { x: dNorm, y: yRef }, { x: dNorm, y: calRoll.panels.groundroll.yRange[0] }], TRACE_COLOR, 2.5);
+    const div = document.createElement('div');
+    div.innerHTML = `<b>Ground roll:</b> yRef ${yRef.toFixed(2)}, dist <b>${Math.round(rollResult.distanceFt)} ft</b> (PA ${Math.round(rollResult.pa)} ft, ${exInputs.oatC} °C, ${exInputs.windKts} kt HW) [TBD]`;
+    tracePtsEl.appendChild(div);
+}
+
+installClickReadout(img, calObs, document.getElementById('clickPx'));
+
+let latticeVisible = true;
+const latticeBtn = document.getElementById('latticeBtn');
+latticeBtn.addEventListener('click', () => {
+    latticeVisible = !latticeVisible;
+    svg.querySelectorAll('.lattice-group').forEach(g => g.classList.toggle('lattice-hidden', !latticeVisible));
+    latticeBtn.textContent = latticeVisible ? 'Hide lattice' : 'Show lattice';
+    latticeBtn.classList.toggle('hidden', !latticeVisible);
+});
+
+let traceVisible = true;
+const traceBtn = document.getElementById('traceBtn');
+traceBtn.addEventListener('click', () => {
+    traceVisible = !traceVisible;
+    svg.querySelectorAll('.trace-group').forEach(g => g.classList.toggle('trace-hidden', !traceVisible));
+    traceBtn.textContent = traceVisible ? 'Hide trace' : 'Show trace';
+    traceBtn.classList.toggle('hidden', !traceVisible);
+});
+</script>
+</body>
+</html>
