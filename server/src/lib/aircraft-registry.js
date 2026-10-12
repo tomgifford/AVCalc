@@ -1,6 +1,8 @@
 import * as pa28151Climb from '../data/pa28-151-climb-data.js';
 import * as pa28151Cruise from '../data/pa28-151-cruise-data.js';
 import * as pa28151Engine from '../data/pa28-151-engine-data.js';
+import * as pa28151Takeoff from '../data/pa28-151-takeoff-data.js';
+import * as pa28151Takeoff25Flap from '../data/pa28-151-takeoff-25flap-data.js';
 import * as pa28161Climb from '../data/pa28-161-climb-data.js';
 import * as pa28161Cruise from '../data/pa28-161-cruise-data.js';
 import * as pa28161Engine from '../data/pa28-161-engine-data.js';
@@ -26,7 +28,14 @@ import { aircraftRefData } from '../data/aircraft-ref-data.js';
  *         Each flap entry provides { roll, obstacle } covering both chart types.
  */
 const REGISTRY = {
-    'pa28-151': { climb: pa28151Climb, cruise: pa28151Cruise, engine: pa28151Engine, airspeedCal: airspeedCalData['pa28-151'], refData: aircraftRefData['pa28-151'] },
+    'pa28-151': {
+        climb: pa28151Climb, cruise: pa28151Cruise, engine: pa28151Engine,
+        airspeedCal: airspeedCalData['pa28-151'], refData: aircraftRefData['pa28-151'],
+        takeoff: {
+            0:  { data: pa28151Takeoff },
+            25: { data: pa28151Takeoff25Flap },
+        },
+    },
     'pa28-161': {
         climb: pa28161Climb, cruise: pa28161Cruise, engine: pa28161Engine,
         airspeedCal: airspeedCalData['pa28-161'], refData: aircraftRefData['pa28-161'],
