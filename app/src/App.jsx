@@ -195,6 +195,7 @@ export default function App() {
 
     const [climbLimits, setClimbLimits] = useState({ minTemp: -40, maxTemp: 50 });
     const [results, setResults]         = useState(null);
+    const [lastClimbData, setLastClimbData] = useState(null);
     const [apiError, setApiError]       = useState(null);
 
     const chartsBannerRef    = useRef(null);
@@ -309,18 +310,14 @@ export default function App() {
                         { aircraftType, altitude: IA, altimeter: AS, cruiseTemp: T, startAlt: SA, startClimbTemp: ST },
                         controller.signal
                     );
+                    setLastClimbData(data);
                 } else if (chartType === 'cruise') {
-                    const [climbData, cruiseData] = await Promise.all([
-                        fetchClimbResults(
-                            { aircraftType, altitude: IA, altimeter: AS, cruiseTemp: T, startAlt: SA, startClimbTemp: ST },
-                            controller.signal
-                        ),
-                        fetchCruiseResults(
-                            { aircraftType, altitude: IA, altimeter: AS, oat: T, power, wheelFairings },
-                            controller.signal
-                        ),
-                    ]);
-                    data = { ...climbData, cruise: cruiseData };
+                    data = await fetchCruiseResults(
+                        { aircraftType, altitude: IA, altimeter: AS, oat: T, power, wheelFairings,
+                          climbNetFuel: lastClimbData?.netFuel,
+                          climbNetTime: lastClimbData?.netTime },
+                        controller.signal
+                    );
                 } else if (chartType === 'engine') {
                     const rpmVal = rpmInput !== '' && !isNaN(parseFloat(rpmInput)) ? parseFloat(rpmInput) : undefined;
                     const [climbData, engineData] = await Promise.all([
@@ -502,35 +499,41 @@ export default function App() {
                     <div className="result-cruise-row" style={{ display: 'flex', alignItems: 'center' }}>
                         <div className="result-cruise-values" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '2rem', alignItems: 'flex-end' }}>
                             <ResultValue label="TAS"
-                                value={results?.cruise?.tas != null ? results.cruise.tas.toFixed(1) : '--'}
+                                value={results?.tas != null ? results.tas.toFixed(1) : '--'}
                                 unit="kts" />
                             <ResultValue label="CAS"
-                                value={results?.cruise?.cas != null ? results.cruise.cas.toFixed(1) : '--'}
+                                value={results?.cas != null ? results.cas.toFixed(1) : '--'}
                                 unit="kts" />
                             <ResultValue label="IAS"
-                                value={results?.cruise?.ias != null ? results.cruise.ias.toFixed(1) : '--'}
+                                value={results?.ias != null ? results.ias.toFixed(1) : '--'}
                                 unit="kts" />
                             <ResultValue label="Fuel Flow"
-                                value={results?.cruise?.fuelFlow != null ? results.cruise.fuelFlow.toFixed(1) : '--'}
+                                value={results?.fuelFlow != null ? results.fuelFlow.toFixed(1) : '--'}
                                 unit="GPH" />
-                            {results?.cruise?.rpmOutOfRange ? (
+                            {results?.rpmOutOfRange ? (
                                 <div style={{ alignSelf: 'center' }}>
                                     <div className="result-label">
                                         RPM{' '}
-                                        {results?.cruise?.powerFromMaxRpm?.power != null && (
-                                            <span style={{ color: '#dc2626' }}>{results.cruise.powerFromMaxRpm.power.toFixed(0)}%</span>
+                                        {results?.powerFromMaxRpm?.power != null && (
+                                            <span style={{ color: '#dc2626' }}>{results.powerFromMaxRpm.power.toFixed(0)}%</span>
                                         )}
                                     </div>
                                     <div className="result-value">
-                                        {results?.cruise?.rpm != null ? Math.round(results.cruise.rpm) : '--'}{' '}
+                                        {results?.rpm != null ? Math.round(results.rpm) : '--'}{' '}
                                         <span className="unit">RPM</span>
                                     </div>
                                 </div>
                             ) : (
                                 <ResultValue label={`RPM (${power}%)`}
-                                    value={results?.cruise?.rpm ? Math.round(results.cruise.rpm) : '--'}
+                                    value={results?.rpm ? Math.round(results.rpm) : '--'}
                                     unit="RPM" />
                             )}
+                            <ResultValue label="First-Hour Fuel"
+                                value={results?.firstHourFuel != null ? results.firstHourFuel.toFixed(2) : '--'}
+                                unit="gal" />
+                            <ResultValue label="First 30-Min Fuel"
+                                value={results?.first30Fuel != null ? results.first30Fuel.toFixed(2) : '--'}
+                                unit="gal" />
                         </div>
                         <div style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'right', lineHeight: 1.3 }}>
                         </div>

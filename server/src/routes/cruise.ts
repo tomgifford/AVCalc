@@ -13,11 +13,13 @@ interface CruiseBody {
     oat: number;
     power: 75 | 65 | 55;
     wheelFairings: 'yes' | 'no';
+    climbNetFuel?: number;   // gallons; from last /v1/climb response
+    climbNetTime?: number;   // minutes; from last /v1/climb response
 }
 
 export async function cruiseRoutes(fastify: FastifyInstance) {
     fastify.post<{ Body: CruiseBody }>('/cruise', async (request, reply) => {
-        const { aircraftType, altitude, altimeter, oat, power, wheelFairings } = request.body;
+        const { aircraftType, altitude, altimeter, oat, power, wheelFairings, climbNetFuel, climbNetTime } = request.body;
 
         const aircraftData = getAircraftData(aircraftType);
         if (!aircraftData) return reply.status(400).send({ error: `Unknown aircraft: ${aircraftType}` });
@@ -34,14 +36,25 @@ export async function cruiseRoutes(fastify: FastifyInstance) {
             ? getPowerFromRPM(aircraftData.engine, engineYRef, engineResult.rpm)
             : null;
 
+        const fuelFlow = aircraftData.cruise.cruiseFuelGPH[power];
+        const hasClimb = climbNetFuel != null && climbNetTime != null;
+        const firstHourFuel = hasClimb && climbNetTime < 60
+            ? parseFloat((climbNetFuel + fuelFlow * ((60 - climbNetTime) / 60)).toFixed(2))
+            : null;
+        const first30Fuel = hasClimb && climbNetTime < 30
+            ? parseFloat((climbNetFuel + fuelFlow * ((30 - climbNetTime) / 60)).toFixed(2))
+            : null;
+
         return {
             tas,
             cas,
             ias,
-            fuelFlow: aircraftData.cruise.cruiseFuelGPH[power],
+            fuelFlow,
             rpm: engineResult?.rpm ?? null,
             rpmOutOfRange: engineResult?.outOfRange ?? false,
             powerFromMaxRpm,
+            firstHourFuel,
+            first30Fuel,
         };
     });
 }

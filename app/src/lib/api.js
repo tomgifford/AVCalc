@@ -33,8 +33,8 @@ export function fetchClimbResults({ aircraftType, altitude, altimeter, cruiseTem
     return post('/climb', { aircraftType, altitude, altimeter, cruiseTemp, startAlt, startClimbTemp }, signal);
 }
 
-export function fetchCruiseResults({ aircraftType, altitude, altimeter, oat, power, wheelFairings }, signal) {
-    return post('/cruise', { aircraftType, altitude, altimeter, oat, power, wheelFairings }, signal);
+export function fetchCruiseResults({ aircraftType, altitude, altimeter, oat, power, wheelFairings, climbNetFuel, climbNetTime }, signal) {
+    return post('/cruise', { aircraftType, altitude, altimeter, oat, power, wheelFairings, climbNetFuel, climbNetTime }, signal);
 }
 
 export function fetchEngineResults({ aircraftType, altitude, altimeter, oat, power, rpm }, signal) {
