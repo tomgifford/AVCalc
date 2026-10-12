@@ -43,11 +43,16 @@ export async function climbRoutes(fastify: FastifyInstance) {
 
         const aboveMax = yRefTarget > aircraftData.climb.timeLookup.at(-1).yRef;
 
+        const netTime = Math.max(0, timeTarget - timeStart);
+        const netFuel = Math.max(0, fuelTarget - fuelStart);
+
         return {
             paTarget, paStart,
             distTarget, distStart, netDist: Math.max(0, distTarget - distStart),
-            timeTarget, timeStart, netTime: Math.max(0, timeTarget - timeStart),
-            fuelTarget, fuelStart, netFuel: Math.max(0, fuelTarget - fuelStart),
+            timeTarget, timeStart, netTime,
+            fuelTarget, fuelStart, netFuel,
+            avgClimbRate:  netTime > 0 ? Math.round((altitude - startAlt) / netTime) : null,
+            climbFuelFlow: netTime > 0 ? parseFloat(((netFuel / netTime) * 60).toFixed(1)) : null,
             aboveMax,
         };
     });

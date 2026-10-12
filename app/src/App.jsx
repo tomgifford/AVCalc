@@ -539,22 +539,27 @@ export default function App() {
                     <>
                         <div className="bar-handle" onClick={() => setShowDetails(d => !d)}></div>
 
-                        <div className="result-label pa-result">Pressure Altitude (cruise)</div>
-                        <div className="result-value pa-result">
-                            {results ? Math.round(results.paTarget).toLocaleString() : '--'}{' '}
-                            <span className="unit">ft</span>
-                        </div>
-
                         <div className="result-main-values" style={{ display: 'flex', justifyContent: 'center', gap: '2rem' }}>
-                            <ResultValue label="Est. Time to Climb"
-                                value={results ? results.netTime.toFixed(0) : '--'}
-                                unit="min" prefix={results?.aboveMax ? '> ' : ''} />
                             <ResultValue label="Est. Distance to Climb"
                                 value={results ? results.netDist.toFixed(1) : '--'}
                                 unit="nm" prefix={results?.aboveMax ? '> ' : ''} />
+                            <ResultValue label="Est. Time to Climb"
+                                value={results ? results.netTime.toFixed(0) : '--'}
+                                unit="min" prefix={results?.aboveMax ? '> ' : ''} />
+                            <ResultValue label="Climb Rate (Avg)"
+                                value={results?.avgClimbRate != null ? results.avgClimbRate.toLocaleString() : '--'}
+                                unit="fpm" prefix={results?.aboveMax ? '< ' : ''} />
+                        </div>
+                        <div className="result-main-values" style={{ display: 'flex', justifyContent: 'center', gap: '2rem' }}>
+                            <ResultValue label="Pressure Altitude (cruise)"
+                                value ={results ? Math.round(results.paTarget).toLocaleString() : '--'}
+                                unit="ft" prefix={results?.aboveMax ? '> ' : ''} />
                             <ResultValue label="Est. Fuel to Climb"
                                 value={results ? results.netFuel.toFixed(2) : '--'}
                                 unit="gal" prefix={results?.aboveMax ? '> ' : ''} />
+                            <ResultValue label="Fuel Flow (Avg)"
+                                value={results?.climbFuelFlow != null ? results.climbFuelFlow.toFixed(1) : '--'}
+                                unit="GPH" prefix={results?.aboveMax ? '> ' : ''} />
                         </div>
 
                         <div className="details-toggle-desktop" style={{ marginTop: '0.75rem' }}>
