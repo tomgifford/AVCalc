@@ -291,12 +291,18 @@ export default function App() {
 
         const aboveMax = yRefTarget > aircraftData.climb.timeLookup.at(-1).yRef;
 
+        const netTime = Math.max(0, timeTarget - timeStart);
+        const netFuel = Math.max(0, fuelTarget - fuelStart);
+
         results = {
             paTarget, paStart,
             distTarget, distStart, netDist: Math.max(0, distTarget - distStart),
-            timeTarget, timeStart, netTime: Math.max(0, timeTarget - timeStart),
-            fuelTarget, fuelStart, netFuel: Math.max(0, fuelTarget - fuelStart),
-            prefix: aboveMax ? '> ' : '',
+            timeTarget, timeStart, netTime,
+            fuelTarget, fuelStart, netFuel,
+            prefix:          aboveMax ? '> ' : '',
+            prefixClimbRate: aboveMax ? '< ' : '',
+            avgClimbRate:    netTime > 0 ? Math.round((IA - SA) / netTime) : null,
+            climbFuelFlow:   netTime > 0 ? parseFloat(((netFuel / netTime) * 60).toFixed(1)) : null,
         };
     }
 
@@ -331,7 +337,11 @@ export default function App() {
         if (tas !== null) {
             const cas = convertTasToCas(tas, results.paTarget, T);
             const ias = getIASfromCAS(aircraftData.airspeedCal, cas, 'flapsUp');
-            cruiseResults = { tas, cas, ias, fuelFlow: aircraftData.cruise.cruiseFuelGPH[power], yRef };
+            const fuelFlow = aircraftData.cruise.cruiseFuelGPH[power];
+            const nf = results.netFuel, nt = results.netTime;
+            const firstHourFuel = nt < 60 ? parseFloat((nf + fuelFlow * ((60 - nt) / 60)).toFixed(2)) : null;
+            const first30Fuel   = nt < 30 ? parseFloat((nf + fuelFlow * ((30 - nt) / 60)).toFixed(2)) : null;
+            cruiseResults = { tas, cas, ias, fuelFlow, yRef, firstHourFuel, first30Fuel };
         }
     }
 
@@ -518,37 +528,47 @@ export default function App() {
                     </div>
                 ) : chartType === 'cruise' ? (
                     <div className="result-cruise-row" style={{ display: 'flex', alignItems: 'center' }}>
-                        <div className="result-cruise-values" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '2rem', alignItems: 'flex-end' }}>
-                            <ResultValue label="TAS"
-                                value={cruiseResults?.tas != null ? cruiseResults.tas.toFixed(1) : '--'}
-                                unit="kts" />
-                            <ResultValue label="CAS"
-                                value={cruiseResults?.cas != null ? cruiseResults.cas.toFixed(1) : '--'}
-                                unit="kts" />
-                            <ResultValue label="IAS"
-                                value={cruiseResults?.ias != null ? cruiseResults.ias.toFixed(1) : '--'}
-                                unit="kts" />
-                            <ResultValue label="Fuel Flow"
-                                value={cruiseResults ? cruiseResults.fuelFlow.toFixed(1) : '--'}
-                                unit="GPH" />
-                            {engineRPM?.outOfRange ? (
-                                <div style={{ alignSelf: 'center' }}>
-                                    <div className="result-label">
-                                        RPM{' '}
-                                        {powerFromMaxRPM?.power != null && (
-                                            <span style={{ color: '#dc2626' }}>{powerFromMaxRPM.power.toFixed(0)}%</span>
-                                        )}
+                        <div className="result-cruise-values" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', alignItems: 'flex-end' }}>
+                                <ResultValue label="TAS"
+                                    value={cruiseResults?.tas != null ? cruiseResults.tas.toFixed(1) : '--'}
+                                    unit="kts" />
+                                <ResultValue label="CAS"
+                                    value={cruiseResults?.cas != null ? cruiseResults.cas.toFixed(1) : '--'}
+                                    unit="kts" />
+                                <ResultValue label="IAS"
+                                    value={cruiseResults?.ias != null ? cruiseResults.ias.toFixed(1) : '--'}
+                                    unit="kts" />
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', alignItems: 'flex-end' }}>
+                                {engineRPM?.outOfRange ? (
+                                    <div style={{ alignSelf: 'center' }}>
+                                        <div className="result-label">
+                                            RPM{' '}
+                                            {powerFromMaxRPM?.power != null && (
+                                                <span style={{ color: '#dc2626' }}>{powerFromMaxRPM.power.toFixed(0)}%</span>
+                                            )}
+                                        </div>
+                                        <div className="result-value">
+                                            {engineRPM.rpm != null ? Math.round(engineRPM.rpm) : '--'}{' '}
+                                            <span className="unit">RPM</span>
+                                        </div>
                                     </div>
-                                    <div className="result-value">
-                                        {engineRPM.rpm != null ? Math.round(engineRPM.rpm) : '--'}{' '}
-                                        <span className="unit">RPM</span>
-                                    </div>
-                                </div>
-                            ) : (
-                                <ResultValue label={`RPM (${power}%)`}
-                                    value={engineRPM ? Math.round(engineRPM.rpm) : '--'}
-                                    unit="RPM" />
-                            )}
+                                ) : (
+                                    <ResultValue label={`RPM (${power}%)`}
+                                        value={engineRPM ? Math.round(engineRPM.rpm) : '--'}
+                                        unit="RPM" />
+                                )}
+                                <ResultValue label="Fuel Flow"
+                                    value={cruiseResults ? cruiseResults.fuelFlow.toFixed(1) : '--'}
+                                    unit="GPH" />
+                                <ResultValue label="First 30-Min Fuel"
+                                    value={cruiseResults?.first30Fuel != null ? cruiseResults.first30Fuel.toFixed(2) : '--'}
+                                    unit="gal" />
+                                <ResultValue label="First-Hour Fuel"
+                                    value={cruiseResults?.firstHourFuel != null ? cruiseResults.firstHourFuel.toFixed(2) : '--'}
+                                    unit="gal" />
+                            </div>
                         </div>
                         <div style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'right', lineHeight: 1.3 }}>
                         </div>
@@ -557,22 +577,27 @@ export default function App() {
                     <>
                         <div className="bar-handle" onClick={() => setShowDetails(d => !d)}></div>
 
-                        <div className="result-label pa-result">Pressure Altitude (cruise)</div>
-                        <div className="result-value pa-result">
-                            {results ? Math.round(results.paTarget).toLocaleString() : '--'}{' '}
-                            <span className="unit">ft</span>
-                        </div>
-
                         <div className="result-main-values" style={{ display: 'flex', justifyContent: 'center', gap: '2rem' }}>
-                            <ResultValue label="Est. Time to Climb"
-                                value={results ? results.netTime.toFixed(0) : '--'}
-                                unit="min" prefix={results?.prefix} />
                             <ResultValue label="Est. Distance to Climb"
                                 value={results ? results.netDist.toFixed(1) : '--'}
                                 unit="nm" prefix={results?.prefix} />
+                            <ResultValue label="Est. Time to Climb"
+                                value={results ? results.netTime.toFixed(0) : '--'}
+                                unit="min" prefix={results?.prefix} />
+                            <ResultValue label="Climb Rate (Avg)"
+                                value={results?.avgClimbRate != null ? results.avgClimbRate.toLocaleString() : '--'}
+                                unit="fpm" prefix={results?.prefixClimbRate} />
+                        </div>
+                        <div className="result-main-values" style={{ display: 'flex', justifyContent: 'center', gap: '2rem' }}>
+                            <ResultValue label="Pressure Altitude (cruise)"
+                                value={results ? Math.round(results.paTarget).toLocaleString() : '--'}
+                                unit="ft" prefix={results?.prefix} />
                             <ResultValue label="Est. Fuel to Climb"
                                 value={results ? results.netFuel.toFixed(2) : '--'}
                                 unit="gal" prefix={results?.prefix} />
+                            <ResultValue label="Fuel Flow (Avg)"
+                                value={results?.climbFuelFlow != null ? results.climbFuelFlow.toFixed(1) : '--'}
+                                unit="GPH" prefix={results?.prefix} />
                         </div>
 
                         <div className="details-toggle-desktop" style={{ marginTop: '0.75rem' }}>
