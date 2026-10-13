@@ -190,6 +190,7 @@ export default function App() {
     const [startAlt, setStartAlt]               = useState('0');
     const [altimeter, setAltimeter] = useState('29.92');
     const [showDetails, setShowDetails] = useState(false);
+    const [showCharts, setShowCharts]   = useState(false);
     const [expandedChart, setExpandedChart] = useState(null);
     const [startTempFlash, setStartTempFlash] = useState(0);
     const [rpmInput, setRpmInput] = useState('');
@@ -459,8 +460,8 @@ export default function App() {
             </div>
 
             <div className="charts-column">
-            <div className="charts-referenced-banner" ref={chartsBannerRef} onClick={scrollToCharts} style={{ cursor: 'pointer' }}>Chart(s) Referenced: ↓</div>
-            <div className="charts-scroll-area" ref={chartsScrollAreaRef}>
+            <div className="charts-referenced-banner" ref={chartsBannerRef} onClick={() => setShowCharts(s => !s)} style={{ cursor: 'pointer' }}>Charts Referenced {showCharts ? '▲' : '▼'}</div>
+            {showCharts && <div className="charts-scroll-area" ref={chartsScrollAreaRef}>
             {chart && (
                 <div className="chart-panel">
                     <div className="chart-title">{chart.title}</div>
@@ -485,7 +486,7 @@ export default function App() {
                     <span className="chart-tap-hint">Tap to expand</span>
                 </div>
             )}
-            </div>
+            </div>}
             {expandedChart && (
                 <div className="chart-modal-overlay" onClick={() => setExpandedChart(null)}>
                     {expandedChart === chart ? (
