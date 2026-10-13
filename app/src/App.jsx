@@ -497,43 +497,47 @@ export default function App() {
                     </div>
                 ) : chartType === 'cruise' ? (
                     <div className="result-cruise-row" style={{ display: 'flex', alignItems: 'center' }}>
-                        <div className="result-cruise-values" style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '2rem', alignItems: 'flex-end' }}>
-                            <ResultValue label="TAS"
-                                value={results?.tas != null ? results.tas.toFixed(1) : '--'}
-                                unit="kts" />
-                            <ResultValue label="CAS"
-                                value={results?.cas != null ? results.cas.toFixed(1) : '--'}
-                                unit="kts" />
-                            <ResultValue label="IAS"
-                                value={results?.ias != null ? results.ias.toFixed(1) : '--'}
-                                unit="kts" />
-                            <ResultValue label="Fuel Flow"
-                                value={results?.fuelFlow != null ? results.fuelFlow.toFixed(1) : '--'}
-                                unit="GPH" />
-                            {results?.rpmOutOfRange ? (
-                                <div style={{ alignSelf: 'center' }}>
-                                    <div className="result-label">
-                                        RPM{' '}
-                                        {results?.powerFromMaxRpm?.power != null && (
-                                            <span style={{ color: '#dc2626' }}>{results.powerFromMaxRpm.power.toFixed(0)}%</span>
-                                        )}
+                        <div className="result-cruise-values" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', alignItems: 'flex-end' }}>
+                                <ResultValue label="TAS"
+                                    value={results?.tas != null ? results.tas.toFixed(1) : '--'}
+                                    unit="kts" />
+                                <ResultValue label="CAS"
+                                    value={results?.cas != null ? results.cas.toFixed(1) : '--'}
+                                    unit="kts" />
+                                <ResultValue label="IAS"
+                                    value={results?.ias != null ? results.ias.toFixed(1) : '--'}
+                                    unit="kts" />
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', alignItems: 'flex-end' }}>
+                                {results?.rpmOutOfRange ? (
+                                    <div style={{ alignSelf: 'center' }}>
+                                        <div className="result-label">
+                                            RPM{' '}
+                                            {results?.powerFromMaxRpm?.power != null && (
+                                                <span style={{ color: '#dc2626' }}>{results.powerFromMaxRpm.power.toFixed(0)}%</span>
+                                            )}
+                                        </div>
+                                        <div className="result-value">
+                                            {results?.rpm != null ? Math.round(results.rpm) : '--'}{' '}
+                                            <span className="unit">RPM</span>
+                                        </div>
                                     </div>
-                                    <div className="result-value">
-                                        {results?.rpm != null ? Math.round(results.rpm) : '--'}{' '}
-                                        <span className="unit">RPM</span>
-                                    </div>
-                                </div>
-                            ) : (
-                                <ResultValue label={`RPM (${power}%)`}
-                                    value={results?.rpm ? Math.round(results.rpm) : '--'}
-                                    unit="RPM" />
-                            )}
-                            <ResultValue label="First-Hour Fuel"
-                                value={results?.firstHourFuel != null ? results.firstHourFuel.toFixed(2) : '--'}
-                                unit="gal" />
-                            <ResultValue label="First 30-Min Fuel"
-                                value={results?.first30Fuel != null ? results.first30Fuel.toFixed(2) : '--'}
-                                unit="gal" />
+                                ) : (
+                                    <ResultValue label={`RPM (${power}%)`}
+                                        value={results?.rpm ? Math.round(results.rpm) : '--'}
+                                        unit="RPM" />
+                                )}
+                                <ResultValue label="Fuel Flow"
+                                    value={results?.fuelFlow != null ? results.fuelFlow.toFixed(1) : '--'}
+                                    unit="GPH" />
+                                <ResultValue label="First 30-Min Fuel"
+                                    value={results?.first30Fuel != null ? results.first30Fuel.toFixed(2) : '--'}
+                                    unit="gal" />
+                                <ResultValue label="First-Hour Fuel"
+                                    value={results?.firstHourFuel != null ? results.firstHourFuel.toFixed(2) : '--'}
+                                    unit="gal" />
+                            </div>
                         </div>
                         <div style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'right', lineHeight: 1.3 }}>
                         </div>
